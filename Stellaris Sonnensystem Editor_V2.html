@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Stellaris Solar System Editor - Korrekte Orbit-Mechanik</title>
+    <title>Stellaris Solar System Editor - Enhanced Version</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;600;700;800;900&family=Exo+2:wght@300;400;500;600&display=swap');
@@ -66,7 +66,7 @@
         .stellaris-input {
             background: linear-gradient(145deg, #2a3847 0%, #1e2936 100%);
             border: 1px solid var(--stellaris-border);
-            color: #0068f3;
+            color: #e2e8f0;
             padding: 0.75rem 1rem;
             border-radius: 8px;
             width: 100%;
@@ -202,8 +202,7 @@
             line-height: 1.4;
             color: #e2e8f0;
             resize: none;
-            min-height: 200px;
-            min-width: 400px;
+            min-height: 300px;
         }
 
         .warning-panel {
@@ -286,6 +285,17 @@
             font-size: 0.8rem;
         }
 
+        .neighbor-item {
+            background: linear-gradient(145deg, rgba(153, 102, 255, 0.1) 0%, rgba(102, 51, 153, 0.1) 100%);
+            border: 1px solid rgba(153, 102, 255, 0.3);
+            border-radius: 6px;
+            padding: 0.75rem;
+            margin-bottom: 0.5rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
         .grid {
             display: grid;
             gap: 1.5rem;
@@ -325,13 +335,29 @@
     <div class="container py-8">
         <h1 class="stellaris-header">Stellaris Solar System Editor</h1>
         <div class="text-center mb-6">
-            <span class="text-yellow-400 font-semibold">Mit korrekter Stellaris-Orbit-Mechanik (orbit_distance = 0 System)</span>
+            <span class="text-yellow-400 font-semibold">Enhanced Version mit Import/Export & Nachbarsystemen</span>
         </div>
 
-        <div class="grid grid-cols-1 lg:grid-cols-3 mb-8">
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
             <!-- System Details Panel -->
-            <div class="stellaris-panel lg:col-span-2">
+            <div class="stellaris-panel md:col-span-3">
                 <h2 class="section-title">Systemdetails</h2>
+                
+                <!-- Import Section -->
+                <div class="mb-6 p-4 bg-gradient-to-r from-purple-900/30 to-blue-900/30 rounded-lg border border-purple-500/30">
+                    <h3 class="text-lg font-medium mb-3 text-purple-400">📂 System Import/Export</h3>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div>
+                            <label class="label">Bestehendes System laden (.txt)</label>
+                            <input type="file" id="importFile" class="stellaris-input" accept=".txt" style="padding: 0.5rem;">
+                        </div>
+                        <div class="flex items-end">
+                            <button id="importBtn" class="stellaris-btn stellaris-btn-secondary">System importieren</button>
+                            <button id="clearSystemBtn" class="stellaris-btn stellaris-btn-danger ml-2">System leeren</button>
+                        </div>
+                    </div>
+                </div>
+
                 <div class="grid grid-cols-1 md:grid-cols-2">
                     <div>
                         <label class="label">Systemname (Interner Bezeichner)</label>
@@ -364,6 +390,33 @@
                             <option value="misc_system_init">Verschiedenes System (Zufällig)</option>
                             <option value="">Keine (Nur durch Ereignis)</option>
                         </select>
+                    </div>
+                </div>
+                
+                <!-- Neighbor Systems Configuration -->
+                <div class="mt-6 p-4 bg-gradient-to-r from-indigo-900/30 to-purple-900/30 rounded-lg border border-indigo-500/30">
+                    <h3 class="text-lg font-medium mb-4 text-indigo-400">🌌 Nachbarsysteme</h3>
+                    <div id="neighborSystemsList" class="space-y-2 mb-4">
+                        <p class="text-gray-400 text-sm">Keine Nachbarsysteme definiert</p>
+                    </div>
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                        <div>
+                            <label class="label">Distanz</label>
+                            <input type="number" id="newNeighborDistance" class="stellaris-input" value="100" min="50" max="200">
+                        </div>
+                        <div>
+                            <label class="label">Initialisierung</label>
+                            <select id="newNeighborInit" class="stellaris-input">
+                                <option value="">Zufällig</option>
+                                <option value="sol_system_initializer">Sol-System</option>
+                                <option value="deneb_system">Deneb</option>
+                                <option value="alpha_centauri_initializer">Alpha Centauri</option>
+                                <option value="custom">Benutzerdefiniert</option>
+                            </select>
+                        </div>
+                        <div class="flex items-end">
+                            <button id="addNeighborBtn" class="stellaris-btn stellaris-btn-secondary">Nachbar hinzufügen</button>
+                        </div>
                     </div>
                 </div>
                 
@@ -409,7 +462,7 @@
             </div>
 
             <!-- Visualizer Panel -->
-            <div class="stellaris-panel">
+            <div class="stellaris-panel md:col-span-3" style="height: 650px;">
                 <h2 class="section-title">System-Visualisierung</h2>
                 <div id="visualizer" class="stellaris-visualizer">
                     <!-- Celestial bodies will be rendered here -->
@@ -469,7 +522,7 @@
                                     <option value="pc_tropical">Tropisch</option>
                                     <option value="pc_arid">Arid</option>
                                     <option value="pc_desert">Wüste</option>
-                                    <option value="pc_savannah">Savanne</option>
+                                    <option value="pc_savanna">Savanne</option>
                                     <option value="pc_arctic">Arktisch</option>
                                     <option value="pc_tundra">Tundra</option>
                                     <option value="pc_alpine">Alpin</option>
@@ -561,38 +614,40 @@
         <!-- Import/Export Section -->
         <div class="stellaris-panel">
             <h2 class="section-title">Import / Export</h2>
-            <div class="grid grid-cols-1 md:grid-cols-2 mt-8">
+            <div class="grid grid-cols-1 md:col-span-2 gap-4">
                 <div>
                     <h3 class="text-xl font-medium mb-4 text-green-400">Generierter Stellaris Code (.txt)</h3>
-                    <textarea id="exportTxt" class="stellaris-export-area" rows="20" readonly></textarea>
-                    <button id="downloadTxtBtn" class="stellaris-btn mt-4">Als .txt herunterladen</button>
+                    <textarea id="exportTxt" class="stellaris-export-area w-full" rows="40" readonly></textarea>
+                    <button id="downloadTxtBtn" class="stellaris-btn mt-4 w-full">Als .txt herunterladen</button>
                 </div>
                 <div>
                     <h3 class="text-xl font-medium mb-4 text-green-400">Generierte Lokalisierung (.yml)</h3>
-                    <textarea id="exportYml" class="stellaris-export-area" rows="20" readonly></textarea>
-                    <button id="downloadYmlBtn" class="stellaris-btn mt-4">Als .yml herunterladen</button>
+                    <textarea id="exportYml" class="stellaris-export-area w-full" rows="40" readonly></textarea>
+                    <button id="downloadYmlBtn" class="stellaris-btn mt-4 w-full">Als .yml herunterladen</button>
                 </div>
             </div>
             <div class="warning-panel">
-                <p class="font-semibold text-yellow-300 mb-2">🎯 Kumulative Stellaris Orbit-Mechanik implementiert:</p>
+                <p class="font-semibold text-yellow-300 mb-2">🎯 Neue Features in Enhanced Version:</p>
                 <ul class="list-disc list-inside space-y-1 text-sm">
-                    <li><strong>Kumulative Addition:</strong> orbit_distance wird zur Gesamtdistanz addiert (Planet 1: 25, Planet 2: +30 = 55)</li>
-                    <li><strong>orbit_distance = 0:</strong> Bedeutet "gleiche Umlaufbahn wie aktuell" (kein Distanz-Zuwachs)</li>
+                    <li><strong>Import-Funktion:</strong> Laden Sie bestehende Stellaris-Systemdateien (.txt) direkt in den Editor</li>
+                    <li><strong>Nachbarsysteme:</strong> Definieren Sie verbundene Systeme mit Distanz und Initialisierung</li>
+                    <li><strong>Kumulative Orbit-Mechanik:</strong> orbit_distance wird zur Gesamtdistanz addiert</li>
                     <li><strong>Multiple Asteroidengürtel:</strong> Beliebig viele Gürtel mit verschiedenen Radien möglich</li>
                     <li><strong>change_orbit:</strong> Verschiebt die aktuelle Umlaufbahn für nachfolgende Planeten</li>
-                    <li><strong>Korrekte Visualisierung:</strong> Zeigt echte Stellaris-Distanzen (z.B. 25 → 55 → 55 → 75)</li>
+                    <li><strong>Korrekte Visualisierung:</strong> Zeigt echte Stellaris-Distanzen und Nachbarsysteme</li>
                 </ul>
             </div>
         </div>
     </div>
 
     <script>
-        // Corrected data model for cumulative orbit calculation
+        // Enhanced data model with neighbor systems
         let solarSystem = {
             name: 'my_custom_system',
             displayName: 'Mein Sonnensystem',
             class: 'sc_g',
             usage: 'custom_empire',
+            neighborSystems: [], // Array of neighbor systems
             asteroidBelts: [], // Array of multiple asteroid belts
             planets: [] // Sequential array of planets with cumulative orbit distances
         };
@@ -603,6 +658,18 @@
 
         // DOM Elements
         const elements = {
+            // Import elements
+            importFile: document.getElementById('importFile'),
+            importBtn: document.getElementById('importBtn'),
+            clearSystemBtn: document.getElementById('clearSystemBtn'),
+            
+            // Neighbor systems elements
+            neighborSystemsList: document.getElementById('neighborSystemsList'),
+            newNeighborDistance: document.getElementById('newNeighborDistance'),
+            newNeighborInit: document.getElementById('newNeighborInit'),
+            addNeighborBtn: document.getElementById('addNeighborBtn'),
+            
+            // Existing elements
             systemName: document.getElementById('systemName'),
             systemDisplayName: document.getElementById('systemDisplayName'),
             systemClass: document.getElementById('systemClass'),
@@ -645,8 +712,338 @@
             downloadYmlBtn: document.getElementById('downloadYmlBtn')
         };
 
+        // Stellaris System Parser
+        class StellarisSystemParser {
+            parse(content) {
+                try {
+                    // Clean content and find system block
+                    const lines = content.split('\n').map(line => line.trim());
+                    const systemData = {
+                        name: '',
+                        displayName: '',
+                        class: 'sc_g',
+                        usage: '',
+                        neighborSystems: [],
+                        asteroidBelts: [],
+                        planets: []
+                    };
+
+                    // Find system definition
+                    const systemMatch = content.match(/(\w+)\s*=\s*{/);
+                    if (systemMatch) {
+                        systemData.name = systemMatch[1];
+                    }
+
+                    // Parse basic properties
+                    const nameMatch = content.match(/name\s*=\s*"([^"]+)"/);
+                    if (nameMatch) systemData.displayName = nameMatch[1];
+
+                    const classMatch = content.match(/class\s*=\s*"?([^"\s]+)"?/);
+                    if (classMatch) systemData.class = classMatch[1];
+
+                    const usageMatch = content.match(/usage\s*=\s*(\w+)/);
+                    if (usageMatch) systemData.usage = usageMatch[1];
+
+                    // Parse neighbor systems
+                    const neighborMatches = content.matchAll(/neighbor_system\s*=\s*{([^}]+)}/g);
+                    for (const match of neighborMatches) {
+                        const neighborBlock = match[1];
+                        const neighbor = {
+                            distance: 100,
+                            initializer: ''
+                        };
+
+                        const distanceMatch = neighborBlock.match(/distance\s*=\s*(\d+)/);
+                        if (distanceMatch) neighbor.distance = parseInt(distanceMatch[1]);
+
+                        const initMatch = neighborBlock.match(/initializer\s*=\s*"?([^"\s]+)"?/);
+                        if (initMatch) neighbor.initializer = initMatch[1];
+
+                        systemData.neighborSystems.push(neighbor);
+                    }
+
+                    // Parse asteroid belts
+                    const asteroidBeltMatches = content.matchAll(/asteroid_belt\s*=\s*{([^}]+)}/g);
+                    for (const match of asteroidBeltMatches) {
+                        const beltBlock = match[1];
+                        const belt = {
+                            type: 'rocky_asteroid_belt',
+                            radius: 575
+                        };
+
+                        const typeMatch = beltBlock.match(/type\s*=\s*(\w+)/);
+                        if (typeMatch) belt.type = typeMatch[1];
+
+                        const radiusMatch = beltBlock.match(/radius\s*=\s*(\d+)/);
+                        if (radiusMatch) belt.radius = parseInt(radiusMatch[1]);
+
+                        systemData.asteroidBelts.push(belt);
+                    }
+
+                    // Parse planets (simplified for demonstration)
+                    const planetBlocks = this.extractPlanetBlocks(content);
+                    let planetId = 1;
+                    
+                    planetBlocks.forEach((block, index) => {
+                        if (index === 0) return; // Skip star
+                        
+                        const planet = this.parsePlanetBlock(block, planetId++);
+                        if (planet) {
+                            systemData.planets.push(planet);
+                        }
+                    });
+
+                    return systemData;
+                } catch (error) {
+                    console.error('Parse error:', error);
+                    throw new Error('Fehler beim Parsen der Systemdatei: ' + error.message);
+                }
+            }
+
+            extractPlanetBlocks(content) {
+                const blocks = [];
+                let depth = 0;
+                let currentBlock = '';
+                let inPlanet = false;
+
+                const lines = content.split('\n');
+                for (const line of lines) {
+                    if (line.includes('planet = {')) {
+                        inPlanet = true;
+                        depth = 1;
+                        currentBlock = line + '\n';
+                    } else if (inPlanet) {
+                        currentBlock += line + '\n';
+                        if (line.includes('{')) depth++;
+                        if (line.includes('}')) depth--;
+                        
+                        if (depth === 0) {
+                            blocks.push(currentBlock);
+                            inPlanet = false;
+                            currentBlock = '';
+                        }
+                    }
+                }
+
+                return blocks;
+            }
+
+            parsePlanetBlock(block, id) {
+                const planet = {
+                    id: id,
+                    type: 'planet',
+                    name: `planet_${id}`,
+                    displayName: `Planet ${id}`,
+                    class: 'pc_barren',
+                    size: 16,
+                    orbitDistance: 0,
+                    orbitAngleType: 'range',
+                    orbitAngleMin: 90,
+                    orbitAngleMax: 270,
+                    changeOrbit: 0,
+                    hasRing: false,
+                    isStartingPlanet: false,
+                    moons: []
+                };
+
+                // Parse planet properties
+                const nameMatch = block.match(/name\s*=\s*"([^"]+)"/);
+                if (nameMatch) {
+                    planet.name = nameMatch[1];
+                    planet.displayName = nameMatch[1].replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
+                }
+
+                const classMatch = block.match(/class\s*=\s*"?([^"\s]+)"?/);
+                if (classMatch) planet.class = classMatch[1];
+
+                const sizeMatch = block.match(/size\s*=\s*(\d+)/);
+                if (sizeMatch) planet.size = parseInt(sizeMatch[1]);
+
+                const orbitDistanceMatch = block.match(/orbit_distance\s*=\s*(\d+)/);
+                if (orbitDistanceMatch) planet.orbitDistance = parseInt(orbitDistanceMatch[1]);
+
+                const changeOrbitMatch = block.match(/change_orbit\s*=\s*(\d+)/);
+                if (changeOrbitMatch) planet.changeOrbit = parseInt(changeOrbitMatch[1]);
+
+                const hasRingMatch = block.match(/has_ring\s*=\s*yes/);
+                planet.hasRing = !!hasRingMatch;
+
+                const startingPlanetMatch = block.match(/starting_planet\s*=\s*yes/);
+                planet.isStartingPlanet = !!startingPlanetMatch;
+
+                // Parse orbit angle
+                const angleRangeMatch = block.match(/orbit_angle\s*=\s*{\s*min\s*=\s*(\d+)\s*max\s*=\s*(\d+)\s*}/);
+                if (angleRangeMatch) {
+                    planet.orbitAngleType = 'range';
+                    planet.orbitAngleMin = parseInt(angleRangeMatch[1]);
+                    planet.orbitAngleMax = parseInt(angleRangeMatch[2]);
+                } else {
+                    const angleMatch = block.match(/orbit_angle\s*=\s*(\d+)/);
+                    if (angleMatch) {
+                        planet.orbitAngleType = 'fixed';
+                        planet.orbitAngle = parseInt(angleMatch[1]);
+                    }
+                }
+
+                return planet;
+            }
+        }
+
+        // Import/Export Functions
+        function importSystem() {
+            const file = elements.importFile.files[0];
+            if (!file) {
+                showNotification('Bitte wählen Sie eine Datei aus.');
+                return;
+            }
+
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                try {
+                    const parser = new StellarisSystemParser();
+                    const parsedSystem = parser.parse(e.target.result);
+                    
+                    // Load parsed data into the editor
+                    loadSystemData(parsedSystem);
+                    showNotification('System erfolgreich importiert!');
+                } catch (error) {
+                    showNotification('Fehler beim Import: ' + error.message);
+                }
+            };
+            reader.readAsText(file);
+        }
+
+        function loadSystemData(systemData) {
+            // Clear existing data
+            clearSystem();
+            
+            // Load basic properties
+            solarSystem.name = systemData.name;
+            solarSystem.displayName = systemData.displayName;
+            solarSystem.class = systemData.class;
+            solarSystem.usage = systemData.usage;
+
+            elements.systemName.value = solarSystem.name;
+            elements.systemDisplayName.value = solarSystem.displayName;
+            elements.systemClass.value = solarSystem.class;
+            elements.systemUsage.value = solarSystem.usage;
+
+            // Load neighbor systems
+            systemData.neighborSystems.forEach(neighbor => {
+                solarSystem.neighborSystems.push({
+                    id: Date.now() + Math.random(),
+                    distance: neighbor.distance,
+                    initializer: neighbor.initializer
+                });
+            });
+
+            // Load asteroid belts
+            systemData.asteroidBelts.forEach(belt => {
+                solarSystem.asteroidBelts.push({
+                    id: Date.now() + Math.random(),
+                    type: belt.type,
+                    radius: belt.radius
+                });
+            });
+
+            // Load planets
+            systemData.planets.forEach(planet => {
+                nextCelestialId = Math.max(nextCelestialId, planet.id + 1);
+                solarSystem.planets.push(planet);
+            });
+
+            // Update UI
+            updateNeighborSystemsList();
+            updateAsteroidBeltList();
+            updatePlanetList();
+            updateOutput();
+            renderVisualizer();
+        }
+
+        function clearSystem() {
+            solarSystem = {
+                name: 'my_custom_system',
+                displayName: 'Mein Sonnensystem',
+                class: 'sc_g',
+                usage: 'custom_empire',
+                neighborSystems: [],
+                asteroidBelts: [],
+                planets: []
+            };
+            
+            selectedPlanet = null;
+            nextCelestialId = 1;
+            
+            // Reset UI
+            elements.systemName.value = solarSystem.name;
+            elements.systemDisplayName.value = solarSystem.displayName;
+            elements.systemClass.value = solarSystem.class;
+            elements.systemUsage.value = solarSystem.usage;
+            
+            updateNeighborSystemsList();
+            updateAsteroidBeltList();
+            updatePlanetList();
+            updateOutput();
+            renderVisualizer();
+            deselectPlanet();
+            
+            showNotification('System geleert!');
+        }
+
+        // Neighbor Systems Management
+        function addNeighborSystem() {
+            const newNeighbor = {
+                id: Date.now(),
+                distance: parseInt(elements.newNeighborDistance.value) || 100,
+                initializer: elements.newNeighborInit.value
+            };
+            
+            solarSystem.neighborSystems.push(newNeighbor);
+            updateNeighborSystemsList();
+            updateOutput();
+            renderVisualizer();
+        }
+
+        function updateNeighborSystemsList() {
+            elements.neighborSystemsList.innerHTML = '';
+            
+            if (solarSystem.neighborSystems.length === 0) {
+                elements.neighborSystemsList.innerHTML = '<p class="text-gray-400 text-sm">Keine Nachbarsysteme definiert</p>';
+                return;
+            }
+
+            solarSystem.neighborSystems.forEach((neighbor, index) => {
+                const neighborItem = document.createElement('div');
+                neighborItem.className = 'neighbor-item';
+                neighborItem.innerHTML = `
+                    <span class="text-sm">
+                        🌌 Distanz: ${neighbor.distance} | System: ${neighbor.initializer || 'Zufällig'}
+                    </span>
+                    <button class="stellaris-btn stellaris-btn-danger text-xs px-2 py-1" onclick="removeNeighborSystem(${neighbor.id})">
+                        Löschen
+                    </button>
+                `;
+                elements.neighborSystemsList.appendChild(neighborItem);
+            });
+        }
+
+        function removeNeighborSystem(neighborId) {
+            solarSystem.neighborSystems = solarSystem.neighborSystems.filter(n => n.id !== neighborId);
+            updateNeighborSystemsList();
+            updateOutput();
+            renderVisualizer();
+        }
+
         // Event Listeners
         function initializeEventListeners() {
+            // Import/Export listeners
+            elements.importBtn.addEventListener('click', importSystem);
+            elements.clearSystemBtn.addEventListener('click', clearSystem);
+            
+            // Neighbor systems listeners
+            elements.addNeighborBtn.addEventListener('click', addNeighborSystem);
+            
+            // Existing listeners
             elements.systemName.addEventListener('input', (e) => {
                 const value = e.target.value.replace(/[^a-zA-Z0-9_]/g, '');
                 e.target.value = value;
@@ -695,7 +1092,7 @@
                     selectedPlanet.size = Math.max(1, Math.min(50, parseInt(e.target.value) || 1));
                     e.target.value = selectedPlanet.size;
                     updateAsteroidBeltList();
-            updatePlanetList();
+                    updatePlanetList();
                     updateOutput();
                     renderVisualizer();
                 }
@@ -872,6 +1269,7 @@
             
             return result;
         }
+
         function addPlanet() {
             const newPlanet = {
                 id: nextCelestialId++,
@@ -1108,7 +1506,7 @@
             renderVisualizer();
         }
 
-        // Visualization with correct cumulative orbit calculation
+        // Enhanced Visualization with neighbor systems
         function renderVisualizer() {
             elements.visualizer.innerHTML = '';
 
@@ -1126,6 +1524,40 @@
             starEl.style.borderRadius = '50%';
             starEl.style.position = 'absolute';
             elements.visualizer.appendChild(starEl);
+
+            // Draw neighbor system indicators
+            solarSystem.neighborSystems.forEach((neighbor, index) => {
+                const angle = (index * 360 / solarSystem.neighborSystems.length) * Math.PI / 180;
+                const distance = 200 * visualizerScale;
+                const x = centerX + distance * Math.cos(angle);
+                const y = centerY + distance * Math.sin(angle);
+
+                // Draw connection line
+                const line = document.createElement('div');
+                line.style.position = 'absolute';
+                line.style.width = `${distance}px`;
+                line.style.height = '1px';
+                line.style.background = 'rgba(153, 102, 255, 0.3)';
+                line.style.left = `${centerX}px`;
+                line.style.top = `${centerY}px`;
+                line.style.transformOrigin = '0 0';
+                line.style.transform = `rotate(${angle}rad)`;
+                elements.visualizer.appendChild(line);
+
+                // Draw neighbor system
+                const neighborEl = document.createElement('div');
+                neighborEl.style.position = 'absolute';
+                neighborEl.style.width = '20px';
+                neighborEl.style.height = '20px';
+                neighborEl.style.left = `${x - 10}px`;
+                neighborEl.style.top = `${y - 10}px`;
+                neighborEl.style.background = 'linear-gradient(45deg, #9966ff, #6633cc)';
+                neighborEl.style.borderRadius = '50%';
+                neighborEl.style.border = '2px solid rgba(153, 102, 255, 0.5)';
+                neighborEl.style.boxShadow = '0 0 10px rgba(153, 102, 255, 0.5)';
+                neighborEl.title = neighbor.initializer || 'Random System';
+                elements.visualizer.appendChild(neighborEl);
+            });
 
             // Draw multiple asteroid belts
             solarSystem.asteroidBelts.forEach(belt => {
@@ -1235,10 +1667,10 @@
             }
         }
 
-        // Code Generation with CORRECT Stellaris format
+        // Enhanced Code Generation with neighbor systems
         function generateStellarisTxt() {
-            let txt = `##### Generated by Stellaris Solar System Editor #####\n`;
-            txt += `##### With correct orbit_distance = 0 mechanics    #####\n\n`;
+            let txt = `##### Generated by Stellaris Solar System Editor - Enhanced Version #####\n`;
+            txt += `##### With correct orbit_distance = 0 mechanics & neighbor systems #####\n\n`;
             txt += `${solarSystem.name} = {\n`;
             txt += `\tname = "${solarSystem.displayName}"\n`;
             txt += `\tclass = "${solarSystem.class}"\n`;
@@ -1254,6 +1686,16 @@
             if (solarSystem.usage) {
                 txt += `\tusage = ${solarSystem.usage}\n`;
             }
+
+            // Neighbor systems
+            solarSystem.neighborSystems.forEach(neighbor => {
+                txt += `\tneighbor_system = {\n`;
+                txt += `\t\tdistance = ${neighbor.distance}\n`;
+                if (neighbor.initializer) {
+                    txt += `\t\tinitializer = "${neighbor.initializer}"\n`;
+                }
+                txt += `\t}\n`;
+            });
 
             txt += `\tinit_effect = {\n`;
             
@@ -1345,7 +1787,7 @@
 
         function generateStellarisYml() {
             let yml = `l_german:\n`;
-            yml += ` # Generated by Stellaris Solar System Editor\n`;
+            yml += ` # Generated by Stellaris Solar System Editor - Enhanced Version\n`;
             yml += ` # System: ${solarSystem.displayName}\n\n`;
             yml += ` ${solarSystem.name}_NAME: "${solarSystem.displayName}"\n`;
             yml += ` ${solarSystem.name}_DESC: "Ein maßgeschneidertes Sonnensystem mit korrekter Stellaris-Orbit-Mechanik."\n\n`;
@@ -1379,7 +1821,7 @@
             const icons = {
                 'pc_b_star': '💙', 'pc_a_star': '⚪', 'pc_f_star': '💛', 'pc_g_star': '☉', 'pc_k_star': '🧡', 'pc_m_star': '🔴',
                 'pc_continental': '🌍', 'pc_ocean': '🌊', 'pc_tropical': '🌴',
-                'pc_arid': '🏜️', 'pc_desert': '🏜️', 'pc_savannah': '🌾',
+                'pc_arid': '🏜️', 'pc_desert': '🏜️', 'pc_savanna': '🌾',
                 'pc_arctic': '🧊', 'pc_tundra': '❄️', 'pc_alpine': '🏔️',
                 'pc_gaia': '🌿', 'pc_barren': '🌑', 'pc_barren_cold': '☄️', 'pc_frozen': '☄️',
                 'pc_molten': '🔥', 'pc_toxic': '☢️', 'pc_hothouse': '🔥',
@@ -1396,7 +1838,7 @@
             const names = {
                 'pc_b_star': 'B-Stern', 'pc_a_star': 'A-Stern', 'pc_f_star': 'F-Stern', 'pc_g_star': 'G-Stern', 'pc_k_star': 'K-Stern', 'pc_m_star': 'M-Stern',
                 'pc_continental': 'Kontinental', 'pc_ocean': 'Ozean', 'pc_tropical': 'Tropisch',
-                'pc_arid': 'Arid', 'pc_desert': 'Wüste', 'pc_savannah': 'Savanne',
+                'pc_arid': 'Arid', 'pc_desert': 'Wüste', 'pc_savanna': 'Savanne',
                 'pc_arctic': 'Arktisch', 'pc_tundra': 'Tundra', 'pc_alpine': 'Alpin',
                 'pc_gaia': 'Gaia', 'pc_barren': 'Karg', 'pc_barren_cold': 'Karg (Kalt)', 'pc_frozen': 'Gefroren',
                 'pc_molten': 'Geschmolzen', 'pc_toxic': 'Toxisch', 'pc_hothouse': 'Treibhaus',
@@ -1484,6 +1926,7 @@
         // Make functions globally available
         window.selectPlanet = selectPlanet;
         window.removeAsteroidBelt = removeAsteroidBelt;
+        window.removeNeighborSystem = removeNeighborSystem;
 
         // Initialize
         document.addEventListener('DOMContentLoaded', () => {
@@ -1495,11 +1938,13 @@
             elements.systemClass.value = solarSystem.class;
             elements.systemUsage.value = solarSystem.usage;
             
+            updateNeighborSystemsList();
+            updateAsteroidBeltList();
             updatePlanetList();
             updateOutput();
             renderVisualizer();
             
-            showNotification('🎯 Kumulative Stellaris-Orbit-Mechanik und Multiple Asteroidengürtel implementiert!');
+            showNotification('🚀 Enhanced Version mit Import/Export & Nachbarsystemen geladen!');
         });
 
         window.addEventListener('resize', () => {
