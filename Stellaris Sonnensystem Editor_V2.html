@@ -83,6 +83,39 @@
                 0 0 0 3px rgba(0, 212, 255, 0.2);
         }
 
+        /* Dropdown Option Styling für bessere Lesbarkeit */
+        .stellaris-input option {
+            background-color: #2a3847;
+            color: #e2e8f0;
+            padding: 8px 12px;
+        }
+
+        .stellaris-input option:hover,
+        .stellaris-input option:focus {
+            background-color: var(--stellaris-blue);
+            color: white;
+        }
+
+        .stellaris-input option:checked {
+            background-color: var(--stellaris-accent);
+            color: white;
+        }
+
+        /* Optgroup Styling für bessere Kategorien-Trennung */
+        .stellaris-input optgroup {
+            background-color: #1e2936;
+            color: #cbd5e0;
+            font-weight: bold;
+            font-style: normal;
+        }
+
+        .stellaris-input optgroup option {
+            background-color: #2a3847;
+            color: #e2e8f0;
+            font-weight: normal;
+            padding-left: 16px;
+        }
+
         .stellaris-btn {
             background: linear-gradient(145deg, var(--stellaris-blue) 0%, var(--stellaris-accent) 100%);
             color: white;
@@ -335,7 +368,7 @@
     <div class="container py-8">
         <h1 class="stellaris-header">Stellaris Solar System Editor</h1>
         <div class="text-center mb-6">
-            <span class="text-yellow-400 font-semibold">Enhanced Version mit Import/Export & Nachbarsystemen</span>
+            <span class="text-yellow-400 font-semibold">Enhanced Version mit Import/Export, Nachbarsystemen & Mod Support</span>
         </div>
 
         <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
@@ -528,22 +561,14 @@
                                     <option value="pc_alpine">Alpin</option>
                                     <option value="pc_gaia">Gaia</option>
                                 </optgroup>
-                                <optgroup label="Unbewohnbare Welten">
+                                <optgroup label="Unbewohnbare Welten (Vanilla)">
                                     <option value="pc_barren" selected>Karg</option>
-                                    <option value="pc_barren_cold">Karg (Kalt)</option>
                                     <option value="pc_frozen">Gefroren</option>
                                     <option value="pc_molten">Geschmolzen</option>
                                     <option value="pc_toxic">Toxisch</option>
-                                    <option value="pc_hothouse">Treibhaus</option>
                                     <option value="pc_gas_giant">Gasriese</option>
-                                    <option value="pc_hot_gas_giant">Heißer Gasriese</option>
-                                    <option value="pc_cold_gas_giant">Kalter Gasriese</option>
-                                    <option value="pc_dwarf_gas_giant">Zwerg-Gasriese</option>
-                                    <option value="pc_storm">Sturm</option>
                                     <option value="pc_nuked">Verstrahlt</option>
-                                    <option value="pc_shattered">Zerstört</option>
                                     <option value="pc_asteroid">Asteroid</option>
-                                    <option value="pc_subglacial">Subglazial</option>
                                 </optgroup>
                                 <optgroup label="Spezielle Welten">
                                     <option value="pc_relic">Relikt-Welt</option>
@@ -552,6 +577,48 @@
                                     <option value="pc_machine">Maschinenwelt</option>
                                     <option value="pc_hive">Schwarmwelt</option>
                                     <option value="pc_shielded">Abgeschirmt</option>
+                                </optgroup>
+                                <optgroup label="🌌 Gigastructural Engineers">
+                                    <option value="pc_birch">Birch World</option>
+                                    <option value="pc_alderson">Alderson Disk</option>
+                                    <option value="pc_gas_giant_habitable">Habitable Gas Giant</option>
+                                    <option value="pc_stellar_systemcraft">Stellar Systemcraft</option>
+                                    <option value="pc_nicoll_dyson_beam">Nicoll-Dyson Beam Target</option>
+                                    <option value="pc_penrose_sphere_habitable">Penrose Sphere Habitat</option>
+                                    <option value="pc_virtual_reality">Virtual Reality World</option>
+                                    <option value="pc_pouchkinn_planet">Pouchkinn Planet</option>
+                                    <option value="pc_gigastructural_shielded">Gigastructural Shielded World</option>
+                                </optgroup>
+                                <optgroup label="🌍 Planetary Diversity">
+                                    <!-- Unbewohnbare PD-Welten -->
+                                    <option value="pc_barren_cold">Karg (Kalt)</option>
+                                    <option value="pc_hothouse">Treibhaus</option>
+                                    <option value="pc_hot_gas_giant">Heißer Gasriese</option>
+                                    <option value="pc_cold_gas_giant">Kalter Gasriese</option>
+                                    <option value="pc_dwarf_gas_giant">Zwerg-Gasriese</option>
+                                    <option value="pc_storm">Sturm</option>
+                                    <option value="pc_shattered">Zerstört</option>
+                                    <option value="pc_subglacial">Subglazial</option>
+                                    <!-- Bewohnbare PD-Welten -->
+                                    <option value="pc_mantle">Mantle World</option>
+                                    <option value="pc_karst">Karst World</option>
+                                    <option value="pc_mushroom">Mushroom World</option>
+                                    <option value="pc_coral">Coral World</option>
+                                    <option value="pc_crystal">Crystal World</option>
+                                    <option value="pc_frozen_desert">Frozen Desert</option>
+                                    <option value="pc_retinal">Retinal World</option>
+                                    <option value="pc_ash">Ash World</option>
+                                    <option value="pc_salt">Salt World</option>
+                                    <option value="pc_superhabitable">Superhabitable</option>
+                                    <option value="pc_tidally_locked">Tidally Locked</option>
+                                    <option value="pc_primal">Primal World</option>
+                                    <option value="pc_geothermal">Geothermal World</option>
+                                    <option value="pc_marginal">Marginal World</option>
+                                    <option value="pc_fog">Fog World</option>
+                                    <option value="pc_mud">Mud World</option>
+                                    <option value="pc_sandsea">Sand Sea World</option>
+                                    <option value="pc_cascadian">Cascadian World</option>
+                                    <option value="pc_technoorganic">Techno-organic World</option>
                                 </optgroup>
                             </select>
                         </div>
@@ -627,21 +694,22 @@
                 </div>
             </div>
             <div class="warning-panel">
-                <p class="font-semibold text-yellow-300 mb-2">🎯 Neue Features in Enhanced Version:</p>
+                <p class="font-semibold text-yellow-300 mb-2">🎯 Features in Enhanced Version mit Mod Support:</p>
                 <ul class="list-disc list-inside space-y-1 text-sm">
                     <li><strong>Import-Funktion:</strong> Laden Sie bestehende Stellaris-Systemdateien (.txt) direkt in den Editor</li>
                     <li><strong>Nachbarsysteme:</strong> Definieren Sie verbundene Systeme mit Distanz und Initialisierung</li>
+                    <li><strong>Mod-Unterstützung:</strong> Vollständige Integration von Gigastructural Engineers & Planetary Diversity</li>
                     <li><strong>Kumulative Orbit-Mechanik:</strong> orbit_distance wird zur Gesamtdistanz addiert</li>
                     <li><strong>Multiple Asteroidengürtel:</strong> Beliebig viele Gürtel mit verschiedenen Radien möglich</li>
                     <li><strong>change_orbit:</strong> Verschiebt die aktuelle Umlaufbahn für nachfolgende Planeten</li>
-                    <li><strong>Korrekte Visualisierung:</strong> Zeigt echte Stellaris-Distanzen und Nachbarsysteme</li>
+                    <li><strong>Automatische Fallbacks:</strong> Mod-Planeten funktionieren auch ohne installierte Mods</li>
                 </ul>
             </div>
         </div>
     </div>
 
     <script>
-        // Enhanced data model with neighbor systems
+        // Enhanced data model with neighbor systems and mod support
         let solarSystem = {
             name: 'my_custom_system',
             displayName: 'Mein Sonnensystem',
@@ -1667,10 +1735,65 @@
             }
         }
 
-        // Enhanced Code Generation with neighbor systems
+        // Helper function to determine mod requirements and fallback classes
+        function getModInfo(planetClass) {
+            const gigastructuralPlanets = {
+                'pc_birch': { fallback: 'pc_gaia', mod: 'gigastructures' },
+                'pc_alderson': { fallback: 'pc_habitat', mod: 'gigastructures' },
+                'pc_gas_giant_habitable': { fallback: 'pc_gas_giant', mod: 'gigastructures' },
+                'pc_stellar_systemcraft': { fallback: 'pc_habitat', mod: 'gigastructures' },
+                'pc_nicoll_dyson_beam': { fallback: 'pc_barren', mod: 'gigastructures' },
+                'pc_penrose_sphere_habitable': { fallback: 'pc_habitat', mod: 'gigastructures' },
+                'pc_virtual_reality': { fallback: 'pc_machine', mod: 'gigastructures' },
+                'pc_pouchkinn_planet': { fallback: 'pc_gaia', mod: 'gigastructures' },
+                'pc_gigastructural_shielded': { fallback: 'pc_shielded', mod: 'gigastructures' }
+            };
+
+            const planetaryDiversityPlanets = {
+                // Bereits aus Vanilla-Listen verschobene PD-Planeten
+                'pc_barren_cold': { fallback: 'pc_barren', mod: 'planetary_diversity' },
+                'pc_hothouse': { fallback: 'pc_molten', mod: 'planetary_diversity' },
+                'pc_hot_gas_giant': { fallback: 'pc_gas_giant', mod: 'planetary_diversity' },
+                'pc_cold_gas_giant': { fallback: 'pc_gas_giant', mod: 'planetary_diversity' },
+                'pc_dwarf_gas_giant': { fallback: 'pc_gas_giant', mod: 'planetary_diversity' },
+                'pc_storm': { fallback: 'pc_gas_giant', mod: 'planetary_diversity' },
+                'pc_shattered': { fallback: 'pc_barren', mod: 'planetary_diversity' },
+                'pc_subglacial': { fallback: 'pc_frozen', mod: 'planetary_diversity' },
+                // Neue PD-Planeten
+                'pc_mantle': { fallback: 'pc_molten', mod: 'planetary_diversity' },
+                'pc_karst': { fallback: 'pc_continental', mod: 'planetary_diversity' },
+                'pc_mushroom': { fallback: 'pc_continental', mod: 'planetary_diversity' },
+                'pc_coral': { fallback: 'pc_ocean', mod: 'planetary_diversity' },
+                'pc_crystal': { fallback: 'pc_frozen', mod: 'planetary_diversity' },
+                'pc_frozen_desert': { fallback: 'pc_arctic', mod: 'planetary_diversity' },
+                'pc_retinal': { fallback: 'pc_toxic', mod: 'planetary_diversity' },
+                'pc_ash': { fallback: 'pc_barren', mod: 'planetary_diversity' },
+                'pc_salt': { fallback: 'pc_desert', mod: 'planetary_diversity' },
+                'pc_superhabitable': { fallback: 'pc_gaia', mod: 'planetary_diversity' },
+                'pc_tidally_locked': { fallback: 'pc_barren', mod: 'planetary_diversity' },
+                'pc_primal': { fallback: 'pc_continental', mod: 'planetary_diversity' },
+                'pc_geothermal': { fallback: 'pc_molten', mod: 'planetary_diversity' },
+                'pc_marginal': { fallback: 'pc_barren', mod: 'planetary_diversity' },
+                'pc_fog': { fallback: 'pc_tundra', mod: 'planetary_diversity' },
+                'pc_mud': { fallback: 'pc_continental', mod: 'planetary_diversity' },
+                'pc_sandsea': { fallback: 'pc_desert', mod: 'planetary_diversity' },
+                'pc_cascadian': { fallback: 'pc_alpine', mod: 'planetary_diversity' },
+                'pc_technoorganic': { fallback: 'pc_machine', mod: 'planetary_diversity' }
+            };
+
+            if (gigastructuralPlanets[planetClass]) {
+                return gigastructuralPlanets[planetClass];
+            }
+            if (planetaryDiversityPlanets[planetClass]) {
+                return planetaryDiversityPlanets[planetClass];
+            }
+            return null;
+        }
+
+        // Enhanced Code Generation with neighbor systems and mod support
         function generateStellarisTxt() {
             let txt = `##### Generated by Stellaris Solar System Editor - Enhanced Version #####\n`;
-            txt += `##### With correct orbit_distance = 0 mechanics & neighbor systems #####\n\n`;
+            txt += `##### With correct orbit_distance = 0 mechanics, neighbor systems & mod support #####\n\n`;
             txt += `${solarSystem.name} = {\n`;
             txt += `\tname = "${solarSystem.displayName}"\n`;
             txt += `\tclass = "${solarSystem.class}"\n`;
@@ -1722,12 +1845,15 @@
             txt += `\t\thas_ring = no\n`;
             txt += `\t}\n\n`;
 
-            // Generate planets with CORRECT orbit logic
+            // Generate planets with CORRECT orbit logic and mod support
             solarSystem.planets.forEach(planet => {
+                const modInfo = getModInfo(planet.class);
+                const actualClass = modInfo ? modInfo.fallback : planet.class;
+
                 txt += `\tplanet = {\n`;
                 txt += `\t\tname = "${planet.name}"\n`;
-                txt += `\t\tclass = "${planet.class}"\n`;
-                txt += `\t\torbit_distance = ${planet.orbitDistance}\n`; // This is the key fix!
+                txt += `\t\tclass = "${actualClass}"\n`;
+                txt += `\t\torbit_distance = ${planet.orbitDistance}\n`;
                 
                 // Handle orbit angle
                 if (planet.orbitAngleType === 'range') {
@@ -1744,24 +1870,53 @@
                 
                 txt += `\t\thas_ring = ${planet.hasRing ? 'yes' : 'no'}\n`;
                 
+                // Add mod-conditional init_effect for modded planet types
+                let hasInitEffect = false;
+                if (modInfo) {
+                    txt += `\t\tinit_effect = {\n`;
+                    hasInitEffect = true;
+                    
+                    if (modInfo.mod === 'gigastructures') {
+                        txt += `\t\t\tif = {\n`;
+                        txt += `\t\t\t\tlimit = { has_gigastructures = yes }\n`;
+                        txt += `\t\t\t\tchange_pc = ${planet.class}\n`;
+                        txt += `\t\t\t}\n`;
+                    } else if (modInfo.mod === 'planetary_diversity') {
+                        txt += `\t\t\tif = {\n`;
+                        txt += `\t\t\t\tlimit = { has_planetary_diversity = yes }\n`;
+                        txt += `\t\t\t\tchange_pc = ${planet.class}\n`;
+                        txt += `\t\t\t}\n`;
+                    }
+                }
+                
                 if (planet.isStartingPlanet) {
+                    if (!hasInitEffect) {
+                        txt += `\t\tinit_effect = {\n`;
+                        hasInitEffect = true;
+                    }
+                    txt += `\t\t\tprevent_anomaly = yes\n`;
+                    txt += `\t\t\tgenerate_start_buildings_and_blockers = yes\n`;
+                }
+                
+                if (hasInitEffect) {
+                    txt += `\t\t}\n`;
+                }
+                
+                if (planet.isStartingPlanet && !hasInitEffect) {
                     txt += `\t\tstarting_planet = yes\n`;
                     txt += `\t\ttile_blockers = none\n`;
                     txt += `\t\tmodifiers = none\n`;
-                    txt += `\t\tinit_effect = {\n`;
-                    txt += `\t\t\tprevent_anomaly = yes\n`;
-                    txt += `\t\t}\n\n`;
-                    txt += `\t\tinit_effect = {\n`;
-                    txt += `\t\t\tgenerate_start_buildings_and_blockers = yes\n`;
-                    txt += `\t\t}\n`;
                 }
 
                 // Generate moons
                 if (planet.moons && planet.moons.length > 0) {
                     planet.moons.forEach(moon => {
+                        const moonModInfo = getModInfo(moon.class);
+                        const moonActualClass = moonModInfo ? moonModInfo.fallback : moon.class;
+
                         txt += `\t\tmoon = {\n`;
                         txt += `\t\t\tname = "${moon.name}"\n`;
-                        txt += `\t\t\tclass = "${moon.class}"\n`;
+                        txt += `\t\t\tclass = "${moonActualClass}"\n`;
                         txt += `\t\t\torbit_distance = ${moon.orbitDistance}\n`;
                         
                         if (moon.orbitAngleType === 'range') {
@@ -1774,6 +1929,44 @@
                         if (moon.hasRing) {
                             txt += `\t\t\thas_ring = yes\n`;
                         }
+                        
+                        // Add mod-conditional init_effect for modded moon types
+                        if (moonModInfo) {
+                            if (moonModInfo.useChangePC) {
+                                txt += `\t\t\tinit_effect = {\n`;
+                                
+                                if (moonModInfo.mod === 'gigastructures') {
+                                    txt += `\t\t\t\tif = {\n`;
+                                    txt += `\t\t\t\t\tlimit = { has_gigastructures = yes }\n`;
+                                    txt += `\t\t\t\t\tchange_pc = ${moon.class}\n`;
+                                    txt += `\t\t\t\t}\n`;
+                                } else if (moonModInfo.mod === 'planetary_diversity') {
+                                    txt += `\t\t\t\tif = {\n`;
+                                    txt += `\t\t\t\t\tlimit = { has_planetary_diversity = yes }\n`;
+                                    txt += `\t\t\t\t\tchange_pc = ${moon.class}\n`;
+                                    txt += `\t\t\t\t}\n`;
+                                }
+                                
+                                txt += `\t\t\t}\n`;
+                            } else if (moonModInfo.effect) {
+                                // Modern PD effect-based approach for moons
+                                txt += `\t\t\tinit_effect = {\n`;
+                                txt += `\t\t\t\tif = {\n`;
+                                txt += `\t\t\t\t\tlimit = { has_planetary_diversity = yes }\n`;
+                                txt += `\t\t\t\t\teffect ${moonModInfo.effect} = yes\n`;
+                                txt += `\t\t\t\t}\n`;
+                                txt += `\t\t\t}\n`;
+                            } else if (moonModInfo.pdClass) {
+                                // PD Uncommon Worlds for moons
+                                txt += `\t\t\tinit_effect = {\n`;
+                                txt += `\t\t\t\tif = {\n`;
+                                txt += `\t\t\t\t\tlimit = { has_planetary_diversity = yes }\n`;
+                                txt += `\t\t\t\t\tchange_pc = ${moonModInfo.pdClass}\n`;
+                                txt += `\t\t\t\t}\n`;
+                                txt += `\t\t\t}\n`;
+                            }
+                        }
+                        
                         txt += `\t\t}\n`;
                     });
                 }
@@ -1790,7 +1983,7 @@
             yml += ` # Generated by Stellaris Solar System Editor - Enhanced Version\n`;
             yml += ` # System: ${solarSystem.displayName}\n\n`;
             yml += ` ${solarSystem.name}_NAME: "${solarSystem.displayName}"\n`;
-            yml += ` ${solarSystem.name}_DESC: "Ein maßgeschneidertes Sonnensystem mit korrekter Stellaris-Orbit-Mechanik."\n\n`;
+            yml += ` ${solarSystem.name}_DESC: "Ein maßgeschneidertes Sonnensystem mit korrekter Stellaris-Orbit-Mechanik und Mod-Support."\n\n`;
 
             solarSystem.planets.forEach(planet => {
                 yml += ` ${planet.name}_NAME: "${planet.displayName}"\n`;
@@ -1825,11 +2018,20 @@
                 'pc_arctic': '🧊', 'pc_tundra': '❄️', 'pc_alpine': '🏔️',
                 'pc_gaia': '🌿', 'pc_barren': '🌑', 'pc_barren_cold': '☄️', 'pc_frozen': '☄️',
                 'pc_molten': '🔥', 'pc_toxic': '☢️', 'pc_hothouse': '🔥',
-                'pc_gas_giant': '🪐', 'pc_hot_gas_giant': '🔥', 'pc_cold_gas_giant': '❄️', 'pc_dwarf_gas_giant': '🌐',
+                'pc_gas_giant': '🪐', 'pc_hot_gas_giant': '🔥', 'pc_cold_gas_giant': '❄️', 'pc_dwarf_gas_giant': '🌌',
                 'pc_storm': '⛈️', 'pc_nuked': '💥', 'pc_shattered': '💥',
                 'pc_asteroid': '☄️', 'pc_relic': '🏛️', 'pc_subglacial': '🧊',
                 'pc_habitat': '🛰️', 'pc_ecumenopolis': '🏙️', 'pc_machine': '🤖',
-                'pc_hive': '🐛', 'pc_shielded': '🛡️'
+                'pc_hive': '🐛', 'pc_shielded': '🛡️',
+                // Gigastructural Engineers
+                'pc_birch': '🌳', 'pc_alderson': '💿', 'pc_gas_giant_habitable': '🪐', 
+                'pc_stellar_systemcraft': '🚀', 'pc_nicoll_dyson_beam': '⚡', 'pc_penrose_sphere_habitable': '⚫',
+                'pc_virtual_reality': '💻', 'pc_pouchkinn_planet': '🌟', 'pc_gigastructural_shielded': '🛡️',
+                // Planetary Diversity
+                'pc_mantle': '🌋', 'pc_karst': '🪨', 'pc_mushroom': '🍄', 'pc_coral': '🪸', 'pc_crystal': '💎',
+                'pc_frozen_desert': '🏔️', 'pc_retinal': '👁️', 'pc_ash': '🌋', 'pc_salt': '🧂', 'pc_superhabitable': '🌺',
+                'pc_tidally_locked': '🌗', 'pc_primal': '🦕', 'pc_geothermal': '♨️', 'pc_marginal': '🌫️',
+                'pc_fog': '🌫️', 'pc_mud': '🤎', 'pc_sandsea': '🏖️', 'pc_cascadian': '🏞️', 'pc_technoorganic': '🔬'
             };
             return icons[planetClass] || '🌌';
         }
@@ -1846,7 +2048,19 @@
                 'pc_storm': 'Sturm', 'pc_nuked': 'Verstrahlt', 'pc_shattered': 'Zerstört',
                 'pc_asteroid': 'Asteroid', 'pc_relic': 'Relikt', 'pc_subglacial': 'Subglazial',
                 'pc_habitat': 'Habitat', 'pc_ecumenopolis': 'Ökumenopolis', 'pc_machine': 'Maschine',
-                'pc_hive': 'Schwarm', 'pc_shielded': 'Abgeschirmt'
+                'pc_hive': 'Schwarm', 'pc_shielded': 'Abgeschirmt',
+                // Gigastructural Engineers
+                'pc_birch': 'Birch-Welt', 'pc_alderson': 'Alderson-Scheibe', 'pc_gas_giant_habitable': 'Bewohnbarer Gasriese',
+                'pc_stellar_systemcraft': 'Stellares Systemschiff', 'pc_nicoll_dyson_beam': 'Nicoll-Dyson-Strahl-Ziel',
+                'pc_penrose_sphere_habitable': 'Penrose-Sphäre Habitat', 'pc_virtual_reality': 'Virtual Reality Welt',
+                'pc_pouchkinn_planet': 'Pouchkinn Planet', 'pc_gigastructural_shielded': 'Gigastruktureller Schild',
+                // Planetary Diversity
+                'pc_mantle': 'Mantel-Welt', 'pc_karst': 'Karst-Welt', 'pc_mushroom': 'Pilz-Welt', 'pc_coral': 'Korallen-Welt',
+                'pc_crystal': 'Kristall-Welt', 'pc_frozen_desert': 'Gefrorene Wüste', 'pc_retinal': 'Retinal-Welt',
+                'pc_ash': 'Asche-Welt', 'pc_salt': 'Salz-Welt', 'pc_superhabitable': 'Superbewohnbar',
+                'pc_tidally_locked': 'Gezeitengebunden', 'pc_primal': 'Urwelt', 'pc_geothermal': 'Geothermisch',
+                'pc_marginal': 'Randwelt', 'pc_fog': 'Nebel-Welt', 'pc_mud': 'Schlamm-Welt',
+                'pc_sandsea': 'Sandmeer-Welt', 'pc_cascadian': 'Kaskaden-Welt', 'pc_technoorganic': 'Techno-Organisch'
             };
             return names[planetClass] || planetClass;
         }
@@ -1889,7 +2103,37 @@
                 'pc_ecumenopolis': 'linear-gradient(45deg, #fed7d7, #fc8181)',
                 'pc_machine': 'linear-gradient(45deg, #4a5568, #2d3748)',
                 'pc_hive': 'linear-gradient(45deg, #9f7aea, #805ad5)',
-                'pc_shielded': 'linear-gradient(45deg, #e2e8f0, #cbd5e0)'
+                'pc_shielded': 'linear-gradient(45deg, #e2e8f0, #cbd5e0)',
+                // Gigastructural Engineers
+                'pc_birch': 'linear-gradient(45deg, #276749, #38a169)',
+                'pc_alderson': 'linear-gradient(45deg, #4a5568, #2d3748)',
+                'pc_gas_giant_habitable': 'linear-gradient(45deg, #48bb78, #805ad5)',
+                'pc_stellar_systemcraft': 'linear-gradient(45deg, #e2e8f0, #a0aec0)',
+                'pc_nicoll_dyson_beam': 'linear-gradient(45deg, #f6e05e, #e53e3e)',
+                'pc_penrose_sphere_habitable': 'linear-gradient(45deg, #2d3748, #1a202c)',
+                'pc_virtual_reality': 'linear-gradient(45deg, #667eea, #764ba2)',
+                'pc_pouchkinn_planet': 'linear-gradient(45deg, #f093fb, #f5576c)',
+                'pc_gigastructural_shielded': 'linear-gradient(45deg, #4fd1c7, #06bfa5)',
+                // Planetary Diversity
+                'pc_mantle': 'linear-gradient(45deg, #c53030, #e53e3e)',
+                'pc_karst': 'linear-gradient(45deg, #a0aec0, #718096)',
+                'pc_mushroom': 'linear-gradient(45deg, #805ad5, #553c9a)',
+                'pc_coral': 'linear-gradient(45deg, #fc8181, #f56565)',
+                'pc_crystal': 'linear-gradient(45deg, #b794f6, #9f7aea)',
+                'pc_frozen_desert': 'linear-gradient(45deg, #bee3f8, #ecc94b)',
+                'pc_retinal': 'linear-gradient(45deg, #fc8181, #e53e3e)',
+                'pc_ash': 'linear-gradient(45deg, #4a5568, #2d3748)',
+                'pc_salt': 'linear-gradient(45deg, #f7fafc, #edf2f7)',
+                'pc_superhabitable': 'linear-gradient(45deg, #68d391, #38b2ac)',
+                'pc_tidally_locked': 'linear-gradient(45deg, #e53e3e, #2d3748)',
+                'pc_primal': 'linear-gradient(45deg, #38a169, #276749)',
+                'pc_geothermal': 'linear-gradient(45deg, #ed8936, #e53e3e)',
+                'pc_marginal': 'linear-gradient(45deg, #718096, #4a5568)',
+                'pc_fog': 'linear-gradient(45deg, #cbd5e0, #a0aec0)',
+                'pc_mud': 'linear-gradient(45deg, #744210, #975a16)',
+                'pc_sandsea': 'linear-gradient(45deg, #ecc94b, #f6ad55)',
+                'pc_cascadian': 'linear-gradient(45deg, #4299e1, #48bb78)',
+                'pc_technoorganic': 'linear-gradient(45deg, #805ad5, #48bb78)'
             };
             return colors[className] || 'linear-gradient(45deg, #e2e8f0, #cbd5e0)';
         }
@@ -1944,7 +2188,7 @@
             updateOutput();
             renderVisualizer();
             
-            showNotification('🚀 Enhanced Version mit Import/Export & Nachbarsystemen geladen!');
+            showNotification('🚀 Enhanced Version mit Import/Export, Nachbarsystemen & Mod Support geladen!');
         });
 
         window.addEventListener('resize', () => {
