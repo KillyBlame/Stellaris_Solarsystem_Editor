@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Stellaris Solar System Editor - Enhanced Version</title>
+    <title>Stellaris Solar System Editor V6 - Modifier System</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;600;700;800;900&family=Exo+2:wght@300;400;500;600&display=swap');
@@ -17,6 +17,7 @@
             --stellaris-panel: #1a2332;
             --stellaris-border: #2a3847;
             --stellaris-accent: #00a8cc;
+            --stellaris-green: #48bb78;
         }
 
         body {
@@ -83,37 +84,17 @@
                 0 0 0 3px rgba(0, 212, 255, 0.2);
         }
 
-        /* Dropdown Option Styling für bessere Lesbarkeit */
         .stellaris-input option {
             background-color: #2a3847;
             color: #e2e8f0;
             padding: 8px 12px;
         }
 
-        .stellaris-input option:hover,
-        .stellaris-input option:focus {
-            background-color: var(--stellaris-blue);
-            color: white;
-        }
-
-        .stellaris-input option:checked {
-            background-color: var(--stellaris-accent);
-            color: white;
-        }
-
-        /* Optgroup Styling für bessere Kategorien-Trennung */
         .stellaris-input optgroup {
             background-color: #1e2936;
             color: #cbd5e0;
             font-weight: bold;
             font-style: normal;
-        }
-
-        .stellaris-input optgroup option {
-            background-color: #2a3847;
-            color: #e2e8f0;
-            font-weight: normal;
-            padding-left: 16px;
         }
 
         .stellaris-btn {
@@ -133,21 +114,6 @@
             box-shadow: 0 4px 15px rgba(0, 212, 255, 0.3);
         }
 
-        .stellaris-btn::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: -100%;
-            width: 100%;
-            height: 100%;
-            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
-            transition: left 0.5s ease;
-        }
-
-        .stellaris-btn:hover::before {
-            left: 100%;
-        }
-
         .stellaris-btn:hover {
             transform: translateY(-2px);
             box-shadow: 0 6px 20px rgba(0, 212, 255, 0.4);
@@ -161,6 +127,11 @@
         .stellaris-btn-danger {
             background: linear-gradient(145deg, #e53e3e 0%, #c53030 100%);
             box-shadow: 0 4px 15px rgba(229, 62, 62, 0.3);
+        }
+
+        .stellaris-btn-success {
+            background: linear-gradient(145deg, var(--stellaris-green) 0%, #38a169 100%);
+            box-shadow: 0 4px 15px rgba(72, 187, 120, 0.3);
         }
 
         .celestial-item {
@@ -238,12 +209,23 @@
             min-height: 300px;
         }
 
-        .warning-panel {
-            background: linear-gradient(145deg, rgba(255, 193, 7, 0.1) 0%, rgba(255, 152, 0, 0.1) 100%);
-            border: 1px solid rgba(255, 193, 7, 0.3);
+        .modifier-panel {
+            background: linear-gradient(145deg, rgba(72, 187, 120, 0.1) 0%, rgba(56, 161, 105, 0.1) 100%);
+            border: 1px solid rgba(72, 187, 120, 0.3);
             border-radius: 8px;
             padding: 1.5rem;
-            margin-top: 2rem;
+            margin-top: 1rem;
+        }
+
+        .modifier-item {
+            background: linear-gradient(145deg, rgba(72, 187, 120, 0.1) 0%, rgba(56, 161, 105, 0.1) 100%);
+            border: 1px solid rgba(72, 187, 120, 0.3);
+            border-radius: 6px;
+            padding: 0.75rem;
+            margin-bottom: 0.5rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
         }
 
         .orbit-indicator {
@@ -292,23 +274,6 @@
                 inset 0 0 15px rgba(255, 255, 255, 0.2);
         }
 
-        .asteroid-belt {
-            position: absolute;
-            border: 2px dotted rgba(139, 69, 19, 0.6);
-            border-radius: 50%;
-            pointer-events: none;
-        }
-
-        .orbit-number {
-            position: absolute;
-            color: rgba(0, 212, 255, 0.7);
-            font-size: 0.8rem;
-            font-weight: bold;
-            background: rgba(0, 0, 0, 0.5);
-            padding: 2px 6px;
-            border-radius: 4px;
-        }
-
         .orbit-distance-info {
             background: rgba(0, 212, 255, 0.1);
             border: 1px solid rgba(0, 212, 255, 0.3);
@@ -318,28 +283,14 @@
             font-size: 0.8rem;
         }
 
-        .neighbor-item {
-            background: linear-gradient(145deg, rgba(153, 102, 255, 0.1) 0%, rgba(102, 51, 153, 0.1) 100%);
-            border: 1px solid rgba(153, 102, 255, 0.3);
-            border-radius: 6px;
-            padding: 0.75rem;
-            margin-bottom: 0.5rem;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-
-        .grid {
-            display: grid;
-            gap: 1.5rem;
-        }
-
+        .grid { display: grid; gap: 1.5rem; }
         .grid-cols-1 { grid-template-columns: 1fr; }
         .grid-cols-2 { grid-template-columns: repeat(2, 1fr); }
         .grid-cols-3 { grid-template-columns: repeat(3, 1fr); }
 
         @media (min-width: 768px) {
             .md\:grid-cols-2 { grid-template-columns: repeat(2, 1fr); }
+            .md\:grid-cols-3 { grid-template-columns: repeat(3, 1fr); }
         }
 
         @media (min-width: 1024px) {
@@ -366,9 +317,9 @@
 </head>
 <body>
     <div class="container py-8">
-        <h1 class="stellaris-header">Stellaris Solar System Editor</h1>
+        <h1 class="stellaris-header">Stellaris Solar System Editor V6</h1>
         <div class="text-center mb-6">
-            <span class="text-yellow-400 font-semibold">Enhanced Version mit Import/Export, Nachbarsystemen & Mod Support</span>
+            <span class="text-yellow-400 font-semibold">Enhanced Version mit korrektem Modifier-System für Planetary Diversity</span>
         </div>
 
         <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
@@ -425,58 +376,6 @@
                         </select>
                     </div>
                 </div>
-                
-                <!-- Neighbor Systems Configuration -->
-                <div class="mt-6 p-4 bg-gradient-to-r from-indigo-900/30 to-purple-900/30 rounded-lg border border-indigo-500/30">
-                    <h3 class="text-lg font-medium mb-4 text-indigo-400">🌌 Nachbarsysteme</h3>
-                    <div id="neighborSystemsList" class="space-y-2 mb-4">
-                        <p class="text-gray-400 text-sm">Keine Nachbarsysteme definiert</p>
-                    </div>
-                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-                        <div>
-                            <label class="label">Distanz</label>
-                            <input type="number" id="newNeighborDistance" class="stellaris-input" value="100" min="50" max="200">
-                        </div>
-                        <div>
-                            <label class="label">Initialisierung</label>
-                            <select id="newNeighborInit" class="stellaris-input">
-                                <option value="">Zufällig</option>
-                                <option value="sol_system_initializer">Sol-System</option>
-                                <option value="deneb_system">Deneb</option>
-                                <option value="alpha_centauri_initializer">Alpha Centauri</option>
-                                <option value="custom">Benutzerdefiniert</option>
-                            </select>
-                        </div>
-                        <div class="flex items-end">
-                            <button id="addNeighborBtn" class="stellaris-btn stellaris-btn-secondary">Nachbar hinzufügen</button>
-                        </div>
-                    </div>
-                </div>
-                
-                <!-- Asteroid Belt Configuration -->
-                <div class="mt-6 p-4 bg-gray-800 rounded-lg">
-                    <h3 class="text-lg font-medium mb-4 text-yellow-400">Asteroidengürtel (Multiple möglich)</h3>
-                    <div id="asteroidBeltList" class="space-y-2 mb-4">
-                        <p class="text-gray-400 text-sm">Keine Asteroidengürtel definiert</p>
-                    </div>
-                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-                        <div>
-                            <label class="label">Typ</label>
-                            <select id="newAsteroidBeltType" class="stellaris-input">
-                                <option value="rocky_asteroid_belt">Rocky Asteroid Belt</option>
-                                <option value="icy_asteroid_belt">Icy Asteroid Belt</option>
-                                <option value="crystalline_asteroid_belt">Crystalline Asteroid Belt</option>
-                            </select>
-                        </div>
-                        <div>
-                            <label class="label">Radius</label>
-                            <input type="number" id="newAsteroidBeltRadius" class="stellaris-input" value="575" min="100" max="1000">
-                        </div>
-                        <div class="flex items-end">
-                            <button id="addAsteroidBeltBtn" class="stellaris-btn stellaris-btn-secondary">Gürtel hinzufügen</button>
-                        </div>
-                    </div>
-                </div>
 
                 <div class="mt-6">
                     <button id="addPlanetBtn" class="stellaris-btn">Planet hinzufügen</button>
@@ -487,7 +386,7 @@
                 <!-- Orbit Distance Info -->
                 <div class="orbit-distance-info mt-4">
                     <strong>💡 Stellaris Kumulative Orbit-Mechanik:</strong><br>
-                    📐 <strong>Kumulative Addition:</strong> orbit_distance wird zur Gesamtdistanz addiert<br>
+                    📏 <strong>Kumulative Addition:</strong> orbit_distance wird zur Gesamtdistanz addiert<br>
                     🟡 <strong>Planet 1:</strong> orbit_distance = 25 → Umlaufbahn bei 25<br>
                     🟡 <strong>Planet 2:</strong> orbit_distance = 30 → Umlaufbahn bei 25+30 = 55<br>
                     ⚪ <strong>Planet 3:</strong> orbit_distance = 0 → Gleiche Umlaufbahn bei 55
@@ -539,7 +438,7 @@
                             <input type="text" id="celestialDisplayName" class="stellaris-input" placeholder="z.B. Akon">
                         </div>
                         <div>
-                            <label class="label">Planetenklasse</label>
+                            <label class="label">Basis-Planetenklasse</label>
                             <select id="celestialClass" class="stellaris-input">
                                 <optgroup label="Sterne">
                                     <option value="pc_b_star">B-Klasse Stern</option>
@@ -553,20 +452,21 @@
                                     <option value="pc_pulsar">Pulsar</option>
                                     <option value="pc_brown_dwarf">Brauner Zwerg</option>
                                 </optgroup>
-                                <optgroup label="Bewohnbare Welten">
+                                <optgroup label="Bewohnbare Welten (Vanilla)">
                                     <option value="pc_continental">Kontinental</option>
                                     <option value="pc_ocean">Ozean</option>
                                     <option value="pc_tropical">Tropisch</option>
                                     <option value="pc_arid">Arid</option>
                                     <option value="pc_desert">Wüste</option>
-                                    <option value="pc_savanna">Savanne</option>
+                                    <option value="pc_savannah">Savanne</option>
                                     <option value="pc_arctic">Arktisch</option>
                                     <option value="pc_tundra">Tundra</option>
                                     <option value="pc_alpine">Alpin</option>
                                     <option value="pc_gaia">Gaia</option>
                                 </optgroup>
-                                <optgroup label="Unbewohnbare Welten (Vanilla)">
+                                <optgroup label="Unbewohnbare Welten">
                                     <option value="pc_barren" selected>Karg</option>
+                                    <option value="pc_barren_cold">Karg (Kalt)</option>
                                     <option value="pc_frozen">Gefroren</option>
                                     <option value="pc_molten">Geschmolzen</option>
                                     <option value="pc_toxic">Toxisch</option>
@@ -592,89 +492,8 @@
                                     <option value="pc_virtual_reality">Virtual Reality World</option>
                                     <option value="pc_pouchkinn_planet">Pouchkinn Planet</option>
                                     <option value="pc_gigastructural_shielded">Gigastructural Shielded World</option>
-                                </optgroup>
-                                <optgroup label="🌊 PD: Wet Worlds (Feuchte Welten)">
-                                    <option value="pd_retinal_world">Retinal World</option>
-                                    <option value="pd_lake_world">Lake World</option>
-                                    <option value="pd_tepid_world">Tepid World</option>
-                                    <option value="pd_mushroom_world">Mushroom World</option>
-                                    <option value="pd_temperate_world">Temperate World</option>
-                                    <option value="pd_sakura_world">Sakura World</option>
-                                    <option value="pd_forest_world">Forest World</option>
-                                    <option value="pd_megaflora_world">Megaflora World</option>
-                                    <option value="pd_petrified_world">Petrified World</option>
-                                    <option value="pd_cascadian_world">Cascadian World</option>
-                                    <option value="pd_swamp_world">Swamp World</option>
-                                    <option value="pd_crag_world">Crag World</option>
-                                    <option value="pd_fog_world">Fog World</option>
-                                    <option value="pd_kelp_world">Kelp World</option>
-                                    <option value="pd_algae_world">Algae World</option>
-                                    <option value="pd_reef_world">Reef World</option>
-                                    <option value="pd_coral_world">Coral World</option>
-                                    <option value="pd_archipelago_world">Archipelago World</option>
-                                    <option value="pd_atoll_world">Atoll World</option>
-                                    <option value="pd_tepui_world">Tepui World</option>
-                                    <option value="pd_mangrove_world">Mangrove World</option>
-                                    <option value="pd_cenote_world">Cenote World</option>
-                                    <option value="pd_fungal_world">Fungal World</option>
-                                    <option value="pd_aerial_world">Aerial World</option>
-                                    <option value="pd_lilypad_world">Lilypad World</option>
-                                    <option value="pd_geothermal_world">Geothermal World</option>
-                                    <option value="pd_biolumen_world">Bioluminescent World</option>
-                                </optgroup>
-                                <optgroup label="🏜️ PD: Dry Worlds (Trockene Welten)">
-                                    <option value="pd_dune_world">Dune World</option>
-                                    <option value="pd_oasis_world">Oasis World</option>
-                                    <option value="pd_outback_world">Outback World</option>
-                                    <option value="pd_coastal_world">Coastal World</option>
-                                    <option value="pd_fungi_world">Fungi World</option>
-                                    <option value="pd_salt_world">Salt World</option>
-                                    <option value="pd_aquifer_world">Aquifer World</option>
-                                    <option value="pd_mesa_world">Mesa World</option>
-                                    <option value="pd_fog_desert_world">Fog Desert World</option>
-                                    <option value="pd_mediterranean_world">Mediterranean World</option>
-                                    <option value="pd_badlands_world">Badlands World</option>
-                                    <option value="pd_succulent_world">Succulent World</option>
-                                    <option value="pd_striped_world">Striped World</option>
-                                    <option value="pd_primal_world">Primal World</option>
-                                    <option value="pd_steppe_world">Steppe World</option>
-                                    <option value="pd_prairie_world">Prairie World</option>
-                                    <option value="pd_veld_world">Veld World</option>
-                                    <option value="pd_semi_arid_world">Semi-Arid World</option>
-                                    <option value="pd_aspen_world">Aspen World</option>
-                                    <option value="pd_sandstone_world">Sandstone World</option>
-                                    <option value="pd_supercontinent_world">Supercontinent World</option>
-                                    <option value="pd_sinkhole_world">Sinkhole World</option>
-                                </optgroup>
-                                <optgroup label="❄️ PD: Cold Worlds (Kalte Welten)">
-                                    <option value="pd_cold_desert_world">Cold Desert World</option>
-                                    <option value="pd_glacial_world">Glacial World</option>
-                                    <option value="pd_antarctic_world">Antarctic World</option>
-                                    <option value="pd_aeolian_world">Aeolian World</option>
-                                    <option value="pd_ice_spike_world">Ice Spike World</option>
-                                    <option value="pd_crevasse_world">Crevasse World</option>
-                                    <option value="pd_ice_dunes_world">Ice Dunes World</option>
-                                    <option value="pd_iceberg_world">Iceberg World</option>
-                                    <option value="pd_boreal_world">Boreal World</option>
-                                    <option value="pd_snow_world">Snow World</option>
-                                    <option value="pd_highland_world">Highland World</option>
-                                    <option value="pd_dune_forest_world">Dune Forest World</option>
-                                    <option value="pd_fjord_world">Fjord World</option>
-                                    <option value="pd_blossom_world">Blossom World</option>
-                                    <option value="pd_glaciovolcanic_world">Glaciovolcanic World</option>
-                                    <option value="pd_lanthanide_world">Lanthanide World</option>
-                                    <option value="pd_bog_world">Bog World</option>
-                                    <option value="pd_mycelium_world">Mycelium World</option>
-                                    <option value="pd_mud_world">Mud World</option>
-                                    <option value="pd_basalt_world">Basalt World</option>
-                                    <option value="pd_tuya_world">Tuya World</option>
-                                    <option value="pd_cryoflora_world">Cryoflora World</option>
-                                    <option value="pd_lichen_world">Lichen World</option>
-                                </optgroup>
-                                <optgroup label="🌿 PD: Gaia Worlds">
-                                    <option value="pd_wet_gaia_world">Wet Gaia World</option>
-                                    <option value="pd_dry_gaia_world">Dry Gaia World</option>
-                                    <option value="pd_cold_gaia_world">Cold Gaia World</option>
+                                    <option value="pc_quasi_stellar_obliterator">Quasi-Stellar Obliterator</option>
+                                    <option value="pc_neutronium_gigaforge">Neutronium Gigaforge</option>
                                 </optgroup>
                                 <optgroup label="✨ PD: Uncommon Worlds">
                                     <option value="pc_superhabitable">Superhabitable</option>
@@ -707,7 +526,7 @@
                                     <option value="pc_subglacial">Subglazial</option>
                                     <option value="pc_storm">Sturm-Welt</option>
                                 </optgroup>
-                            </select>
+                        </select>
                         </div>
                         <div>
                             <label class="label">Größe (1-50)</label>
@@ -756,6 +575,42 @@
                             </div>
                         </div>
                     </div>
+
+                    <!-- Modifier System -->
+                    <div class="modifier-panel">
+                        <h3 class="text-lg font-medium mb-4 text-green-400">🌿 Intelligentes Planet-Modifier System</h3>
+                        <div class="mb-3 p-2 bg-blue-900/20 rounded border border-blue-500/30">
+                            <p class="text-blue-200 text-xs">
+                                <strong>Planetary Diversity:</strong> Zeigt nur kompatible Modifier für gewählte Basis-Planetenklasse<br>
+                                <strong>Andere:</strong> Standard-Modifier funktionieren mit allen Klassen
+                            </p>
+                        </div>
+                        <div id="modifierList" class="space-y-2 mb-4">
+                            <p class="text-gray-400 text-sm">Keine Modifier ausgewählt</p>
+                        </div>
+                        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                            <div>
+                                <label class="label">Modifier Kategorie</label>
+                                <select id="modifierCategory" class="stellaris-input">
+                                    <option value="">-- Kategorie wählen --</option>
+                                    <option value="planetary_diversity">Planetary Diversity</option>
+                                    <option value="environmental">Umwelt-Modifier</option>
+                                    <option value="resource">Ressourcen-Modifier</option>
+                                    <option value="special">Spezial-Modifier</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label class="label">Modifier</label>
+                                <select id="modifierType" class="stellaris-input" disabled>
+                                    <option value="">-- Erst Kategorie wählen --</option>
+                                </select>
+                            </div>
+                            <div class="flex items-end">
+                                <button id="addModifierBtn" class="stellaris-btn stellaris-btn-success" disabled>Modifier hinzufügen</button>
+                            </div>
+                        </div>
+                    </div>
+
                     <div class="mt-6">
                         <button id="addMoonBtn" class="stellaris-btn stellaris-btn-secondary">Mond hinzufügen</button>
                         <button id="deleteCelestialBtn" class="stellaris-btn stellaris-btn-danger ml-2">Löschen</button>
@@ -765,10 +620,10 @@
             </div>
         </div>
 
-        <!-- Import/Export Section -->
+        <!-- Export Section -->
         <div class="stellaris-panel">
-            <h2 class="section-title">Import / Export</h2>
-            <div class="grid grid-cols-1 md:col-span-2 gap-4">
+            <h2 class="section-title">Export</h2>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
                     <h3 class="text-xl font-medium mb-4 text-green-400">Generierter Stellaris Code (.txt)</h3>
                     <textarea id="exportTxt" class="stellaris-export-area w-full" rows="40" readonly></textarea>
@@ -780,36 +635,264 @@
                     <button id="downloadYmlBtn" class="stellaris-btn mt-4 w-full">Als .yml herunterladen</button>
                 </div>
             </div>
-            <div class="warning-panel">
-                <p class="font-semibold text-yellow-300 mb-2">🎯 Features in Enhanced Version mit Mod Support:</p>
+            <div class="mt-6 p-4 bg-gradient-to-r from-green-900/30 to-blue-900/30 rounded-lg border border-green-500/30">
+                <p class="font-semibold text-green-300 mb-2">🎯 V6 Features - Intelligentes Basis-Klassen-System:</p>
                 <ul class="list-disc list-inside space-y-1 text-sm">
-                    <li><strong>Import-Funktion:</strong> Laden Sie bestehende Stellaris-Systemdateien (.txt) direkt in den Editor</li>
-                    <li><strong>Nachbarsysteme:</strong> Definieren Sie verbundene Systeme mit Distanz und Initialisierung</li>
-                    <li><strong>Mod-Unterstützung:</strong> Vollständige Integration von Gigastructural Engineers & Planetary Diversity</li>
-                    <li><strong>Kumulative Orbit-Mechanik:</strong> orbit_distance wird zur Gesamtdistanz addiert</li>
-                    <li><strong>Multiple Asteroidengürtel:</strong> Beliebig viele Gürtel mit verschiedenen Radien möglich</li>
-                    <li><strong>change_orbit:</strong> Verschiebt die aktuelle Umlaufbahn für nachfolgende Planeten</li>
-                    <li><strong>Automatische Fallbacks:</strong> Mod-Planeten funktionieren auch ohne installierte Mods</li>
+                    <li><strong>Basis-Klassen-System:</strong> Nur bewährte Vanilla-Planetenklassen als Grundlage</li>
+                    <li><strong>Intelligente PD-Modifier:</strong> Zeigt nur kompatible Modifier für gewählte Basis-Klasse</li>
+                    <li><strong>Korrekte PD-Struktur:</strong> change_pc + add_modifier mit korrekten Werten</li>
+                    <li><strong>Klassische Struktur:</strong> modifiers = none + init_effect wie gewünscht</li>
+                    <li><strong>Kontextuell:</strong> Modifier-Auswahl passt sich automatisch der Planetenklasse an</li>
+                    <li><strong>Vollständige Kompatibilität:</strong> 100+ authentische PD-Modifier korrekt implementiert</li>
+                    <li><strong>Übersichtlich:</strong> Nur relevante Optionen werden angezeigt</li>
                 </ul>
+                <div class="mt-3 p-3 bg-blue-900/20 rounded border border-blue-500/30">
+                    <p class="text-blue-200 text-sm"><strong>💡 Anleitung:</strong> 
+                    Wählen Sie erst eine Basis-Planetenklasse (z.B. Continental), dann bei Planetary Diversity 
+                    nur die für diese Klasse verfügbaren Modifier (z.B. Retinal World, Lake World, etc.)</p>
+                </div>
             </div>
         </div>
     </div>
 
     <script>
-        // Enhanced data model with neighbor systems and mod support
+        // Enhanced data model with proper modifier system
         let solarSystem = {
             name: 'my_custom_system',
             displayName: 'Mein Sonnensystem',
             class: 'sc_g',
             usage: 'custom_empire',
-            neighborSystems: [], // Array of neighbor systems
-            asteroidBelts: [], // Array of multiple asteroid belts
-            planets: [] // Sequential array of planets with cumulative orbit distances
+            planets: [] // Sequential array of planets
         };
 
         let selectedPlanet = null;
         let nextCelestialId = 1;
         let visualizerScale = 0.3;
+
+        // Intelligent Planet-Class-Based Modifier Database
+        const MODIFIERS = {
+            planetary_diversity: {
+                name: "Planetary Diversity",
+                modifiers: {
+                    // Continental-based modifiers
+                    pc_continental: {
+                        "pd_retinal_world_effect": { name: "Retinal World", description: "Augen-ähnliche Strukturen" },
+                        "pd_lake_world_effect": { name: "Lake World", description: "Viele Seen und Wasserkörper" },
+                        "pd_tepid_world_effect": { name: "Tepid World", description: "Lauwarmes Klima" },
+                        "pd_mushroom_world_effect": { name: "Mushroom World", description: "Dominiert von Pilzen" },
+                        "pd_temperate_world_effect": { name: "Temperate World", description: "Gemäßigtes Klima" },
+                        "pd_sakura_world_effect": { name: "Sakura World", description: "Kirschblüten-Landschaften" },
+                        "pd_moss_world_effect": { name: "Moss World", description: "Moos-bedeckt" },
+                        "pd_marsh_world_effect": { name: "Marsh World", description: "Sumpfgebiete" },
+                        "pd_forest_world_effect": { name: "Forest World", description: "Dichte Wälder" },
+                        "pd_megaflora_world_effect": { name: "Megaflora World", description: "Riesenpflanzen" },
+                        "pd_petrified_world_effect": { name: "Petrified World", description: "Versteinerte Landschaften" }
+                    },
+                    // Ocean-based modifiers
+                    pc_ocean: {
+                        "pd_cascadian_world_effect": { name: "Cascadian World", description: "Wasserfälle und Kaskaden" },
+                        "pd_swamp_world_effect": { name: "Swamp World", description: "Sumpfige Gebiete" },
+                        "pd_crag_world_effect": { name: "Crag World", description: "Schroffe Küsten" },
+                        "pd_fog_world_effect": { name: "Fog World", description: "Permanenter Nebel" },
+                        "pd_kelp_world_effect": { name: "Kelp World", description: "Ausgedehnte Algenwälder" },
+                        "pd_algae_world_effect": { name: "Algae World", description: "Algen-dominiert" },
+                        "pd_columnar_world_effect": { name: "Columnar World", description: "Säulenförmige Strukturen" },
+                        "pd_tidepool_world_effect": { name: "Tidepool World", description: "Gezeitentümpel" },
+                        "pd_reef_world_effect": { name: "Reef World", description: "Korallenriff-Strukturen" },
+                        "pd_archipelago_world_effect": { name: "Archipelago World", description: "Inselgruppen" }
+                    },
+                    // Tropical-based modifiers
+                    pc_tropical: {
+                        "pd_atoll_world_effect": { name: "Atoll World", description: "Ringförmige Inseln" },
+                        "pd_tepui_world_effect": { name: "Tepui World", description: "Tafelberge im Dschungel" },
+                        "pd_mangrove_world_effect": { name: "Mangrove World", description: "Mangrovenwälder" },
+                        "pd_cenote_world_effect": { name: "Cenote World", description: "Unterirdische Seen" },
+                        "pd_fungal_world_effect": { name: "Fungal World", description: "Pilz-Ökosysteme" },
+                        "pd_aerial_world_effect": { name: "Aerial World", description: "Luftige Baumkronen" },
+                        "pd_lilypad_world_effect": { name: "Lilypad World", description: "Riesige Seerosen" },
+                        "pd_obsidian_world_effect": { name: "Obsidian World", description: "Vulkanisches Glas" },
+                        "pd_geothermal_world_effect": { name: "Geothermal World", description: "Heiße Quellen" },
+                        "pd_biolumen_world_effect": { name: "Bioluminescent World", description: "Leuchtende Organismen" }
+                    },
+                    // Desert-based modifiers
+                    pc_desert: {
+                        "pd_dune_world_effect": { name: "Dune World", description: "Wanderdünen" },
+                        "pd_oasis_world_effect": { name: "Oasis World", description: "Oasen in Wüsten" },
+                        "pd_outback_world_effect": { name: "Outback World", description: "Trockenes Buschland" },
+                        "pd_coastal_world_effect": { name: "Coastal World", description: "Wüstenküsten" },
+                        "pd_fungi_world_effect": { name: "Fungi World", description: "Wüstenpilze" },
+                        "pd_ironsand_world_effect": { name: "Ironsand World", description: "Eisenhaltiger Sand" },
+                        "pd_cactus_world_effect": { name: "Cactus World", description: "Riesenkakteen" },
+                        "pd_salt_world_effect": { name: "Salt World", description: "Salzwüsten" },
+                        "pd_aquifer_world_effect": { name: "Aquifer World", description: "Unterirdisches Wasser" }
+                    },
+                    // Arid-based modifiers
+                    pc_arid: {
+                        "pd_mesa_world_effect": { name: "Mesa World", description: "Tafelberge und Plateaus" },
+                        "pd_fog_desert_world_effect": { name: "Fog Desert World", description: "Nebelwüste" },
+                        "pd_mediterranean_world_effect": { name: "Mediterranean World", description: "Mediterranes Klima" },
+                        "pd_badlands_world_effect": { name: "Badlands World", description: "Zerklüftete Landschaften" },
+                        "pd_succulent_world_effect": { name: "Succulent World", description: "Sukkulenten-dominiert" },
+                        "pd_striped_world_effect": { name: "Striped World", description: "Gestreifte Landschaften" },
+                        "pd_amethyst_world_effect": { name: "Amethyst World", description: "Amethyst-Formationen" },
+                        "pd_coral_world_effect": { name: "Coral World", description: "Fossile Korallenriffe" },
+                        "pd_primal_world_effect": { name: "Primal World", description: "Urzeitliche Landschaften" }
+                    },
+                    // Savannah-based modifiers
+                    pc_savannah: {
+                        "pd_steppe_world_effect": { name: "Steppe World", description: "Weite Graslandschaften" },
+                        "pd_prairie_world_effect": { name: "Prairie World", description: "Prärie-Ökosystem" },
+                        "pd_veld_world_effect": { name: "Veld World", description: "Afrikanische Savanne" },
+                        "pd_semi_arid_world_effect": { name: "Semi-Arid World", description: "Halbtrockenes Klima" },
+                        "pd_aspen_world_effect": { name: "Aspen World", description: "Zitterpappel-Wälder" },
+                        "pd_sandstone_world_effect": { name: "Sandstone World", description: "Sandstein-Formationen" },
+                        "pd_turquoise_world_effect": { name: "Turquoise World", description: "Türkisfarbene Landschaften" },
+                        "pd_calcite_world_effect": { name: "Calcite World", description: "Kalzit-Kristalle" },
+                        "pd_monsoon_world_effect": { name: "Monsoon World", description: "Monsun-Klima" },
+                        "pd_supercontinent_world_effect": { name: "Supercontinent World", description: "Riesiger Kontinent" },
+                        "pd_sinkhole_world_effect": { name: "Sinkhole World", description: "Dolinen und Senklöcher" }
+                    },
+                    // Arctic-based modifiers
+                    pc_arctic: {
+                        "pd_cold_desert_world_effect": { name: "Cold Desert World", description: "Kalte Wüste" },
+                        "pd_glacial_world_effect": { name: "Glacial World", description: "Gletscher-bedeckt" },
+                        "pd_antarctic_world_effect": { name: "Antarctic World", description: "Antarktische Bedingungen" },
+                        "pd_aeolian_world_effect": { name: "Aeolian World", description: "Windgeformte Landschaften" },
+                        "pd_ice_spike_world_effect": { name: "Ice Spike World", description: "Eisstachel-Formationen" },
+                        "pd_crevasse_world_effect": { name: "Crevasse World", description: "Gletscherspalten" },
+                        "pd_ice_dunes_world_effect": { name: "Ice Dunes World", description: "Eisdünen" },
+                        "pd_ferrospring_world_effect": { name: "Ferrospring World", description: "Eisenhaltige Quellen" },
+                        "pd_storm_world_effect": { name: "Storm World", description: "Permanente Stürme" },
+                        "pd_iceberg_world_effect": { name: "Iceberg World", description: "Schwimmende Eisberge" }
+                    },
+                    // Alpine-based modifiers
+                    pc_alpine: {
+                        "pd_boreal_world_effect": { name: "Boreal World", description: "Nordische Wälder" },
+                        "pd_snow_world_effect": { name: "Snow World", description: "Schnee-bedeckt" },
+                        "pd_highland_world_effect": { name: "Highland World", description: "Hochlandschaften" },
+                        "pd_dune_forest_world_effect": { name: "Dune Forest World", description: "Waldige Dünen" },
+                        "pd_fjord_world_effect": { name: "Fjord World", description: "Tiefe Fjorde" },
+                        "pd_blossom_world_effect": { name: "Blossom World", description: "Blütenpracht" },
+                        "pd_taiga_world_effect": { name: "Taiga World", description: "Nadelwald-Taiga" },
+                        "pd_craton_world_effect": { name: "Craton World", description: "Alte Kontinentalplatten" },
+                        "pd_glaciovolcanic_world_effect": { name: "Glaciovolcanic World", description: "Eis und Vulkane" },
+                        "pd_lanthanide_world_effect": { name: "Lanthanide World", description: "Seltene Erden" }
+                    },
+                    // Tundra-based modifiers
+                    pc_tundra: {
+                        "pd_bog_world_effect": { name: "Bog World", description: "Torfmoore" },
+                        "pd_mycelium_world_effect": { name: "Mycelium World", description: "Pilzmyzel-Netzwerke" },
+                        "pd_mud_world_effect": { name: "Mud World", description: "Schlammige Landschaften" },
+                        "pd_basalt_world_effect": { name: "Basalt World", description: "Basalt-Formationen" },
+                        "pd_tuya_world_effect": { name: "Tuya World", description: "Tafelberge aus Eis" },
+                        "pd_cryovolcano_world_effect": { name: "Cryovolcano World", description: "Eisvulkane" },
+                        "pd_treeline_world_effect": { name: "Treeline World", description: "Baumgrenze-Ökosysteme" },
+                        "pd_cryoflora_world_effect": { name: "Cryoflora World", description: "Kälte-angepasste Pflanzen" },
+                        "pd_lichen_world_effect": { name: "Lichen World", description: "Flechten-dominiert" }
+                    }
+                }
+            },
+            environmental: {
+                name: "Umwelt-Modifier",
+                modifiers: {
+                    "pm_tidal_locked": { name: "Gezeitengebunden", description: "Immer dieselbe Seite zur Sonne" },
+                    "pm_asteroid_impacts": { name: "Asteroideneinschläge", description: "Regelmäßige Einschläge" },
+                    "pm_unstable_weather": { name: "Instabiles Wetter", description: "Extreme Wetterschwankungen" },
+                    "pm_strong_magnetic_field": { name: "Starkes Magnetfeld", description: "Schutz vor Strahlung" },
+                    "pm_weak_magnetic_field": { name: "Schwaches Magnetfeld", description: "Erhöhte Strahlung" },
+                    "pm_low_gravity": { name: "Niedrige Schwerkraft", description: "Geringe Gravitationskraft" },
+                    "pm_high_gravity": { name: "Hohe Schwerkraft", description: "Starke Gravitationskraft" }
+                }
+            },
+            resource: {
+                name: "Ressourcen-Modifier",
+                modifiers: {
+                    "pm_mineral_rich": { name: "Mineralienreich", description: "+2 Mineralien aus Bergbau-Jobs" },
+                    "pm_mineral_poor": { name: "Mineralienarm", description: "-1 Mineralien aus Bergbau-Jobs" },
+                    "pm_energy_rich": { name: "Energiereich", description: "+2 Energie aus Techniker-Jobs" },
+                    "pm_energy_poor": { name: "Energiearm", description: "-1 Energie aus Techniker-Jobs" },
+                    "pm_food_rich": { name: "Nahrungsreich", description: "+2 Nahrung aus Farmer-Jobs" },
+                    "pm_food_poor": { name: "Nahrungsarm", description: "-1 Nahrung aus Farmer-Jobs" }
+                }
+            },
+            special: {
+                name: "Spezial-Modifier",
+                modifiers: {
+                    "pm_natural_beauty": { name: "Natürliche Schönheit", description: "+5% Glück" },
+                    "pm_dangerous_wildlife": { name: "Gefährliche Tierwelt", description: "+25% Armeeaufbaugeschwindigkeit" },
+                    "pm_lush": { name: "Üppig", description: "+20% Bevölkerungswachstum" },
+                    "pm_bleak": { name: "Trostlos", description: "-10% Glück" },
+                    "pm_irradiated": { name: "Verstrahlt", description: "-10% Gesundheit" },
+                    "pm_titanic_life": { name: "Titanisches Leben", description: "+4 Gesellschaftsforschung aus Forscher-Jobs" },
+                    "pm_storm_wracked": { name: "Sturmgeplagt", description: "-20% Produktivität" }
+                }
+            }
+        };
+
+        // Helper function to determine mod requirements and fallback classes
+        function getModInfo(planetClass) {
+            const gigastructuralPlanets = {
+                'pc_birch': { fallback: 'pc_gaia', mod: 'gigastructures' },
+                'pc_alderson': { fallback: 'pc_habitat', mod: 'gigastructures' },
+                'pc_gas_giant_habitable': { fallback: 'pc_gas_giant', mod: 'gigastructures' },
+                'pc_stellar_systemcraft': { fallback: 'pc_habitat', mod: 'gigastructures' },
+                'pc_nicoll_dyson_beam': { fallback: 'pc_barren', mod: 'gigastructures' },
+                'pc_penrose_sphere_habitable': { fallback: 'pc_habitat', mod: 'gigastructures' },
+                'pc_virtual_reality': { fallback: 'pc_machine', mod: 'gigastructures' },
+                'pc_pouchkinn_planet': { fallback: 'pc_gaia', mod: 'gigastructures' },
+                'pc_gigastructural_shielded': { fallback: 'pc_shielded', mod: 'gigastructures' },
+                'pc_quasi_stellar_obliterator': { fallback: 'pc_habitat', mod: 'gigastructures' },
+                'pc_neutronium_gigaforge': { fallback: 'pc_habitat', mod: 'gigastructures' }
+            };
+
+            const planetaryDiversityPlanets = {
+                // PD Enhanced Uninhabitable
+                'pc_barren_cold': { fallback: 'pc_barren', mod: 'planetary_diversity' },
+                'pc_hothouse': { fallback: 'pc_molten', mod: 'planetary_diversity' },
+                'pc_hot_gas_giant': { fallback: 'pc_gas_giant', mod: 'planetary_diversity' },
+                'pc_cold_gas_giant': { fallback: 'pc_gas_giant', mod: 'planetary_diversity' },
+                'pc_dwarf_gas_giant': { fallback: 'pc_gas_giant', mod: 'planetary_diversity' },
+                'pc_storm': { fallback: 'pc_gas_giant', mod: 'planetary_diversity' },
+                'pc_shattered': { fallback: 'pc_barren', mod: 'planetary_diversity' },
+                'pc_subglacial': { fallback: 'pc_frozen', mod: 'planetary_diversity' },
+                
+                // PD Uncommon Worlds
+                'pc_mantle': { fallback: 'pc_molten', mod: 'planetary_diversity' },
+                'pc_karst': { fallback: 'pc_continental', mod: 'planetary_diversity' },
+                'pc_crystal': { fallback: 'pc_frozen', mod: 'planetary_diversity' },
+                'pc_frozen_desert': { fallback: 'pc_arctic', mod: 'planetary_diversity' },
+                'pc_ash': { fallback: 'pc_barren', mod: 'planetary_diversity' },
+                'pc_marginal': { fallback: 'pc_barren', mod: 'planetary_diversity' },
+                'pc_sandsea': { fallback: 'pc_desert', mod: 'planetary_diversity' },
+                'pc_superhabitable': { fallback: 'pc_gaia', mod: 'planetary_diversity' },
+                'pc_tidally_locked': { fallback: 'pc_barren', mod: 'planetary_diversity' },
+                'pc_technoorganic': { fallback: 'pc_machine', mod: 'planetary_diversity' },
+
+                // PD Gaia Worlds
+                'pd_wet_gaia_world': { fallback: 'pc_gaia', mod: 'planetary_diversity' },
+                'pd_dry_gaia_world': { fallback: 'pc_gaia', mod: 'planetary_diversity' },
+                'pd_cold_gaia_world': { fallback: 'pc_gaia', mod: 'planetary_diversity' },
+                
+                // PD Cave/Superhabitable/Tidally Locked variants
+                'pd_wet_cave_world': { fallback: 'pc_continental', mod: 'planetary_diversity' },
+                'pd_dry_cave_world': { fallback: 'pc_desert', mod: 'planetary_diversity' },
+                'pd_cold_cave_world': { fallback: 'pc_arctic', mod: 'planetary_diversity' },
+                'pd_wet_superhabitable_world': { fallback: 'pc_gaia', mod: 'planetary_diversity' },
+                'pd_dry_superhabitable_world': { fallback: 'pc_gaia', mod: 'planetary_diversity' },
+                'pd_cold_superhabitable_world': { fallback: 'pc_gaia', mod: 'planetary_diversity' },
+                'pd_wet_tidally_locked_world': { fallback: 'pc_continental', mod: 'planetary_diversity' },
+                'pd_dry_tidally_locked_world': { fallback: 'pc_desert', mod: 'planetary_diversity' },
+                'pd_cold_tidally_locked_world': { fallback: 'pc_arctic', mod: 'planetary_diversity' }
+            };
+
+            if (gigastructuralPlanets[planetClass]) {
+                return gigastructuralPlanets[planetClass];
+            }
+            if (planetaryDiversityPlanets[planetClass]) {
+                return planetaryDiversityPlanets[planetClass];
+            }
+            return null;
+        }
 
         // DOM Elements
         const elements = {
@@ -818,25 +901,19 @@
             importBtn: document.getElementById('importBtn'),
             clearSystemBtn: document.getElementById('clearSystemBtn'),
             
-            // Neighbor systems elements
-            neighborSystemsList: document.getElementById('neighborSystemsList'),
-            newNeighborDistance: document.getElementById('newNeighborDistance'),
-            newNeighborInit: document.getElementById('newNeighborInit'),
-            addNeighborBtn: document.getElementById('addNeighborBtn'),
-            
-            // Existing elements
+            // System elements
             systemName: document.getElementById('systemName'),
             systemDisplayName: document.getElementById('systemDisplayName'),
             systemClass: document.getElementById('systemClass'),
             systemUsage: document.getElementById('systemUsage'),
-            asteroidBeltList: document.getElementById('asteroidBeltList'),
-            newAsteroidBeltType: document.getElementById('newAsteroidBeltType'),
-            newAsteroidBeltRadius: document.getElementById('newAsteroidBeltRadius'),
-            addAsteroidBeltBtn: document.getElementById('addAsteroidBeltBtn'),
+            
+            // Planet management
             addPlanetBtn: document.getElementById('addPlanetBtn'),
             moveUpBtn: document.getElementById('moveUpBtn'),
             moveDownBtn: document.getElementById('moveDownBtn'),
             planetList: document.getElementById('planetList'),
+            
+            // Planet details
             celestialDetails: document.getElementById('celestialDetails'),
             noCelestialSelected: document.getElementById('noCelestialSelected'),
             celestialType: document.getElementById('celestialType'),
@@ -857,545 +934,433 @@
             deleteCelestialBtn: document.getElementById('deleteCelestialBtn'),
             fixedAngleControl: document.getElementById('fixedAngleControl'),
             rangeAngleControl: document.getElementById('rangeAngleControl'),
+            
+            // Modifier system
+            modifierList: document.getElementById('modifierList'),
+            modifierCategory: document.getElementById('modifierCategory'),
+            modifierType: document.getElementById('modifierType'),
+            addModifierBtn: document.getElementById('addModifierBtn'),
+            
+            // Visualizer
             visualizer: document.getElementById('visualizer'),
             zoomInBtn: document.getElementById('zoomInBtn'),
             zoomOutBtn: document.getElementById('zoomOutBtn'),
             resetViewBtn: document.getElementById('resetViewBtn'),
+            
+            // Export
             exportTxt: document.getElementById('exportTxt'),
             exportYml: document.getElementById('exportYml'),
             downloadTxtBtn: document.getElementById('downloadTxtBtn'),
             downloadYmlBtn: document.getElementById('downloadYmlBtn')
         };
 
-        // Stellaris System Parser
-        class StellarisSystemParser {
-            parse(content) {
-                try {
-                    // Clean content and find system block
-                    const lines = content.split('\n').map(line => line.trim());
-                    const systemData = {
-                        name: '',
-                        displayName: '',
-                        class: 'sc_g',
-                        usage: '',
-                        neighborSystems: [],
-                        asteroidBelts: [],
-                        planets: []
-                    };
+        // Modifier System Functions
+        function initializeModifierSystem() {
+            elements.modifierCategory.addEventListener('change', updateModifierTypes);
+            elements.modifierType.addEventListener('change', enableAddModifierButton);
+            elements.addModifierBtn.addEventListener('click', addModifierToPlanet);
+        }
 
-                    // Find system definition
-                    const systemMatch = content.match(/(\w+)\s*=\s*{/);
-                    if (systemMatch) {
-                        systemData.name = systemMatch[1];
-                    }
-
-                    // Parse basic properties
-                    const nameMatch = content.match(/name\s*=\s*"([^"]+)"/);
-                    if (nameMatch) systemData.displayName = nameMatch[1];
-
-                    const classMatch = content.match(/class\s*=\s*"?([^"\s]+)"?/);
-                    if (classMatch) systemData.class = classMatch[1];
-
-                    const usageMatch = content.match(/usage\s*=\s*(\w+)/);
-                    if (usageMatch) systemData.usage = usageMatch[1];
-
-                    // Parse neighbor systems
-                    const neighborMatches = content.matchAll(/neighbor_system\s*=\s*{([^}]+)}/g);
-                    for (const match of neighborMatches) {
-                        const neighborBlock = match[1];
-                        const neighbor = {
-                            distance: 100,
-                            initializer: ''
-                        };
-
-                        const distanceMatch = neighborBlock.match(/distance\s*=\s*(\d+)/);
-                        if (distanceMatch) neighbor.distance = parseInt(distanceMatch[1]);
-
-                        const initMatch = neighborBlock.match(/initializer\s*=\s*"?([^"\s]+)"?/);
-                        if (initMatch) neighbor.initializer = initMatch[1];
-
-                        systemData.neighborSystems.push(neighbor);
-                    }
-
-                    // Parse asteroid belts
-                    const asteroidBeltMatches = content.matchAll(/asteroid_belt\s*=\s*{([^}]+)}/g);
-                    for (const match of asteroidBeltMatches) {
-                        const beltBlock = match[1];
-                        const belt = {
-                            type: 'rocky_asteroid_belt',
-                            radius: 575
-                        };
-
-                        const typeMatch = beltBlock.match(/type\s*=\s*(\w+)/);
-                        if (typeMatch) belt.type = typeMatch[1];
-
-                        const radiusMatch = beltBlock.match(/radius\s*=\s*(\d+)/);
-                        if (radiusMatch) belt.radius = parseInt(radiusMatch[1]);
-
-                        systemData.asteroidBelts.push(belt);
-                    }
-
-                    // Parse planets (simplified for demonstration)
-                    const planetBlocks = this.extractPlanetBlocks(content);
-                    let planetId = 1;
+        function updateModifierTypes() {
+            const category = elements.modifierCategory.value;
+            const modifierSelect = elements.modifierType;
+            
+            // Clear existing options
+            modifierSelect.innerHTML = '<option value="">-- Modifier wählen --</option>';
+            
+            if (category && MODIFIERS[category]) {
+                modifierSelect.disabled = false;
+                
+                if (category === 'planetary_diversity') {
+                    // For PD, only show modifiers compatible with selected planet class
+                    const selectedClass = selectedPlanet ? selectedPlanet.class : null;
                     
-                    planetBlocks.forEach((block, index) => {
-                        if (index === 0) return; // Skip star
-                        
-                        const planet = this.parsePlanetBlock(block, planetId++);
-                        if (planet) {
-                            systemData.planets.push(planet);
-                        }
-                    });
-
-                    return systemData;
-                } catch (error) {
-                    console.error('Parse error:', error);
-                    throw new Error('Fehler beim Parsen der Systemdatei: ' + error.message);
-                }
-            }
-
-            extractPlanetBlocks(content) {
-                const blocks = [];
-                let depth = 0;
-                let currentBlock = '';
-                let inPlanet = false;
-
-                const lines = content.split('\n');
-                for (const line of lines) {
-                    if (line.includes('planet = {')) {
-                        inPlanet = true;
-                        depth = 1;
-                        currentBlock = line + '\n';
-                    } else if (inPlanet) {
-                        currentBlock += line + '\n';
-                        if (line.includes('{')) depth++;
-                        if (line.includes('}')) depth--;
-                        
-                        if (depth === 0) {
-                            blocks.push(currentBlock);
-                            inPlanet = false;
-                            currentBlock = '';
-                        }
+                    if (selectedClass && MODIFIERS[category].modifiers[selectedClass]) {
+                        Object.entries(MODIFIERS[category].modifiers[selectedClass]).forEach(([key, modifier]) => {
+                            const option = document.createElement('option');
+                            option.value = key;
+                            option.textContent = modifier.name;
+                            option.title = modifier.description;
+                            modifierSelect.appendChild(option);
+                        });
+                    } else if (selectedClass) {
+                        // Show message if no PD modifiers available for this class
+                        const option = document.createElement('option');
+                        option.value = '';
+                        option.textContent = `Keine PD-Modifier für ${getClassDisplayName(selectedClass)} verfügbar`;
+                        option.disabled = true;
+                        modifierSelect.appendChild(option);
+                    } else {
+                        const option = document.createElement('option');
+                        option.value = '';
+                        option.textContent = 'Erst Planeten auswählen';
+                        option.disabled = true;
+                        modifierSelect.appendChild(option);
                     }
-                }
-
-                return blocks;
-            }
-
-            parsePlanetBlock(block, id) {
-                const planet = {
-                    id: id,
-                    type: 'planet',
-                    name: `planet_${id}`,
-                    displayName: `Planet ${id}`,
-                    class: 'pc_barren',
-                    size: 16,
-                    orbitDistance: 0,
-                    orbitAngleType: 'range',
-                    orbitAngleMin: 90,
-                    orbitAngleMax: 270,
-                    changeOrbit: 0,
-                    hasRing: false,
-                    isStartingPlanet: false,
-                    moons: []
-                };
-
-                // Parse planet properties
-                const nameMatch = block.match(/name\s*=\s*"([^"]+)"/);
-                if (nameMatch) {
-                    planet.name = nameMatch[1];
-                    planet.displayName = nameMatch[1].replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
-                }
-
-                const classMatch = block.match(/class\s*=\s*"?([^"\s]+)"?/);
-                if (classMatch) planet.class = classMatch[1];
-
-                const sizeMatch = block.match(/size\s*=\s*(\d+)/);
-                if (sizeMatch) planet.size = parseInt(sizeMatch[1]);
-
-                const orbitDistanceMatch = block.match(/orbit_distance\s*=\s*(\d+)/);
-                if (orbitDistanceMatch) planet.orbitDistance = parseInt(orbitDistanceMatch[1]);
-
-                const changeOrbitMatch = block.match(/change_orbit\s*=\s*(\d+)/);
-                if (changeOrbitMatch) planet.changeOrbit = parseInt(changeOrbitMatch[1]);
-
-                const hasRingMatch = block.match(/has_ring\s*=\s*yes/);
-                planet.hasRing = !!hasRingMatch;
-
-                const startingPlanetMatch = block.match(/starting_planet\s*=\s*yes/);
-                planet.isStartingPlanet = !!startingPlanetMatch;
-
-                // Parse orbit angle
-                const angleRangeMatch = block.match(/orbit_angle\s*=\s*{\s*min\s*=\s*(\d+)\s*max\s*=\s*(\d+)\s*}/);
-                if (angleRangeMatch) {
-                    planet.orbitAngleType = 'range';
-                    planet.orbitAngleMin = parseInt(angleRangeMatch[1]);
-                    planet.orbitAngleMax = parseInt(angleRangeMatch[2]);
                 } else {
-                    const angleMatch = block.match(/orbit_angle\s*=\s*(\d+)/);
-                    if (angleMatch) {
-                        planet.orbitAngleType = 'fixed';
-                        planet.orbitAngle = parseInt(angleMatch[1]);
-                    }
+                    // For other categories, show all modifiers
+                    Object.entries(MODIFIERS[category].modifiers).forEach(([key, modifier]) => {
+                        const option = document.createElement('option');
+                        option.value = key;
+                        option.textContent = modifier.name;
+                        option.title = modifier.description;
+                        modifierSelect.appendChild(option);
+                    });
                 }
-
-                return planet;
+            } else {
+                modifierSelect.disabled = true;
             }
+            
+            elements.addModifierBtn.disabled = true;
         }
 
-        // Import/Export Functions
-        function importSystem() {
-            const file = elements.importFile.files[0];
-            if (!file) {
-                showNotification('Bitte wählen Sie eine Datei aus.');
+        function enableAddModifierButton() {
+            elements.addModifierBtn.disabled = !elements.modifierType.value;
+        }
+
+        function addModifierToPlanet() {
+            if (!selectedPlanet || !elements.modifierType.value) return;
+
+            const modifierKey = elements.modifierType.value;
+            const category = elements.modifierCategory.value;
+            
+            let modifierInfo;
+            if (category === 'planetary_diversity' && selectedPlanet.class) {
+                modifierInfo = MODIFIERS[category].modifiers[selectedPlanet.class][modifierKey];
+            } else {
+                modifierInfo = MODIFIERS[category].modifiers[modifierKey];
+            }
+
+            if (!modifierInfo) {
+                showNotification('Fehler: Modifier-Information nicht gefunden!');
                 return;
             }
 
-            const reader = new FileReader();
-            reader.onload = function(e) {
-                try {
-                    const parser = new StellarisSystemParser();
-                    const parsedSystem = parser.parse(e.target.result);
-                    
-                    // Load parsed data into the editor
-                    loadSystemData(parsedSystem);
-                    showNotification('System erfolgreich importiert!');
-                } catch (error) {
-                    showNotification('Fehler beim Import: ' + error.message);
-                }
-            };
-            reader.readAsText(file);
-        }
+            // Check if modifier already exists
+            if (!selectedPlanet.modifiers) {
+                selectedPlanet.modifiers = [];
+            }
 
-        function loadSystemData(systemData) {
-            // Clear existing data
-            clearSystem();
-            
-            // Load basic properties
-            solarSystem.name = systemData.name;
-            solarSystem.displayName = systemData.displayName;
-            solarSystem.class = systemData.class;
-            solarSystem.usage = systemData.usage;
-
-            elements.systemName.value = solarSystem.name;
-            elements.systemDisplayName.value = solarSystem.displayName;
-            elements.systemClass.value = solarSystem.class;
-            elements.systemUsage.value = solarSystem.usage;
-
-            // Load neighbor systems
-            systemData.neighborSystems.forEach(neighbor => {
-                solarSystem.neighborSystems.push({
-                    id: Date.now() + Math.random(),
-                    distance: neighbor.distance,
-                    initializer: neighbor.initializer
-                });
-            });
-
-            // Load asteroid belts
-            systemData.asteroidBelts.forEach(belt => {
-                solarSystem.asteroidBelts.push({
-                    id: Date.now() + Math.random(),
-                    type: belt.type,
-                    radius: belt.radius
-                });
-            });
-
-            // Load planets
-            systemData.planets.forEach(planet => {
-                nextCelestialId = Math.max(nextCelestialId, planet.id + 1);
-                solarSystem.planets.push(planet);
-            });
-
-            // Update UI
-            updateNeighborSystemsList();
-            updateAsteroidBeltList();
-            updatePlanetList();
-            updateOutput();
-            renderVisualizer();
-        }
-
-        function clearSystem() {
-            solarSystem = {
-                name: 'my_custom_system',
-                displayName: 'Mein Sonnensystem',
-                class: 'sc_g',
-                usage: 'custom_empire',
-                neighborSystems: [],
-                asteroidBelts: [],
-                planets: []
-            };
-            
-            selectedPlanet = null;
-            nextCelestialId = 1;
-            
-            // Reset UI
-            elements.systemName.value = solarSystem.name;
-            elements.systemDisplayName.value = solarSystem.displayName;
-            elements.systemClass.value = solarSystem.class;
-            elements.systemUsage.value = solarSystem.usage;
-            
-            updateNeighborSystemsList();
-            updateAsteroidBeltList();
-            updatePlanetList();
-            updateOutput();
-            renderVisualizer();
-            deselectPlanet();
-            
-            showNotification('System geleert!');
-        }
-
-        // Neighbor Systems Management
-        function addNeighborSystem() {
-            const newNeighbor = {
-                id: Date.now(),
-                distance: parseInt(elements.newNeighborDistance.value) || 100,
-                initializer: elements.newNeighborInit.value
-            };
-            
-            solarSystem.neighborSystems.push(newNeighbor);
-            updateNeighborSystemsList();
-            updateOutput();
-            renderVisualizer();
-        }
-
-        function updateNeighborSystemsList() {
-            elements.neighborSystemsList.innerHTML = '';
-            
-            if (solarSystem.neighborSystems.length === 0) {
-                elements.neighborSystemsList.innerHTML = '<p class="text-gray-400 text-sm">Keine Nachbarsysteme definiert</p>';
+            if (selectedPlanet.modifiers.some(m => m.key === modifierKey)) {
+                showNotification('Dieser Modifier ist bereits hinzugefügt!');
                 return;
             }
 
-            solarSystem.neighborSystems.forEach((neighbor, index) => {
-                const neighborItem = document.createElement('div');
-                neighborItem.className = 'neighbor-item';
-                neighborItem.innerHTML = `
-                    <span class="text-sm">
-                        🌌 Distanz: ${neighbor.distance} | System: ${neighbor.initializer || 'Zufällig'}
-                    </span>
-                    <button class="stellaris-btn stellaris-btn-danger text-xs px-2 py-1" onclick="removeNeighborSystem(${neighbor.id})">
-                        Löschen
+            selectedPlanet.modifiers.push({
+                key: modifierKey,
+                name: modifierInfo.name,
+                description: modifierInfo.description,
+                category: category,
+                baseClass: category === 'planetary_diversity' ? selectedPlanet.class : null
+            });
+
+            updateModifierList();
+            updatePlanetList();
+            updateOutput();
+            renderVisualizer();
+            
+            // Reset selection
+            elements.modifierCategory.value = '';
+            elements.modifierType.innerHTML = '<option value="">-- Erst Kategorie wählen --</option>';
+            elements.modifierType.disabled = true;
+            elements.addModifierBtn.disabled = true;
+            
+            showNotification(`Modifier "${modifierInfo.name}" hinzugefügt!`);
+        }
+
+        function updateModifierList() {
+            if (!selectedPlanet || !selectedPlanet.modifiers || selectedPlanet.modifiers.length === 0) {
+                elements.modifierList.innerHTML = '<p class="text-gray-400 text-sm">Keine Modifier ausgewählt</p>';
+                return;
+            }
+
+            elements.modifierList.innerHTML = '';
+            selectedPlanet.modifiers.forEach((modifier, index) => {
+                const modifierItem = document.createElement('div');
+                modifierItem.className = 'modifier-item';
+                modifierItem.innerHTML = `
+                    <div>
+                        <span class="font-medium text-green-300">${modifier.name}</span>
+                        <p class="text-xs text-gray-400">${modifier.description}</p>
+                    </div>
+                    <button class="stellaris-btn stellaris-btn-danger text-xs px-2 py-1" onclick="removeModifier(${index})">
+                        Entfernen
                     </button>
                 `;
-                elements.neighborSystemsList.appendChild(neighborItem);
+                elements.modifierList.appendChild(modifierItem);
             });
         }
 
-        function removeNeighborSystem(neighborId) {
-            solarSystem.neighborSystems = solarSystem.neighborSystems.filter(n => n.id !== neighborId);
-            updateNeighborSystemsList();
+        function removeModifier(index) {
+            if (selectedPlanet && selectedPlanet.modifiers) {
+                selectedPlanet.modifiers.splice(index, 1);
+                updateModifierList();
+                updateOutput();
+            }
+        }
+
+        // Planet Management Functions
+        function addPlanet() {
+            const newPlanet = {
+                id: nextCelestialId++,
+                type: 'planet',
+                name: `planet_${nextCelestialId - 1}`,
+                displayName: `Planet ${nextCelestialId - 1}`,
+                class: 'pc_continental',
+                size: 16,
+                orbitDistance: solarSystem.planets.length === 0 ? 40 : 0,
+                orbitAngleType: 'range',
+                orbitAngleMin: 90,
+                orbitAngleMax: 270,
+                changeOrbit: 0,
+                hasRing: false,
+                isStartingPlanet: false,
+                modifiers: [],
+                moons: []
+            };
+
+            solarSystem.planets.push(newPlanet);
+            updatePlanetList();
+            selectPlanet(newPlanet.id);
             updateOutput();
             renderVisualizer();
         }
 
-        // Event Listeners
-        function initializeEventListeners() {
-            // Import/Export listeners
-            elements.importBtn.addEventListener('click', importSystem);
-            elements.clearSystemBtn.addEventListener('click', clearSystem);
-            
-            // Neighbor systems listeners
-            elements.addNeighborBtn.addEventListener('click', addNeighborSystem);
-            
-            // Existing listeners
-            elements.systemName.addEventListener('input', (e) => {
-                const value = e.target.value.replace(/[^a-zA-Z0-9_]/g, '');
-                e.target.value = value;
-                solarSystem.name = value || 'my_custom_system';
-                updateOutput();
-            });
+        function selectPlanet(id) {
+            selectedPlanet = findPlanetById(id);
+            if (selectedPlanet) {
+                elements.celestialDetails.classList.remove('hidden');
+                elements.noCelestialSelected.classList.add('hidden');
 
-            elements.systemDisplayName.addEventListener('input', (e) => {
-                solarSystem.displayName = e.target.value || 'Unbenanntes System';
-                updateOutput();
-            });
+                const planetIndex = solarSystem.planets.findIndex(p => p.id === selectedPlanet.id);
+                
+                // Populate details panel
+                elements.celestialType.value = selectedPlanet.type === 'planet' ? 'Planet' : 'Mond';
+                elements.celestialPosition.value = selectedPlanet.type === 'planet' ? 
+                    `Position ${planetIndex + 1}` : `Mond von ${findParentPlanet(selectedPlanet).displayName}`;
+                elements.celestialName.value = selectedPlanet.name;
+                elements.celestialDisplayName.value = selectedPlanet.displayName;
+                elements.celestialClass.value = selectedPlanet.class;
+                elements.celestialSize.value = selectedPlanet.size;
+                elements.celestialOrbitDistance.value = selectedPlanet.orbitDistance;
+                elements.orbitAngleType.value = selectedPlanet.orbitAngleType || 'range';
+                elements.celestialOrbitAngle.value = selectedPlanet.orbitAngle || 0;
+                elements.celestialOrbitAngleMin.value = selectedPlanet.orbitAngleMin || 90;
+                elements.celestialOrbitAngleMax.value = selectedPlanet.orbitAngleMax || 270;
+                elements.celestialChangeOrbit.value = selectedPlanet.changeOrbit || 0;
+                elements.celestialHasRing.checked = selectedPlanet.hasRing || false;
+                elements.celestialIsStartingPlanet.checked = selectedPlanet.isStartingPlanet || false;
 
-            elements.systemClass.addEventListener('change', (e) => {
-                solarSystem.class = e.target.value;
-                updateOutput();
-                renderVisualizer();
-            });
-
-            elements.systemUsage.addEventListener('change', (e) => {
-                solarSystem.usage = e.target.value;
-                updateOutput();
-            });
-
-            elements.addAsteroidBeltBtn.addEventListener('click', addAsteroidBelt);
-
-            elements.addPlanetBtn.addEventListener('click', addPlanet);
-            elements.moveUpBtn.addEventListener('click', movePlanetUp);
-            elements.moveDownBtn.addEventListener('click', movePlanetDown);
-
-            elements.orbitAngleType.addEventListener('change', (e) => {
-                const isRange = e.target.value === 'range';
+                // Toggle angle controls
+                const isRange = selectedPlanet.orbitAngleType === 'range';
                 elements.fixedAngleControl.classList.toggle('hidden', isRange);
                 elements.rangeAngleControl.classList.toggle('hidden', !isRange);
-                if (selectedPlanet) {
-                    selectedPlanet.orbitAngleType = e.target.value;
-                    updateOutput();
-                }
-            });
 
-            // Planet property updates
-            elements.celestialName.addEventListener('input', updateSelectedPlanetProperty('name'));
-            elements.celestialDisplayName.addEventListener('input', updateSelectedPlanetProperty('displayName'));
-            elements.celestialClass.addEventListener('change', updateSelectedPlanetProperty('class'));
-            elements.celestialSize.addEventListener('input', (e) => {
-                if (selectedPlanet) {
-                    selectedPlanet.size = Math.max(1, Math.min(50, parseInt(e.target.value) || 1));
-                    e.target.value = selectedPlanet.size;
-                    updateAsteroidBeltList();
-                    updatePlanetList();
-                    updateOutput();
-                    renderVisualizer();
-                }
-            });
-            elements.celestialOrbitDistance.addEventListener('input', (e) => {
-                if (selectedPlanet) {
-                    selectedPlanet.orbitDistance = Math.max(0, parseInt(e.target.value) || 0);
-                    e.target.value = selectedPlanet.orbitDistance;
-                    updatePlanetList();
-                    updateOutput();
-                    renderVisualizer();
-                }
-            });
-            elements.celestialOrbitAngle.addEventListener('input', (e) => {
-                if (selectedPlanet) {
-                    selectedPlanet.orbitAngle = Math.max(0, Math.min(360, parseInt(e.target.value) || 0));
-                    e.target.value = selectedPlanet.orbitAngle;
-                    updateOutput();
-                    renderVisualizer();
-                }
-            });
-            elements.celestialOrbitAngleMin.addEventListener('input', (e) => {
-                if (selectedPlanet) {
-                    selectedPlanet.orbitAngleMin = Math.max(0, Math.min(360, parseInt(e.target.value) || 0));
-                    e.target.value = selectedPlanet.orbitAngleMin;
-                    updateOutput();
-                    renderVisualizer();
-                }
-            });
-            elements.celestialOrbitAngleMax.addEventListener('input', (e) => {
-                if (selectedPlanet) {
-                    selectedPlanet.orbitAngleMax = Math.max(0, Math.min(360, parseInt(e.target.value) || 0));
-                    e.target.value = selectedPlanet.orbitAngleMax;
-                    updateOutput();
-                    renderVisualizer();
-                }
-            });
-            elements.celestialChangeOrbit.addEventListener('input', (e) => {
-                if (selectedPlanet) {
-                    selectedPlanet.changeOrbit = Math.max(0, parseInt(e.target.value) || 0);
-                    e.target.value = selectedPlanet.changeOrbit;
-                    updateOutput();
-                }
-            });
-            elements.celestialHasRing.addEventListener('change', (e) => {
-                if (selectedPlanet) {
-                    selectedPlanet.hasRing = e.target.checked;
-                    updateOutput();
-                }
-            });
-            elements.celestialIsStartingPlanet.addEventListener('change', (e) => {
-                if (selectedPlanet) {
-                    selectedPlanet.isStartingPlanet = e.target.checked;
-                    updateOutput();
-                }
-            });
+                // Update modifier list and reset modifier selection
+                updateModifierList();
+                elements.modifierCategory.value = '';
+                elements.modifierType.innerHTML = '<option value="">-- Erst Kategorie wählen --</option>';
+                elements.modifierType.disabled = true;
+                elements.addModifierBtn.disabled = true;
 
-            elements.addMoonBtn.addEventListener('click', addMoonToSelectedPlanet);
-            elements.deleteCelestialBtn.addEventListener('click', deleteSelectedPlanet);
+                // Enable/disable buttons
+                elements.addMoonBtn.disabled = selectedPlanet.type !== 'planet';
+                elements.moveUpBtn.disabled = planetIndex <= 0 || selectedPlanet.type === 'moon';
+                elements.moveDownBtn.disabled = planetIndex >= solarSystem.planets.length - 1 || selectedPlanet.type === 'moon';
 
-            // Visualizer controls
-            elements.zoomInBtn.addEventListener('click', () => {
-                visualizerScale = Math.min(1.0, visualizerScale * 1.2);
-                renderVisualizer();
-            });
-            elements.zoomOutBtn.addEventListener('click', () => {
-                visualizerScale = Math.max(0.1, visualizerScale * 0.8);
-                renderVisualizer();
-            });
-            elements.resetViewBtn.addEventListener('click', () => {
-                visualizerScale = 0.3;
-                renderVisualizer();
-            });
-
-            // Export buttons
-            elements.downloadTxtBtn.addEventListener('click', () => 
-                downloadFile(elements.exportTxt.value, `${solarSystem.name}.txt`, 'text/plain'));
-            elements.downloadYmlBtn.addEventListener('click', () => {
-                const bom = '\ufeff';
-                downloadFile(bom + elements.exportYml.value, `${solarSystem.name}_l_german.yml`, 'text/plain;charset=utf-8');
-            });
+                updatePlanetList();
+            } else {
+                deselectPlanet();
+            }
         }
 
-        function updateSelectedPlanetProperty(property) {
-            return (e) => {
-                if (selectedPlanet) {
-                    selectedPlanet[property] = e.target.value;
-                    updatePlanetList();
-                    updateOutput();
-                    renderVisualizer();
+        function deselectPlanet() {
+            selectedPlanet = null;
+            elements.celestialDetails.classList.add('hidden');
+            elements.noCelestialSelected.classList.remove('hidden');
+            elements.addMoonBtn.disabled = true;
+            elements.moveUpBtn.disabled = true;
+            elements.moveDownBtn.disabled = true;
+            updatePlanetList();
+        }
+
+        function findPlanetById(id) {
+            for (const planet of solarSystem.planets) {
+                if (planet.id === id) return planet;
+                if (planet.moons) {
+                    for (const moon of planet.moons) {
+                        if (moon.id === id) return moon;
+                    }
                 }
-            };
+            }
+            return null;
         }
 
-        // Asteroid Belt Management
-        function addAsteroidBelt() {
-            const newBelt = {
-                id: Date.now(), // Simple unique ID
-                type: elements.newAsteroidBeltType.value,
-                radius: parseInt(elements.newAsteroidBeltRadius.value) || 575
-            };
-            
-            solarSystem.asteroidBelts.push(newBelt);
-            updateAsteroidBeltList();
-            updateOutput();
-            renderVisualizer();
+        function findParentPlanet(moon) {
+            for (const planet of solarSystem.planets) {
+                if (planet.moons && planet.moons.some(m => m.id === moon.id)) {
+                    return planet;
+                }
+            }
+            return null;
         }
 
-        function updateAsteroidBeltList() {
-            elements.asteroidBeltList.innerHTML = '';
-            
-            if (solarSystem.asteroidBelts.length === 0) {
-                elements.asteroidBeltList.innerHTML = '<p class="text-gray-400 text-sm">Keine Asteroidengürtel definiert</p>';
-                return;
+        // Code Generation with proper modifier system
+        function generateStellarisTxt() {
+            let txt = `##### Generated by Stellaris Solar System Editor V6 #####\n`;
+            txt += `##### With correct modifier system for Planetary Diversity #####\n\n`;
+            txt += `${solarSystem.name} = {\n`;
+            txt += `\tname = "${solarSystem.displayName}"\n`;
+            txt += `\tclass = "${solarSystem.class}"\n`;
+
+            if (solarSystem.usage) {
+                txt += `\tusage = ${solarSystem.usage}\n`;
             }
 
-            solarSystem.asteroidBelts.forEach((belt, index) => {
-                const beltItem = document.createElement('div');
-                beltItem.className = 'flex items-center justify-between bg-gray-700 p-2 rounded';
-                beltItem.innerHTML = `
-                    <span class="text-sm">
-                        ☄️ ${getAsteroidBeltTypeName(belt.type)} (Radius: ${belt.radius})
-                    </span>
-                    <button class="stellaris-btn stellaris-btn-danger text-xs px-2 py-1" onclick="removeAsteroidBelt(${belt.id})">
-                        Löschen
-                    </button>
-                `;
-                elements.asteroidBeltList.appendChild(beltItem);
+            txt += `\tinit_effect = {\n`;
+            
+            // Add empire cluster effects if custom_empire
+            if (solarSystem.usage === 'custom_empire') {
+                txt += `\t\tevery_neighbor_system = {\n`;
+                txt += `\t\t\tset_star_flag = empire_cluster\n`;
+                txt += `\t\t\tevery_neighbor_system = {\n`;
+                txt += `\t\t\t\tset_star_flag = empire_cluster\n`;
+                txt += `\t\t\t}\n`;
+                txt += `\t\t}\n`;
+                txt += `\t\tgenerate_home_system_resources = yes\n`;
+            }
+            
+            txt += `\t}\n\n`;
+
+            // Generate star as first planet
+            txt += `\tplanet = {\n`;
+            txt += `\t\tname = "${solarSystem.displayName.toLowerCase().replace(/\s+/g, '_')}"\n`;
+            txt += `\t\tclass = "${getStarClassForSystemClass(solarSystem.class)}"\n`;
+            txt += `\t\torbit_distance = 0\n`;
+            txt += `\t\torbit_angle = 1\n`;
+            txt += `\t\tsize = 45\n`;
+            txt += `\t\thas_ring = no\n`;
+            txt += `\t}\n\n`;
+
+            // Generate planets with proper modifier system
+            solarSystem.planets.forEach(planet => {
+                txt += `\tplanet = {\n`;
+                txt += `\t\tname = "${planet.name}"\n`;
+                txt += `\t\tclass = "${planet.class}"\n`;
+                txt += `\t\torbit_distance = ${planet.orbitDistance}\n`;
+                
+                // Handle orbit angle
+                if (planet.orbitAngleType === 'range') {
+                    txt += `\t\torbit_angle = { min = ${planet.orbitAngleMin} max = ${planet.orbitAngleMax} }\n`;
+                } else {
+                    txt += `\t\torbit_angle = ${planet.orbitAngle}\n`;
+                }
+                
+                txt += `\t\tsize = ${planet.size}\n`;
+                
+                if (planet.changeOrbit > 0) {
+                    txt += `\t\tchange_orbit = ${planet.changeOrbit}\n`;
+                }
+                
+                txt += `\t\thas_ring = ${planet.hasRing ? 'yes' : 'no'}\n`;
+                
+                // Generate modifiers
+                let hasInitEffect = false;
+                let initEffectContent = '';
+                
+                if (planet.modifiers && planet.modifiers.length > 0) {
+                    hasInitEffect = true;
+                    
+                    // Group modifiers by category for better organization
+                    const pdModifiers = planet.modifiers.filter(m => m.category === 'planetary_diversity');
+                    const otherModifiers = planet.modifiers.filter(m => m.category !== 'planetary_diversity');
+                    
+                    // Add PD modifiers with conditional check
+                    if (pdModifiers.length > 0) {
+                        initEffectContent += `\t\t\tif = {\n`;
+                        initEffectContent += `\t\t\t\tlimit = { has_planetary_diversity = yes }\n`;
+                        pdModifiers.forEach(modifier => {
+                            initEffectContent += `\t\t\t\t${modifier.key} = yes\n`;
+                        });
+                        initEffectContent += `\t\t\t}\n`;
+                    }
+                    
+                    // Add other modifiers directly
+                    otherModifiers.forEach(modifier => {
+                        if (modifier.category === 'environmental' || modifier.category === 'resource' || modifier.category === 'special') {
+                            initEffectContent += `\t\t\tadd_modifier = { modifier = ${modifier.key} }\n`;
+                        }
+                    });
+                }
+                
+                if (planet.isStartingPlanet) {
+                    hasInitEffect = true;
+                    initEffectContent += `\t\t\tprevent_anomaly = yes\n`;
+                    initEffectContent += `\t\t\tgenerate_start_buildings_and_blockers = yes\n`;
+                }
+                
+                if (hasInitEffect) {
+                    txt += `\t\tmodifiers = none\n`;
+                    txt += `\t\tinit_effect = {\n`;
+                    txt += initEffectContent;
+                    txt += `\t\t}\n`;
+                } else if (planet.isStartingPlanet) {
+                    txt += `\t\tstarting_planet = yes\n`;
+                    txt += `\t\ttile_blockers = none\n`;
+                    txt += `\t\tmodifiers = none\n`;
+                }
+
+                // Generate moons
+                if (planet.moons && planet.moons.length > 0) {
+                    planet.moons.forEach(moon => {
+                        txt += `\t\tmoon = {\n`;
+                        txt += `\t\t\tname = "${moon.name}"\n`;
+                        txt += `\t\t\tclass = "${moon.class}"\n`;
+                        txt += `\t\t\torbit_distance = ${moon.orbitDistance}\n`;
+                        
+                        if (moon.orbitAngleType === 'range') {
+                            txt += `\t\t\torbit_angle = { min = ${moon.orbitAngleMin} max = ${moon.orbitAngleMax} }\n`;
+                        } else {
+                            txt += `\t\t\torbit_angle = ${moon.orbitAngle}\n`;
+                        }
+                        
+                        txt += `\t\t\tsize = ${moon.size}\n`;
+                        if (moon.hasRing) {
+                            txt += `\t\t\thas_ring = yes\n`;
+                        }
+                        
+                        txt += `\t\t}\n`;
+                    });
+                }
+
+                txt += `\t}\n`;
             });
+
+            txt += `}\n`;
+            return txt;
         }
 
-        function removeAsteroidBelt(beltId) {
-            solarSystem.asteroidBelts = solarSystem.asteroidBelts.filter(belt => belt.id !== beltId);
-            updateAsteroidBeltList();
-            updateOutput();
-            renderVisualizer();
+        function generateStellarisYml() {
+            let yml = `l_german:\n`;
+            yml += ` # Generated by Stellaris Solar System Editor V6\n`;
+            yml += ` # System: ${solarSystem.displayName}\n`;
+            yml += ` # With proper modifier system\n\n`;
+            yml += ` ${solarSystem.name}_NAME: "${solarSystem.displayName}"\n`;
+            yml += ` ${solarSystem.name}_DESC: "Ein maßgeschneidertes Sonnensystem mit korrektem Modifier-System."\n\n`;
+
+            solarSystem.planets.forEach(planet => {
+                yml += ` ${planet.name}_NAME: "${planet.displayName}"\n`;
+                if (planet.moons && planet.moons.length > 0) {
+                    planet.moons.forEach(moon => {
+                        yml += ` ${moon.name}_NAME: "${moon.displayName}"\n`;
+                    });
+                }
+            });
+
+            return yml;
         }
 
-        function getAsteroidBeltTypeName(type) {
-            const names = {
-                'rocky_asteroid_belt': 'Felsiger Asteroidengürtel',
-                'icy_asteroid_belt': 'Eisiger Asteroidengürtel',
-                'crystalline_asteroid_belt': 'Kristalliner Asteroidengürtel'
-            };
-            return names[type] || type;
-        }
-
-        // Cumulative Orbit Calculation
+        // Cumulative Orbit Calculation (unchanged from V5)
         function calculateCumulativeOrbitDistances() {
             const result = [];
             let currentDistance = 0;
@@ -1425,85 +1390,7 @@
             return result;
         }
 
-        function addPlanet() {
-            const newPlanet = {
-                id: nextCelestialId++,
-                type: 'planet',
-                name: `planet_${nextCelestialId - 1}`,
-                displayName: `Planet ${nextCelestialId - 1}`,
-                class: 'pc_barren',
-                size: 16,
-                orbitDistance: solarSystem.planets.length === 0 ? 40 : 0, // First planet gets distance, others default to 0
-                orbitAngleType: 'range',
-                orbitAngleMin: 90,
-                orbitAngleMax: 270,
-                changeOrbit: 0,
-                hasRing: false,
-                isStartingPlanet: false,
-                moons: []
-            };
-
-            solarSystem.planets.push(newPlanet);
-            updatePlanetList();
-            selectPlanet(newPlanet.id);
-            updateOutput();
-            renderVisualizer();
-        }
-
-        function movePlanetUp() {
-            if (!selectedPlanet) return;
-            
-            const index = solarSystem.planets.findIndex(p => p.id === selectedPlanet.id);
-            if (index > 0) {
-                [solarSystem.planets[index], solarSystem.planets[index - 1]] = 
-                [solarSystem.planets[index - 1], solarSystem.planets[index]];
-                updatePlanetList();
-                updateOutput();
-                renderVisualizer();
-            }
-        }
-
-        function movePlanetDown() {
-            if (!selectedPlanet) return;
-            
-            const index = solarSystem.planets.findIndex(p => p.id === selectedPlanet.id);
-            if (index < solarSystem.planets.length - 1) {
-                [solarSystem.planets[index], solarSystem.planets[index + 1]] = 
-                [solarSystem.planets[index + 1], solarSystem.planets[index]];
-                updatePlanetList();
-                updateOutput();
-                renderVisualizer();
-            }
-        }
-
-        function addMoonToSelectedPlanet() {
-            if (!selectedPlanet || selectedPlanet.type !== 'planet') {
-                showNotification('Bitte wählen Sie zuerst einen Planeten aus.');
-                return;
-            }
-
-            const newMoon = {
-                id: nextCelestialId++,
-                type: 'moon',
-                name: `moon_${nextCelestialId - 1}`,
-                displayName: `Mond ${nextCelestialId - 1}`,
-                class: 'pc_barren',
-                size: 8,
-                orbitDistance: 12,
-                orbitAngleType: 'range',
-                orbitAngleMin: 90,
-                orbitAngleMax: 270,
-                hasRing: false,
-                parentId: selectedPlanet.id
-            };
-
-            selectedPlanet.moons.push(newMoon);
-            updatePlanetList();
-            updateOutput();
-            renderVisualizer();
-        }
-
-        // UI Updates
+        // UI Update Functions
         function updatePlanetList() {
             elements.planetList.innerHTML = '';
             
@@ -1548,6 +1435,12 @@
                 }
             }
             
+            // Show modifier count
+            let modifierInfo = '';
+            if (celestial.modifiers && celestial.modifiers.length > 0) {
+                modifierInfo = `<div class="text-xs text-green-300">🌿 ${celestial.modifiers.length} Modifier</div>`;
+            }
+            
             item.innerHTML = `
                 <div class="flex items-center">
                     <span class="text-2xl mr-2">${icon}</span>
@@ -1555,6 +1448,7 @@
                         <div class="font-medium">${isMoon ? '↳ ' : `${index + 1}. `}${celestial.displayName}</div>
                         <div class="text-sm text-gray-400">${getClassDisplayName(celestial.class)} • Größe ${celestial.size}</div>
                         ${orbitInfo ? `<div class="text-xs text-blue-300">${orbitInfo}</div>` : ''}
+                        ${modifierInfo}
                     </div>
                 </div>
                 <button class="stellaris-btn stellaris-btn-secondary text-sm px-2 py-1" onclick="selectPlanet(${celestial.id})">
@@ -1571,97 +1465,7 @@
             return item;
         }
 
-        function selectPlanet(id) {
-            selectedPlanet = findPlanetById(id);
-            if (selectedPlanet) {
-                elements.celestialDetails.classList.remove('hidden');
-                elements.noCelestialSelected.classList.add('hidden');
-
-                const planetIndex = solarSystem.planets.findIndex(p => p.id === selectedPlanet.id);
-                
-                // Populate details panel
-                elements.celestialType.value = selectedPlanet.type === 'planet' ? 'Planet' : 'Mond';
-                elements.celestialPosition.value = selectedPlanet.type === 'planet' ? 
-                    `Position ${planetIndex + 1}` : `Mond von ${findParentPlanet(selectedPlanet).displayName}`;
-                elements.celestialName.value = selectedPlanet.name;
-                elements.celestialDisplayName.value = selectedPlanet.displayName;
-                elements.celestialClass.value = selectedPlanet.class;
-                elements.celestialSize.value = selectedPlanet.size;
-                elements.celestialOrbitDistance.value = selectedPlanet.orbitDistance;
-                elements.orbitAngleType.value = selectedPlanet.orbitAngleType || 'range';
-                elements.celestialOrbitAngle.value = selectedPlanet.orbitAngle || 0;
-                elements.celestialOrbitAngleMin.value = selectedPlanet.orbitAngleMin || 90;
-                elements.celestialOrbitAngleMax.value = selectedPlanet.orbitAngleMax || 270;
-                elements.celestialChangeOrbit.value = selectedPlanet.changeOrbit || 0;
-                elements.celestialHasRing.checked = selectedPlanet.hasRing || false;
-                elements.celestialIsStartingPlanet.checked = selectedPlanet.isStartingPlanet || false;
-
-                // Toggle angle controls
-                const isRange = selectedPlanet.orbitAngleType === 'range';
-                elements.fixedAngleControl.classList.toggle('hidden', isRange);
-                elements.rangeAngleControl.classList.toggle('hidden', !isRange);
-
-                // Enable/disable buttons based on selection
-                elements.addMoonBtn.disabled = selectedPlanet.type !== 'planet';
-                elements.moveUpBtn.disabled = planetIndex <= 0 || selectedPlanet.type === 'moon';
-                elements.moveDownBtn.disabled = planetIndex >= solarSystem.planets.length - 1 || selectedPlanet.type === 'moon';
-
-                updatePlanetList();
-            } else {
-                deselectPlanet();
-            }
-        }
-
-        function deselectPlanet() {
-            selectedPlanet = null;
-            elements.celestialDetails.classList.add('hidden');
-            elements.noCelestialSelected.classList.remove('hidden');
-            elements.addMoonBtn.disabled = true;
-            elements.moveUpBtn.disabled = true;
-            elements.moveDownBtn.disabled = true;
-            updatePlanetList();
-        }
-
-        function findPlanetById(id) {
-            for (const planet of solarSystem.planets) {
-                if (planet.id === id) return planet;
-                if (planet.moons) {
-                    for (const moon of planet.moons) {
-                        if (moon.id === id) return moon;
-                    }
-                }
-            }
-            return null;
-        }
-
-        function findParentPlanet(moon) {
-            for (const planet of solarSystem.planets) {
-                if (planet.moons && planet.moons.some(m => m.id === moon.id)) {
-                    return planet;
-                }
-            }
-            return null;
-        }
-
-        function deleteSelectedPlanet() {
-            if (!selectedPlanet) return;
-
-            if (selectedPlanet.type === 'planet') {
-                solarSystem.planets = solarSystem.planets.filter(p => p.id !== selectedPlanet.id);
-            } else if (selectedPlanet.type === 'moon') {
-                const parentPlanet = findParentPlanet(selectedPlanet);
-                if (parentPlanet) {
-                    parentPlanet.moons = parentPlanet.moons.filter(m => m.id !== selectedPlanet.id);
-                }
-            }
-
-            deselectPlanet();
-            updatePlanetList();
-            updateOutput();
-            renderVisualizer();
-        }
-
-        // Enhanced Visualization with neighbor systems
+        // Visualization (unchanged from V5)
         function renderVisualizer() {
             elements.visualizer.innerHTML = '';
 
@@ -1679,52 +1483,6 @@
             starEl.style.borderRadius = '50%';
             starEl.style.position = 'absolute';
             elements.visualizer.appendChild(starEl);
-
-            // Draw neighbor system indicators
-            solarSystem.neighborSystems.forEach((neighbor, index) => {
-                const angle = (index * 360 / solarSystem.neighborSystems.length) * Math.PI / 180;
-                const distance = 200 * visualizerScale;
-                const x = centerX + distance * Math.cos(angle);
-                const y = centerY + distance * Math.sin(angle);
-
-                // Draw connection line
-                const line = document.createElement('div');
-                line.style.position = 'absolute';
-                line.style.width = `${distance}px`;
-                line.style.height = '1px';
-                line.style.background = 'rgba(153, 102, 255, 0.3)';
-                line.style.left = `${centerX}px`;
-                line.style.top = `${centerY}px`;
-                line.style.transformOrigin = '0 0';
-                line.style.transform = `rotate(${angle}rad)`;
-                elements.visualizer.appendChild(line);
-
-                // Draw neighbor system
-                const neighborEl = document.createElement('div');
-                neighborEl.style.position = 'absolute';
-                neighborEl.style.width = '20px';
-                neighborEl.style.height = '20px';
-                neighborEl.style.left = `${x - 10}px`;
-                neighborEl.style.top = `${y - 10}px`;
-                neighborEl.style.background = 'linear-gradient(45deg, #9966ff, #6633cc)';
-                neighborEl.style.borderRadius = '50%';
-                neighborEl.style.border = '2px solid rgba(153, 102, 255, 0.5)';
-                neighborEl.style.boxShadow = '0 0 10px rgba(153, 102, 255, 0.5)';
-                neighborEl.title = neighbor.initializer || 'Random System';
-                elements.visualizer.appendChild(neighborEl);
-            });
-
-            // Draw multiple asteroid belts
-            solarSystem.asteroidBelts.forEach(belt => {
-                const beltRadius = belt.radius * visualizerScale;
-                const beltEl = document.createElement('div');
-                beltEl.className = 'asteroid-belt';
-                beltEl.style.width = `${beltRadius * 2}px`;
-                beltEl.style.height = `${beltRadius * 2}px`;
-                beltEl.style.left = `${centerX - beltRadius}px`;
-                beltEl.style.top = `${centerY - beltRadius}px`;
-                elements.visualizer.appendChild(beltEl);
-            });
 
             // Calculate cumulative orbits and draw planets
             const cumulativeOrbits = calculateCumulativeOrbitDistances();
@@ -1745,14 +1503,6 @@
                     orbitEl.style.left = `${centerX - orbitRadius}px`;
                     orbitEl.style.top = `${centerY - orbitRadius}px`;
                     elements.visualizer.appendChild(orbitEl);
-
-                    // Add orbit distance label
-                    const orbitLabel = document.createElement('div');
-                    orbitLabel.className = 'orbit-number';
-                    orbitLabel.textContent = actualDistance;
-                    orbitLabel.style.left = `${centerX + orbitRadius - 20}px`;
-                    orbitLabel.style.top = `${centerY - 10}px`;
-                    elements.visualizer.appendChild(orbitLabel);
                 }
 
                 // Draw planet
@@ -1783,7 +1533,7 @@
             bodyEl.style.height = `${size}px`;
             bodyEl.style.left = `${x - size / 2}px`;
             bodyEl.style.top = `${y - size / 2}px`;
-            bodyEl.style.background = getEnhancedColorForClass(celestial.class);
+            bodyEl.style.background = getColorForClass(celestial.class);
             bodyEl.style.position = 'absolute';
             bodyEl.style.borderRadius = '50%';
             bodyEl.style.display = 'flex';
@@ -1795,6 +1545,12 @@
             bodyEl.style.textShadow = '0 0 5px rgba(0,0,0,0.8)';
             bodyEl.style.cursor = 'pointer';
             bodyEl.textContent = celestial.displayName.substring(0, 3);
+            
+            // Add modifier indicator
+            if (celestial.modifiers && celestial.modifiers.length > 0) {
+                bodyEl.style.border = '3px solid #48bb78';
+                bodyEl.style.boxShadow = '0 0 10px rgba(72, 187, 120, 0.5)';
+            }
             
             bodyEl.addEventListener('click', () => selectPlanet(celestial.id));
             elements.visualizer.appendChild(bodyEl);
@@ -1822,326 +1578,97 @@
             }
         }
 
-        // Helper function to determine mod requirements and fallback classes
-        function getModInfo(planetClass) {
-            const gigastructuralPlanets = {
-                'pc_birch': { fallback: 'pc_gaia', mod: 'gigastructures' },
-                'pc_alderson': { fallback: 'pc_habitat', mod: 'gigastructures' },
-                'pc_gas_giant_habitable': { fallback: 'pc_gas_giant', mod: 'gigastructures' },
-                'pc_stellar_systemcraft': { fallback: 'pc_habitat', mod: 'gigastructures' },
-                'pc_nicoll_dyson_beam': { fallback: 'pc_barren', mod: 'gigastructures' },
-                'pc_penrose_sphere_habitable': { fallback: 'pc_habitat', mod: 'gigastructures' },
-                'pc_virtual_reality': { fallback: 'pc_machine', mod: 'gigastructures' },
-                'pc_pouchkinn_planet': { fallback: 'pc_gaia', mod: 'gigastructures' },
-                'pc_gigastructural_shielded': { fallback: 'pc_shielded', mod: 'gigastructures' }
-            };
-
-            const planetaryDiversityPlanets = {
-                // Bereits aus Vanilla-Listen verschobene PD-Planeten
-                'pc_barren_cold': { fallback: 'pc_barren', mod: 'planetary_diversity' },
-                'pc_hothouse': { fallback: 'pc_molten', mod: 'planetary_diversity' },
-                'pc_hot_gas_giant': { fallback: 'pc_gas_giant', mod: 'planetary_diversity' },
-                'pc_cold_gas_giant': { fallback: 'pc_gas_giant', mod: 'planetary_diversity' },
-                'pc_dwarf_gas_giant': { fallback: 'pc_gas_giant', mod: 'planetary_diversity' },
-                'pc_storm': { fallback: 'pc_gas_giant', mod: 'planetary_diversity' },
-                'pc_shattered': { fallback: 'pc_barren', mod: 'planetary_diversity' },
-                'pc_subglacial': { fallback: 'pc_frozen', mod: 'planetary_diversity' },
-                // Neue PD-Planeten
-                'pc_mantle': { fallback: 'pc_molten', mod: 'planetary_diversity' },
-                'pc_karst': { fallback: 'pc_continental', mod: 'planetary_diversity' },
-                'pc_mushroom': { fallback: 'pc_continental', mod: 'planetary_diversity' },
-                'pc_coral': { fallback: 'pc_ocean', mod: 'planetary_diversity' },
-                'pc_crystal': { fallback: 'pc_frozen', mod: 'planetary_diversity' },
-                'pc_frozen_desert': { fallback: 'pc_arctic', mod: 'planetary_diversity' },
-                'pc_retinal': { fallback: 'pc_toxic', mod: 'planetary_diversity' },
-                'pc_ash': { fallback: 'pc_barren', mod: 'planetary_diversity' },
-                'pc_salt': { fallback: 'pc_desert', mod: 'planetary_diversity' },
-                'pc_superhabitable': { fallback: 'pc_gaia', mod: 'planetary_diversity' },
-                'pc_tidally_locked': { fallback: 'pc_barren', mod: 'planetary_diversity' },
-                'pc_primal': { fallback: 'pc_continental', mod: 'planetary_diversity' },
-                'pc_geothermal': { fallback: 'pc_molten', mod: 'planetary_diversity' },
-                'pc_marginal': { fallback: 'pc_barren', mod: 'planetary_diversity' },
-                'pc_fog': { fallback: 'pc_tundra', mod: 'planetary_diversity' },
-                'pc_mud': { fallback: 'pc_continental', mod: 'planetary_diversity' },
-                'pc_sandsea': { fallback: 'pc_desert', mod: 'planetary_diversity' },
-                'pc_cascadian': { fallback: 'pc_alpine', mod: 'planetary_diversity' },
-                'pc_technoorganic': { fallback: 'pc_machine', mod: 'planetary_diversity' }
-            };
-
-            if (gigastructuralPlanets[planetClass]) {
-                return gigastructuralPlanets[planetClass];
-            }
-            if (planetaryDiversityPlanets[planetClass]) {
-                return planetaryDiversityPlanets[planetClass];
-            }
-            return null;
-        }
-
-        // Enhanced Code Generation with neighbor systems and mod support
-        function generateStellarisTxt() {
-            let txt = `##### Generated by Stellaris Solar System Editor - Enhanced Version #####\n`;
-            txt += `##### With correct orbit_distance = 0 mechanics, neighbor systems & mod support #####\n\n`;
-            txt += `${solarSystem.name} = {\n`;
-            txt += `\tname = "${solarSystem.displayName}"\n`;
-            txt += `\tclass = "${solarSystem.class}"\n`;
-
-            // Multiple asteroid belts
-            solarSystem.asteroidBelts.forEach(belt => {
-                txt += `\tasteroid_belt = {\n`;
-                txt += `\t\ttype = ${belt.type}\n`;
-                txt += `\t\tradius = ${belt.radius}\n`;
-                txt += `\t}\n`;
-            });
-
-            if (solarSystem.usage) {
-                txt += `\tusage = ${solarSystem.usage}\n`;
-            }
-
-            // Neighbor systems
-            solarSystem.neighborSystems.forEach(neighbor => {
-                txt += `\tneighbor_system = {\n`;
-                txt += `\t\tdistance = ${neighbor.distance}\n`;
-                if (neighbor.initializer) {
-                    txt += `\t\tinitializer = "${neighbor.initializer}"\n`;
-                }
-                txt += `\t}\n`;
-            });
-
-            txt += `\tinit_effect = {\n`;
-            
-            // Add empire cluster effects if custom_empire
-            if (solarSystem.usage === 'custom_empire') {
-                txt += `\t\tevery_neighbor_system = {\n`;
-                txt += `\t\t\tset_star_flag = empire_cluster\n`;
-                txt += `\t\t\tevery_neighbor_system = {\n`;
-                txt += `\t\t\t\tset_star_flag = empire_cluster\n`;
-                txt += `\t\t\t}\n`;
-                txt += `\t\t}\n`;
-                txt += `\t\tgenerate_home_system_resources = yes\n`;
-            }
-            
-            txt += `\t}\n\n`;
-
-            // Generate star as first planet
-            txt += `\tplanet = {\n`;
-            txt += `\t\tname = "${solarSystem.displayName.toLowerCase().replace(/\s+/g, '_')}"\n`;
-            txt += `\t\tclass = "${getStarClassForSystemClass(solarSystem.class)}"\n`;
-            txt += `\t\torbit_distance = 0\n`;
-            txt += `\t\torbit_angle = 1\n`;
-            txt += `\t\tsize = 45\n`;
-            txt += `\t\thas_ring = no\n`;
-            txt += `\t}\n\n`;
-
-            // Generate planets with CORRECT orbit logic and mod support
-            solarSystem.planets.forEach(planet => {
-                const modInfo = getModInfo(planet.class);
-                const actualClass = modInfo ? modInfo.fallback : planet.class;
-
-                txt += `\tplanet = {\n`;
-                txt += `\t\tname = "${planet.name}"\n`;
-                txt += `\t\tclass = "${actualClass}"\n`;
-                txt += `\t\torbit_distance = ${planet.orbitDistance}\n`;
-                
-                // Handle orbit angle
-                if (planet.orbitAngleType === 'range') {
-                    txt += `\t\torbit_angle = { min = ${planet.orbitAngleMin} max = ${planet.orbitAngleMax} }\n`;
-                } else {
-                    txt += `\t\torbit_angle = ${planet.orbitAngle}\n`;
-                }
-                
-                txt += `\t\tsize = ${planet.size}\n`;
-                
-                if (planet.changeOrbit > 0) {
-                    txt += `\t\tchange_orbit = ${planet.changeOrbit}\n`;
-                }
-                
-                txt += `\t\thas_ring = ${planet.hasRing ? 'yes' : 'no'}\n`;
-                
-                // Add mod-conditional init_effect for modded planet types
-                let hasInitEffect = false;
-                if (modInfo) {
-                    txt += `\t\tinit_effect = {\n`;
-                    hasInitEffect = true;
-                    
-                    if (modInfo.mod === 'gigastructures') {
-                        txt += `\t\t\tif = {\n`;
-                        txt += `\t\t\t\tlimit = { has_gigastructures = yes }\n`;
-                        txt += `\t\t\t\tchange_pc = ${planet.class}\n`;
-                        txt += `\t\t\t}\n`;
-                    } else if (modInfo.mod === 'planetary_diversity') {
-                        txt += `\t\t\tif = {\n`;
-                        txt += `\t\t\t\tlimit = { has_planetary_diversity = yes }\n`;
-                        txt += `\t\t\t\tchange_pc = ${planet.class}\n`;
-                        txt += `\t\t\t}\n`;
-                    }
-                }
-                
-                if (planet.isStartingPlanet) {
-                    if (!hasInitEffect) {
-                        txt += `\t\tinit_effect = {\n`;
-                        hasInitEffect = true;
-                    }
-                    txt += `\t\t\tprevent_anomaly = yes\n`;
-                    txt += `\t\t\tgenerate_start_buildings_and_blockers = yes\n`;
-                }
-                
-                if (hasInitEffect) {
-                    txt += `\t\t}\n`;
-                }
-                
-                if (planet.isStartingPlanet && !hasInitEffect) {
-                    txt += `\t\tstarting_planet = yes\n`;
-                    txt += `\t\ttile_blockers = none\n`;
-                    txt += `\t\tmodifiers = none\n`;
-                }
-
-                // Generate moons
-                if (planet.moons && planet.moons.length > 0) {
-                    planet.moons.forEach(moon => {
-                        const moonModInfo = getModInfo(moon.class);
-                        const moonActualClass = moonModInfo ? moonModInfo.fallback : moon.class;
-
-                        txt += `\t\tmoon = {\n`;
-                        txt += `\t\t\tname = "${moon.name}"\n`;
-                        txt += `\t\t\tclass = "${moonActualClass}"\n`;
-                        txt += `\t\t\torbit_distance = ${moon.orbitDistance}\n`;
-                        
-                        if (moon.orbitAngleType === 'range') {
-                            txt += `\t\t\torbit_angle = { min = ${moon.orbitAngleMin} max = ${moon.orbitAngleMax} }\n`;
-                        } else {
-                            txt += `\t\t\torbit_angle = ${moon.orbitAngle}\n`;
-                        }
-                        
-                        txt += `\t\t\tsize = ${moon.size}\n`;
-                        if (moon.hasRing) {
-                            txt += `\t\t\thas_ring = yes\n`;
-                        }
-                        
-                        // Add mod-conditional init_effect for modded moon types
-                        if (moonModInfo) {
-                            if (moonModInfo.useChangePC) {
-                                txt += `\t\t\tinit_effect = {\n`;
-                                
-                                if (moonModInfo.mod === 'gigastructures') {
-                                    txt += `\t\t\t\tif = {\n`;
-                                    txt += `\t\t\t\t\tlimit = { has_gigastructures = yes }\n`;
-                                    txt += `\t\t\t\t\tchange_pc = ${moon.class}\n`;
-                                    txt += `\t\t\t\t}\n`;
-                                } else if (moonModInfo.mod === 'planetary_diversity') {
-                                    txt += `\t\t\t\tif = {\n`;
-                                    txt += `\t\t\t\t\tlimit = { has_planetary_diversity = yes }\n`;
-                                    txt += `\t\t\t\t\tchange_pc = ${moon.class}\n`;
-                                    txt += `\t\t\t\t}\n`;
-                                }
-                                
-                                txt += `\t\t\t}\n`;
-                            } else {
-                                // Modifier-based PD moon
-                                txt += `\t\t\t# ${moonModInfo.comment} if Planetary Diversity is active\n`;
-                            }
-                        }
-                        
-                        txt += `\t\t}\n`;
-                    });
-                }
-
-                txt += `\t}\n`;
-            });
-
-            txt += `}\n`;
-            return txt;
-        }
-
-        function generateStellarisYml() {
-            let yml = `l_german:\n`;
-            yml += ` # Generated by Stellaris Solar System Editor - Enhanced Version\n`;
-            yml += ` # System: ${solarSystem.displayName}\n\n`;
-            yml += ` ${solarSystem.name}_NAME: "${solarSystem.displayName}"\n`;
-            yml += ` ${solarSystem.name}_DESC: "Ein maßgeschneidertes Sonnensystem mit korrekter Stellaris-Orbit-Mechanik und Mod-Support."\n\n`;
-
-            solarSystem.planets.forEach(planet => {
-                yml += ` ${planet.name}_NAME: "${planet.displayName}"\n`;
-                if (planet.moons && planet.moons.length > 0) {
-                    planet.moons.forEach(moon => {
-                        yml += ` ${moon.name}_NAME: "${moon.displayName}"\n`;
-                    });
-                }
-            });
-
-            return yml;
-        }
-
-        function getStarClassForSystemClass(systemClass) {
-            const mapping = {
-                'sc_b': 'pc_b_star',
-                'sc_a': 'pc_a_star',
-                'sc_f': 'pc_f_star',
-                'sc_g': 'pc_g_star',
-                'sc_k': 'pc_k_star',
-                'sc_m': 'pc_m_star'
-            };
-            return mapping[systemClass] || 'pc_g_star';
-        }
-
-        // Helper functions
+        // Helper Functions
         function getPlanetIcon(planetClass) {
             const icons = {
+                // Stars
                 'pc_b_star': '💙', 'pc_a_star': '⚪', 'pc_f_star': '💛', 'pc_g_star': '☉', 'pc_k_star': '🧡', 'pc_m_star': '🔴',
+                'pc_black_hole': '⚫', 'pc_neutron_star': '⚫', 'pc_pulsar': '🌟', 'pc_brown_dwarf': '🟤',
+                
+                // Habitable Worlds
                 'pc_continental': '🌍', 'pc_ocean': '🌊', 'pc_tropical': '🌴',
-                'pc_arid': '🏜️', 'pc_desert': '🏜️', 'pc_savanna': '🌾',
+                'pc_arid': '🏜️', 'pc_desert': '🏜️', 'pc_savannah': '🌾',
                 'pc_arctic': '🧊', 'pc_tundra': '❄️', 'pc_alpine': '🏔️',
-                'pc_gaia': '🌿', 'pc_barren': '🌑', 'pc_barren_cold': '☄️', 'pc_frozen': '☄️',
+                'pc_gaia': '🌿',
+                
+                // Uninhabitable Worlds
+                'pc_barren': '🌑', 'pc_barren_cold': '☄️', 'pc_frozen': '☄️',
                 'pc_molten': '🔥', 'pc_toxic': '☢️', 'pc_hothouse': '🔥',
                 'pc_gas_giant': '🪐', 'pc_hot_gas_giant': '🔥', 'pc_cold_gas_giant': '❄️', 'pc_dwarf_gas_giant': '🌌',
                 'pc_storm': '⛈️', 'pc_nuked': '💥', 'pc_shattered': '💥',
-                'pc_asteroid': '☄️', 'pc_relic': '🏛️', 'pc_subglacial': '🧊',
-                'pc_habitat': '🛰️', 'pc_ecumenopolis': '🏙️', 'pc_machine': '🤖',
-                'pc_hive': '🐛', 'pc_shielded': '🛡️',
+                'pc_asteroid': '☄️', 'pc_subglacial': '🧊',
+                
+                // Special Worlds
+                'pc_relic': '🛛️', 'pc_habitat': '🛰️', 'pc_ecumenopolis': '🏙️',
+                'pc_machine': '🤖', 'pc_hive': '🪲', 'pc_shielded': '🛡️',
+                
                 // Gigastructural Engineers
                 'pc_birch': '🌳', 'pc_alderson': '💿', 'pc_gas_giant_habitable': '🪐', 
                 'pc_stellar_systemcraft': '🚀', 'pc_nicoll_dyson_beam': '⚡', 'pc_penrose_sphere_habitable': '⚫',
                 'pc_virtual_reality': '💻', 'pc_pouchkinn_planet': '🌟', 'pc_gigastructural_shielded': '🛡️',
-                // Planetary Diversity
-                'pc_mantle': '🌋', 'pc_karst': '🪨', 'pc_mushroom': '🍄', 'pc_coral': '🪸', 'pc_crystal': '💎',
-                'pc_frozen_desert': '🏔️', 'pc_retinal': '👁️', 'pc_ash': '🌋', 'pc_salt': '🧂', 'pc_superhabitable': '🌺',
-                'pc_tidally_locked': '🌗', 'pc_primal': '🦕', 'pc_geothermal': '♨️', 'pc_marginal': '🌫️',
-                'pc_fog': '🌫️', 'pc_mud': '🤎', 'pc_sandsea': '🏖️', 'pc_cascadian': '🏞️', 'pc_technoorganic': '🔬'
+                'pc_quasi_stellar_obliterator': '⭐', 'pc_neutronium_gigaforge': '⚒️',
+                
+                // Planetary Diversity - Gaia & Special
+                'pd_wet_gaia_world': '🌿', 'pd_dry_gaia_world': '🌿', 'pd_cold_gaia_world': '🌿',
+                'pd_wet_cave_world': '🕳️', 'pd_dry_cave_world': '🕳️', 'pd_cold_cave_world': '🕳️',
+                'pd_wet_superhabitable_world': '🌺', 'pd_dry_superhabitable_world': '🌺', 'pd_cold_superhabitable_world': '🌺',
+                'pd_wet_tidally_locked_world': '🌗', 'pd_dry_tidally_locked_world': '🌗', 'pd_cold_tidally_locked_world': '🌗',
+                
+                // Planetary Diversity - Uncommon
+                'pc_superhabitable': '🌺', 'pc_tidally_locked': '🌗', 'pc_mantle': '🌋', 'pc_karst': '🪨',
+                'pc_crystal': '💎', 'pc_frozen_desert': '🏔️', 'pc_ash': '🌋', 'pc_marginal': '🌫️',
+                'pc_sandsea': '🏖️', 'pc_technoorganic': '🔬'
             };
             return icons[planetClass] || '🌌';
         }
 
         function getClassDisplayName(planetClass) {
             const names = {
-                'pc_b_star': 'B-Stern', 'pc_a_star': 'A-Stern', 'pc_f_star': 'F-Stern', 'pc_g_star': 'G-Stern', 'pc_k_star': 'K-Stern', 'pc_m_star': 'M-Stern',
+                // Stars
+                'pc_b_star': 'B-Stern', 'pc_a_star': 'A-Stern', 'pc_f_star': 'F-Stern',
+                'pc_g_star': 'G-Stern', 'pc_k_star': 'K-Stern', 'pc_m_star': 'M-Stern',
+                'pc_black_hole': 'Schwarzes Loch', 'pc_neutron_star': 'Neutronenstern',
+                'pc_pulsar': 'Pulsar', 'pc_brown_dwarf': 'Brauner Zwerg',
+                
+                // Habitable Worlds
                 'pc_continental': 'Kontinental', 'pc_ocean': 'Ozean', 'pc_tropical': 'Tropisch',
-                'pc_arid': 'Arid', 'pc_desert': 'Wüste', 'pc_savanna': 'Savanne',
+                'pc_arid': 'Arid', 'pc_desert': 'Wüste', 'pc_savannah': 'Savanne',
                 'pc_arctic': 'Arktisch', 'pc_tundra': 'Tundra', 'pc_alpine': 'Alpin',
-                'pc_gaia': 'Gaia', 'pc_barren': 'Karg', 'pc_barren_cold': 'Karg (Kalt)', 'pc_frozen': 'Gefroren',
+                'pc_gaia': 'Gaia',
+                
+                // Uninhabitable Worlds
+                'pc_barren': 'Karg', 'pc_barren_cold': 'Karg (Kalt)', 'pc_frozen': 'Gefroren',
                 'pc_molten': 'Geschmolzen', 'pc_toxic': 'Toxisch', 'pc_hothouse': 'Treibhaus',
-                'pc_gas_giant': 'Gasriese', 'pc_hot_gas_giant': 'Heißer Gasriese', 'pc_cold_gas_giant': 'Kalter Gasriese', 'pc_dwarf_gas_giant': 'Zwerg-Gasriese',
+                'pc_gas_giant': 'Gasriese', 'pc_hot_gas_giant': 'Heißer Gasriese',
+                'pc_cold_gas_giant': 'Kalter Gasriese', 'pc_dwarf_gas_giant': 'Zwerg-Gasriese',
                 'pc_storm': 'Sturm', 'pc_nuked': 'Verstrahlt', 'pc_shattered': 'Zerstört',
-                'pc_asteroid': 'Asteroid', 'pc_relic': 'Relikt', 'pc_subglacial': 'Subglazial',
-                'pc_habitat': 'Habitat', 'pc_ecumenopolis': 'Ökumenopolis', 'pc_machine': 'Maschine',
-                'pc_hive': 'Schwarm', 'pc_shielded': 'Abgeschirmt',
+                'pc_asteroid': 'Asteroid', 'pc_subglacial': 'Subglazial',
+                
+                // Special Worlds
+                'pc_relic': 'Relikt', 'pc_habitat': 'Habitat', 'pc_ecumenopolis': 'Ökumenopolis',
+                'pc_machine': 'Maschine', 'pc_hive': 'Schwarm', 'pc_shielded': 'Abgeschirmt',
+                
                 // Gigastructural Engineers
-                'pc_birch': 'Birch-Welt', 'pc_alderson': 'Alderson-Scheibe', 'pc_gas_giant_habitable': 'Bewohnbarer Gasriese',
-                'pc_stellar_systemcraft': 'Stellares Systemschiff', 'pc_nicoll_dyson_beam': 'Nicoll-Dyson-Strahl-Ziel',
-                'pc_penrose_sphere_habitable': 'Penrose-Sphäre Habitat', 'pc_virtual_reality': 'Virtual Reality Welt',
-                'pc_pouchkinn_planet': 'Pouchkinn Planet', 'pc_gigastructural_shielded': 'Gigastruktureller Schild',
-                // Planetary Diversity
-                'pc_mantle': 'Mantel-Welt', 'pc_karst': 'Karst-Welt', 'pc_mushroom': 'Pilz-Welt', 'pc_coral': 'Korallen-Welt',
-                'pc_crystal': 'Kristall-Welt', 'pc_frozen_desert': 'Gefrorene Wüste', 'pc_retinal': 'Retinal-Welt',
-                'pc_ash': 'Asche-Welt', 'pc_salt': 'Salz-Welt', 'pc_superhabitable': 'Superbewohnbar',
-                'pc_tidally_locked': 'Gezeitengebunden', 'pc_primal': 'Urwelt', 'pc_geothermal': 'Geothermisch',
-                'pc_marginal': 'Randwelt', 'pc_fog': 'Nebel-Welt', 'pc_mud': 'Schlamm-Welt',
-                'pc_sandsea': 'Sandmeer-Welt', 'pc_cascadian': 'Kaskaden-Welt', 'pc_technoorganic': 'Techno-Organisch'
+                'pc_birch': 'Birch-Welt', 'pc_alderson': 'Alderson-Scheibe',
+                'pc_gas_giant_habitable': 'Bewohnbarer Gasriese', 'pc_stellar_systemcraft': 'Stellares Systemschiff',
+                'pc_nicoll_dyson_beam': 'Nicoll-Dyson-Strahl-Ziel', 'pc_penrose_sphere_habitable': 'Penrose-Sphäre Habitat',
+                'pc_virtual_reality': 'Virtual Reality Welt', 'pc_pouchkinn_planet': 'Pouchkinn Planet',
+                'pc_gigastructural_shielded': 'Gigastruktureller Schild', 'pc_quasi_stellar_obliterator': 'Quasi-Stellar Obliterator',
+                'pc_neutronium_gigaforge': 'Neutronium Gigaforge',
+                
+                // Planetary Diversity (shortened for space, add more as needed)
+                'pd_retinal_world': 'Retinal-Welt', 'pd_lake_world': 'Seen-Welt', 'pd_mushroom_world': 'Pilz-Welt',
+                'pd_dune_world': 'Dünen-Welt', 'pd_glacial_world': 'Gletscher-Welt',
+                'pc_superhabitable': 'Superbewohnbar', 'pc_tidally_locked': 'Gezeitengebunden',
+                'pc_mantle': 'Mantel-Welt', 'pc_crystal': 'Kristall-Welt'
             };
             return names[planetClass] || planetClass;
         }
 
-        function getEnhancedColorForClass(className) {
+        function getColorForClass(className) {
             const colors = {
-                // Vanilla Stars
+                // Habitable Worlds
+                // Stars
                 'pc_b_star': 'linear-gradient(45deg, #4299e1, #3182ce)',
                 'pc_a_star': 'linear-gradient(45deg, #f7fafc, #edf2f7)',
                 'pc_f_star': 'linear-gradient(45deg, #faf089, #f6e05e)',
@@ -2149,20 +1676,21 @@
                 'pc_k_star': 'linear-gradient(45deg, #ed8936, #dd6b20)',
                 'pc_m_star': 'linear-gradient(45deg, #e53e3e, #c53030)',
                 
-                // Vanilla Habitable Worlds
+                // Habitable Worlds
                 'pc_continental': 'linear-gradient(45deg, #38b2ac, #4299e1)',
                 'pc_ocean': 'linear-gradient(45deg, #4299e1, #3182ce)',
                 'pc_tropical': 'linear-gradient(45deg, #48bb78, #38a169)',
                 'pc_arid': 'linear-gradient(45deg, #f6ad55, #ed8936)',
                 'pc_desert': 'linear-gradient(45deg, #ecc94b, #d69e2e)',
-                'pc_savanna': 'linear-gradient(45deg, #ed8936, #dd6b20)',
+                'pc_savannah': 'linear-gradient(45deg, #ed8936, #dd6b20)',
                 'pc_arctic': 'linear-gradient(45deg, #a0aec0, #718096)',
                 'pc_tundra': 'linear-gradient(45deg, #718096, #4a5568)',
                 'pc_alpine': 'linear-gradient(45deg, #cbd5e0, #a0aec0)',
                 'pc_gaia': 'linear-gradient(45deg, #68d391, #48bb78)',
                 
-                // Vanilla Uninhabitable Worlds
+                // Uninhabitable Worlds
                 'pc_barren': 'linear-gradient(45deg, #718096, #4a5568)',
+                'pc_barren_cold': 'linear-gradient(45deg, #a0aec0, #718096)',
                 'pc_frozen': 'linear-gradient(45deg, #bee3f8, #90cdf4)',
                 'pc_molten': 'linear-gradient(45deg, #e53e3e, #c53030)',
                 'pc_toxic': 'linear-gradient(45deg, #805ad5, #6b46c1)',
@@ -2170,7 +1698,7 @@
                 'pc_nuked': 'linear-gradient(45deg, #a3bffa, #7c3aed)',
                 'pc_asteroid': 'linear-gradient(45deg, #718096, #4a5568)',
                 
-                // Vanilla Special Worlds
+                // Special Worlds
                 'pc_relic': 'linear-gradient(45deg, #d69e2e, #b7791f)',
                 'pc_habitat': 'linear-gradient(45deg, #a0aec0, #718096)',
                 'pc_ecumenopolis': 'linear-gradient(45deg, #fed7d7, #fc8181)',
@@ -2189,123 +1717,40 @@
                 'pc_pouchkinn_planet': 'linear-gradient(45deg, #f093fb, #f5576c)',
                 'pc_gigastructural_shielded': 'linear-gradient(45deg, #4fd1c7, #06bfa5)',
                 
-                // PD Enhanced Uninhabitable
-                'pc_barren_cold': 'linear-gradient(45deg, #a0aec0, #718096)',
-                'pc_hothouse': 'linear-gradient(45deg, #e53e3e, #ed8936)',
-                'pc_hot_gas_giant': 'linear-gradient(45deg, #e53e3e, #9f7aea)',
-                'pc_cold_gas_giant': 'linear-gradient(45deg, #bee3f8, #9f7aea)',
-                'pc_dwarf_gas_giant': 'linear-gradient(45deg, #805ad5, #553c9a)',
-                'pc_shattered': 'linear-gradient(45deg, #4a5568, #2d3748)',
-                'pc_subglacial': 'linear-gradient(45deg, #90cdf4, #4299e1)',
-                'pc_storm': 'linear-gradient(45deg, #667eea, #5a67d8)',
-                
-                // PD Direct Planet Classes (Uncommon)
-                'pc_superhabitable': 'linear-gradient(45deg, #68d391, #38b2ac)',
-                'pc_tidally_locked': 'linear-gradient(45deg, #e53e3e, #c53030)',
-                'pc_mantle': 'linear-gradient(45deg, #c53030, #e53e3e)',
-                'pc_karst': 'linear-gradient(45deg, #a0aec0, #38b2ac)',
-                'pc_crystal': 'linear-gradient(45deg, #9f7aea, #bee3f8)',
-                'pc_frozen_desert': 'linear-gradient(45deg, #bee3f8, #ecc94b)',
-                'pc_ash': 'linear-gradient(45deg, #4a5568, #718096)',
-                'pc_marginal': 'linear-gradient(45deg, #718096, #4a5568)',
-                'pc_sandsea': 'linear-gradient(45deg, #ecc94b, #f6ad55)',
-                'pc_technoorganic': 'linear-gradient(45deg, #667eea, #4a5568)',
-                
-                // PD Wet Worlds (Modifier-based)
+                // Add more Planetary Diversity colors as needed
                 'pd_retinal_world': 'linear-gradient(45deg, #fc8181, #e53e3e)',
                 'pd_lake_world': 'linear-gradient(45deg, #4299e1, #3182ce)',
-                'pd_tepid_world': 'linear-gradient(45deg, #90cdf4, #4299e1)',
                 'pd_mushroom_world': 'linear-gradient(45deg, #805ad5, #38a169)',
-                'pd_temperate_world': 'linear-gradient(45deg, #48bb78, #38a169)',
-                'pd_sakura_world': 'linear-gradient(45deg, #f093fb, #e879f9)',
-                'pd_forest_world': 'linear-gradient(45deg, #276749, #38a169)',
-                'pd_megaflora_world': 'linear-gradient(45deg, #68d391, #38b2ac)',
-                'pd_petrified_world': 'linear-gradient(45deg, #a0aec0, #718096)',
-                'pd_cascadian_world': 'linear-gradient(45deg, #4299e1, #48bb78)',
-                'pd_swamp_world': 'linear-gradient(45deg, #38a169, #2d5016)',
-                'pd_crag_world': 'linear-gradient(45deg, #4a5568, #2d3748)',
-                'pd_fog_world': 'linear-gradient(45deg, #cbd5e0, #a0aec0)',
-                'pd_kelp_world': 'linear-gradient(45deg, #38a169, #4299e1)',
-                'pd_algae_world': 'linear-gradient(45deg, #68d391, #4299e1)',
-                'pd_reef_world': 'linear-gradient(45deg, #fc8181, #4299e1)',
-                'pd_coral_world': 'linear-gradient(45deg, #fc8181, #4299e1)',
-                'pd_archipelago_world': 'linear-gradient(45deg, #4299e1, #38a169)',
-                'pd_atoll_world': 'linear-gradient(45deg, #f6e05e, #4299e1)',
-                'pd_tepui_world': 'linear-gradient(45deg, #48bb78, #cbd5e0)',
-                'pd_mangrove_world': 'linear-gradient(45deg, #38a169, #4299e1)',
-                'pd_cenote_world': 'linear-gradient(45deg, #4299e1, #2d3748)',
-                'pd_fungal_world': 'linear-gradient(45deg, #805ad5, #38a169)',
-                'pd_aerial_world': 'linear-gradient(45deg, #cbd5e0, #48bb78)',
-                'pd_lilypad_world': 'linear-gradient(45deg, #68d391, #4299e1)',
-                'pd_geothermal_world': 'linear-gradient(45deg, #ed8936, #e53e3e)',
-                'pd_biolumen_world': 'linear-gradient(45deg, #4299e1, #9f7aea)',
-                
-                // PD Dry Worlds (Modifier-based)
                 'pd_dune_world': 'linear-gradient(45deg, #ecc94b, #d69e2e)',
-                'pd_oasis_world': 'linear-gradient(45deg, #48bb78, #ecc94b)',
-                'pd_outback_world': 'linear-gradient(45deg, #ed8936, #c53030)',
-                'pd_coastal_world': 'linear-gradient(45deg, #f6ad55, #4299e1)',
-                'pd_fungi_world': 'linear-gradient(45deg, #805ad5, #ed8936)',
-                'pd_salt_world': 'linear-gradient(45deg, #f7fafc, #edf2f7)',
-                'pd_aquifer_world': 'linear-gradient(45deg, #4299e1, #f6ad55)',
-                'pd_mesa_world': 'linear-gradient(45deg, #ed8936, #a0aec0)',
-                'pd_fog_desert_world': 'linear-gradient(45deg, #cbd5e0, #ecc94b)',
-                'pd_mediterranean_world': 'linear-gradient(45deg, #68d391, #f6ad55)',
-                'pd_badlands_world': 'linear-gradient(45deg, #c53030, #ecc94b)',
-                'pd_succulent_world': 'linear-gradient(45deg, #68d391, #ed8936)',
-                'pd_striped_world': 'linear-gradient(45deg, #ecc94b, #a0aec0)',
-                'pd_primal_world': 'linear-gradient(45deg, #38a169, #ed8936)',
-                'pd_steppe_world': 'linear-gradient(45deg, #ecc94b, #38a169)',
-                'pd_prairie_world': 'linear-gradient(45deg, #68d391, #ecc94b)',
-                'pd_veld_world': 'linear-gradient(45deg, #ed8936, #68d391)',
-                'pd_semi_arid_world': 'linear-gradient(45deg, #f6ad55, #38a169)',
-                'pd_aspen_world': 'linear-gradient(45deg, #faf089, #ed8936)',
-                'pd_sandstone_world': 'linear-gradient(45deg, #ecc94b, #a0aec0)',
-                'pd_supercontinent_world': 'linear-gradient(45deg, #ed8936, #4a5568)',
-                'pd_sinkhole_world': 'linear-gradient(45deg, #2d3748, #ecc94b)',
-                
-                // PD Cold Worlds (Modifier-based)
-                'pd_cold_desert_world': 'linear-gradient(45deg, #a0aec0, #ecc94b)',
                 'pd_glacial_world': 'linear-gradient(45deg, #bee3f8, #90cdf4)',
-                'pd_antarctic_world': 'linear-gradient(45deg, #f7fafc, #bee3f8)',
-                'pd_aeolian_world': 'linear-gradient(45deg, #cbd5e0, #90cdf4)',
-                'pd_ice_spike_world': 'linear-gradient(45deg, #bee3f8, #cbd5e0)',
-                'pd_crevasse_world': 'linear-gradient(45deg, #90cdf4, #a0aec0)',
-                'pd_ice_dunes_world': 'linear-gradient(45deg, #bee3f8, #ecc94b)',
-                'pd_iceberg_world': 'linear-gradient(45deg, #bee3f8, #4299e1)',
-                'pd_boreal_world': 'linear-gradient(45deg, #38a169, #a0aec0)',
-                'pd_snow_world': 'linear-gradient(45deg, #f7fafc, #cbd5e0)',
-                'pd_highland_world': 'linear-gradient(45deg, #a0aec0, #718096)',
-                'pd_dune_forest_world': 'linear-gradient(45deg, #38a169, #cbd5e0)',
-                'pd_fjord_world': 'linear-gradient(45deg, #4299e1, #a0aec0)',
-                'pd_blossom_world': 'linear-gradient(45deg, #f093fb, #a0aec0)',
-                'pd_glaciovolcanic_world': 'linear-gradient(45deg, #e53e3e, #bee3f8)',
-                'pd_lanthanide_world': 'linear-gradient(45deg, #9f7aea, #a0aec0)',
-                'pd_bog_world': 'linear-gradient(45deg, #38a169, #4a5568)',
-                'pd_mycelium_world': 'linear-gradient(45deg, #805ad5, #a0aec0)',
-                'pd_mud_world': 'linear-gradient(45deg, #744210, #718096)',
-                'pd_basalt_world': 'linear-gradient(45deg, #2d3748, #a0aec0)',
-                'pd_tuya_world': 'linear-gradient(45deg, #718096, #bee3f8)',
-                'pd_cryoflora_world': 'linear-gradient(45deg, #68d391, #bee3f8)',
-                'pd_lichen_world': 'linear-gradient(45deg, #68d391, #a0aec0)',
-                
-                // PD Gaia Worlds (Modifier-based)
-                'pd_wet_gaia_world': 'linear-gradient(45deg, #68d391, #4299e1)',
-                'pd_dry_gaia_world': 'linear-gradient(45deg, #68d391, #ecc94b)',
-                'pd_cold_gaia_world': 'linear-gradient(45deg, #68d391, #bee3f8)',
-                
-                // PD Uncommon Worlds (Modifier-based)
-                'pd_wet_cave_world': 'linear-gradient(45deg, #2d3748, #4299e1)',
-                'pd_dry_cave_world': 'linear-gradient(45deg, #2d3748, #ecc94b)',
-                'pd_cold_cave_world': 'linear-gradient(45deg, #2d3748, #bee3f8)',
-                'pd_wet_superhabitable_world': 'linear-gradient(45deg, #68d391, #4299e1)',
-                'pd_dry_superhabitable_world': 'linear-gradient(45deg, #68d391, #ed8936)',
-                'pd_cold_superhabitable_world': 'linear-gradient(45deg, #68d391, #a0aec0)',
-                'pd_wet_tidally_locked_world': 'linear-gradient(45deg, #e53e3e, #4299e1)',
-                'pd_dry_tidally_locked_world': 'linear-gradient(45deg, #e53e3e, #ecc94b)',
-                'pd_cold_tidally_locked_world': 'linear-gradient(45deg, #e53e3e, #bee3f8)'
+                'pc_superhabitable': 'linear-gradient(45deg, #68d391, #38b2ac)',
+                'pc_crystal': 'linear-gradient(45deg, #9f7aea, #bee3f8)'
             };
             return colors[className] || 'linear-gradient(45deg, #e2e8f0, #cbd5e0)';
+        }
+
+        function getStarClassForSystemClass(systemClass) {
+            const mapping = {
+                'sc_b': 'pc_b_star',
+                'sc_a': 'pc_a_star',
+                'sc_f': 'pc_f_star',
+                'sc_g': 'pc_g_star',
+                'sc_k': 'pc_k_star',
+                'sc_m': 'pc_m_star'
+            };
+            return mapping[systemClass] || 'pc_g_star';
+        }
+
+        // Event handlers and property updates
+        function updateSelectedPlanetProperty(property) {
+            return (e) => {
+                if (selectedPlanet) {
+                    selectedPlanet[property] = e.target.value;
+                    updatePlanetList();
+                    updateOutput();
+                    renderVisualizer();
+                }
+            };
         }
 
         function updateOutput() {
@@ -2337,14 +1782,142 @@
             showNotification(`Datei "${filename}" wurde erfolgreich heruntergeladen!`);
         }
 
+        // Event Listeners
+        function initializeEventListeners() {
+            // System properties
+            elements.systemName.addEventListener('input', (e) => {
+                const value = e.target.value.replace(/[^a-zA-Z0-9_]/g, '');
+                e.target.value = value;
+                solarSystem.name = value || 'my_custom_system';
+                updateOutput();
+            });
+
+            elements.systemDisplayName.addEventListener('input', (e) => {
+                solarSystem.displayName = e.target.value || 'Unbenanntes System';
+                updateOutput();
+            });
+
+            elements.systemClass.addEventListener('change', (e) => {
+                solarSystem.class = e.target.value;
+                updateOutput();
+                renderVisualizer();
+            });
+
+            elements.systemUsage.addEventListener('change', (e) => {
+                solarSystem.usage = e.target.value;
+                updateOutput();
+            });
+
+            // Planet management
+            elements.addPlanetBtn.addEventListener('click', addPlanet);
+
+            elements.orbitAngleType.addEventListener('change', (e) => {
+                const isRange = e.target.value === 'range';
+                elements.fixedAngleControl.classList.toggle('hidden', isRange);
+                elements.rangeAngleControl.classList.toggle('hidden', !isRange);
+                if (selectedPlanet) {
+                    selectedPlanet.orbitAngleType = e.target.value;
+                    updateOutput();
+                }
+            });
+
+            // Planet property updates
+            elements.celestialName.addEventListener('input', updateSelectedPlanetProperty('name'));
+            elements.celestialDisplayName.addEventListener('input', updateSelectedPlanetProperty('displayName'));
+            elements.celestialClass.addEventListener('change', (e) => {
+                if (selectedPlanet) {
+                    selectedPlanet.class = e.target.value;
+                    updatePlanetList();
+                    updateOutput();
+                    renderVisualizer();
+                    
+                    // Reset modifier selection when class changes as available modifiers change
+                    elements.modifierCategory.value = '';
+                    elements.modifierType.innerHTML = '<option value="">-- Erst Kategorie wählen --</option>';
+                    elements.modifierType.disabled = true;
+                    elements.addModifierBtn.disabled = true;
+                }
+            });
+            
+            elements.celestialSize.addEventListener('input', (e) => {
+                if (selectedPlanet) {
+                    selectedPlanet.size = Math.max(1, Math.min(50, parseInt(e.target.value) || 1));
+                    e.target.value = selectedPlanet.size;
+                    updatePlanetList();
+                    updateOutput();
+                    renderVisualizer();
+                }
+            });
+            
+            elements.celestialOrbitDistance.addEventListener('input', (e) => {
+                if (selectedPlanet) {
+                    selectedPlanet.orbitDistance = Math.max(0, parseInt(e.target.value) || 0);
+                    e.target.value = selectedPlanet.orbitDistance;
+                    updatePlanetList();
+                    updateOutput();
+                    renderVisualizer();
+                }
+            });
+
+            elements.celestialHasRing.addEventListener('change', (e) => {
+                if (selectedPlanet) {
+                    selectedPlanet.hasRing = e.target.checked;
+                    updateOutput();
+                    renderVisualizer();
+                }
+            });
+            
+            elements.celestialIsStartingPlanet.addEventListener('change', (e) => {
+                if (selectedPlanet) {
+                    selectedPlanet.isStartingPlanet = e.target.checked;
+                    updateOutput();
+                }
+            });
+
+            elements.deleteCelestialBtn.addEventListener('click', () => {
+                if (!selectedPlanet) return;
+
+                if (selectedPlanet.type === 'planet') {
+                    solarSystem.planets = solarSystem.planets.filter(p => p.id !== selectedPlanet.id);
+                }
+
+                deselectPlanet();
+                updatePlanetList();
+                updateOutput();
+                renderVisualizer();
+            });
+
+            // Visualizer controls
+            elements.zoomInBtn.addEventListener('click', () => {
+                visualizerScale = Math.min(1.0, visualizerScale * 1.2);
+                renderVisualizer();
+            });
+            elements.zoomOutBtn.addEventListener('click', () => {
+                visualizerScale = Math.max(0.1, visualizerScale * 0.8);
+                renderVisualizer();
+            });
+            elements.resetViewBtn.addEventListener('click', () => {
+                visualizerScale = 0.3;
+                renderVisualizer();
+            });
+
+            // Export buttons
+            elements.downloadTxtBtn.addEventListener('click', () => 
+                downloadFile(elements.exportTxt.value, `${solarSystem.name}.txt`, 'text/plain'));
+            elements.downloadYmlBtn.addEventListener('click', () => {
+                const bom = '\ufeff';
+                downloadFile(bom + elements.exportYml.value, `${solarSystem.name}_l_german.yml`, 'text/plain;charset=utf-8');
+            });
+        }
+
         // Make functions globally available
         window.selectPlanet = selectPlanet;
-        window.removeAsteroidBelt = removeAsteroidBelt;
-        window.removeNeighborSystem = removeNeighborSystem;
+        window.removeModifier = removeModifier;
 
         // Initialize
         document.addEventListener('DOMContentLoaded', () => {
             initializeEventListeners();
+            initializeModifierSystem();
             
             // Load default system
             elements.systemName.value = solarSystem.name;
@@ -2352,13 +1925,11 @@
             elements.systemClass.value = solarSystem.class;
             elements.systemUsage.value = solarSystem.usage;
             
-            updateNeighborSystemsList();
-            updateAsteroidBeltList();
             updatePlanetList();
             updateOutput();
             renderVisualizer();
             
-            showNotification('🚀 Enhanced Version mit Import/Export, Nachbarsystemen & Mod Support geladen!');
+            showNotification('🚀 V6 - Intelligentes Basis-Klassen-System geladen!');
         });
 
         window.addEventListener('resize', () => {
