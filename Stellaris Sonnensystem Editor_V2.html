@@ -274,6 +274,23 @@
                 inset 0 0 15px rgba(255, 255, 255, 0.2);
         }
 
+        .asteroid-belt {
+            position: absolute;
+            border: 2px dotted rgba(139, 69, 19, 0.6);
+            border-radius: 50%;
+            pointer-events: none;
+        }
+
+        .orbit-number {
+            position: absolute;
+            color: rgba(0, 212, 255, 0.7);
+            font-size: 0.8rem;
+            font-weight: bold;
+            background: rgba(0, 0, 0, 0.5);
+            padding: 2px 6px;
+            border-radius: 4px;
+        }
+
         .orbit-distance-info {
             background: rgba(0, 212, 255, 0.1);
             border: 1px solid rgba(0, 212, 255, 0.3);
@@ -381,6 +398,58 @@
                     <button id="addPlanetBtn" class="stellaris-btn">Planet hinzufügen</button>
                     <button id="moveUpBtn" class="stellaris-btn stellaris-btn-secondary ml-2" disabled>↑ Nach oben</button>
                     <button id="moveDownBtn" class="stellaris-btn stellaris-btn-secondary ml-2" disabled>↓ Nach unten</button>
+                </div>
+
+                <!-- Neighbor Systems Configuration -->
+                <div class="mt-6 p-4 bg-gradient-to-r from-indigo-900/30 to-purple-900/30 rounded-lg border border-indigo-500/30">
+                    <h3 class="text-lg font-medium mb-4 text-indigo-400">🌌 Nachbarsysteme</h3>
+                    <div id="neighborSystemsList" class="space-y-2 mb-4">
+                        <p class="text-gray-400 text-sm">Keine Nachbarsysteme definiert</p>
+                    </div>
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                        <div>
+                            <label class="label">Distanz</label>
+                            <input type="number" id="newNeighborDistance" class="stellaris-input" value="100" min="50" max="200">
+                        </div>
+                        <div>
+                            <label class="label">Initialisierung</label>
+                            <select id="newNeighborInit" class="stellaris-input">
+                                <option value="">Zufällig</option>
+                                <option value="sol_system_initializer">Sol-System</option>
+                                <option value="deneb_system">Deneb</option>
+                                <option value="alpha_centauri_initializer">Alpha Centauri</option>
+                                <option value="custom">Benutzerdefiniert</option>
+                            </select>
+                        </div>
+                        <div class="flex items-end">
+                            <button id="addNeighborBtn" class="stellaris-btn stellaris-btn-secondary">Nachbar hinzufügen</button>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Asteroid Belt Configuration -->
+                <div class="mt-6 p-4 bg-gray-800 rounded-lg">
+                    <h3 class="text-lg font-medium mb-4 text-yellow-400">Asteroidengürtel (Multiple möglich)</h3>
+                    <div id="asteroidBeltList" class="space-y-2 mb-4">
+                        <p class="text-gray-400 text-sm">Keine Asteroidengürtel definiert</p>
+                    </div>
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                        <div>
+                            <label class="label">Typ</label>
+                            <select id="newAsteroidBeltType" class="stellaris-input">
+                                <option value="rocky_asteroid_belt">Rocky Asteroid Belt</option>
+                                <option value="icy_asteroid_belt">Icy Asteroid Belt</option>
+                                <option value="crystalline_asteroid_belt">Crystalline Asteroid Belt</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="label">Radius</label>
+                            <input type="number" id="newAsteroidBeltRadius" class="stellaris-input" value="575" min="100" max="1000">
+                        </div>
+                        <div class="flex items-end">
+                            <button id="addAsteroidBeltBtn" class="stellaris-btn stellaris-btn-secondary">Gürtel hinzufügen</button>
+                        </div>
+                    </div>
                 </div>
                 
                 <!-- Orbit Distance Info -->
@@ -662,6 +731,8 @@
             displayName: 'Mein Sonnensystem',
             class: 'sc_g',
             usage: 'custom_empire',
+            neighborSystems: [], // Array of neighbor systems
+            asteroidBelts: [], // Array of multiple asteroid belts
             planets: [] // Sequential array of planets
         };
 
@@ -900,6 +971,18 @@
             importFile: document.getElementById('importFile'),
             importBtn: document.getElementById('importBtn'),
             clearSystemBtn: document.getElementById('clearSystemBtn'),
+
+            // Neighbor systems elements
+            neighborSystemsList: document.getElementById('neighborSystemsList'),
+            newNeighborDistance: document.getElementById('newNeighborDistance'),
+            newNeighborInit: document.getElementById('newNeighborInit'),
+            addNeighborBtn: document.getElementById('addNeighborBtn'),
+
+            // Asteroid belt elements - HINZUFÜGEN
+            asteroidBeltList: document.getElementById('asteroidBeltList'),
+            newAsteroidBeltType: document.getElementById('newAsteroidBeltType'),
+            newAsteroidBeltRadius: document.getElementById('newAsteroidBeltRadius'),
+            addAsteroidBeltBtn: document.getElementById('addAsteroidBeltBtn'),
             
             // System elements
             systemName: document.getElementById('systemName'),
@@ -1205,6 +1288,205 @@
             return null;
         }
 
+        // Import/Export Functions
+        function importSystem() {
+            const file = elements.importFile.files[0];
+            if (!file) {
+                showNotification('Bitte wählen Sie eine Datei aus.');
+                return;
+            }
+
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                try {
+                    const parser = new StellarisSystemParser();
+                    const parsedSystem = parser.parse(e.target.result);
+                    
+                    // Load parsed data into the editor
+                    loadSystemData(parsedSystem);
+                    showNotification('System erfolgreich importiert!');
+                } catch (error) {
+                    showNotification('Fehler beim Import: ' + error.message);
+                }
+            };
+            reader.readAsText(file);
+        }
+
+        function loadSystemData(systemData) {
+            // Clear existing data
+            clearSystem();
+            
+            // Load basic properties
+            solarSystem.name = systemData.name;
+            solarSystem.displayName = systemData.displayName;
+            solarSystem.class = systemData.class;
+            solarSystem.usage = systemData.usage;
+
+            elements.systemName.value = solarSystem.name;
+            elements.systemDisplayName.value = solarSystem.displayName;
+            elements.systemClass.value = solarSystem.class;
+            elements.systemUsage.value = solarSystem.usage;
+
+            // Load neighbor systems
+            systemData.neighborSystems.forEach(neighbor => {
+                solarSystem.neighborSystems.push({
+                    id: Date.now() + Math.random(),
+                    distance: neighbor.distance,
+                    initializer: neighbor.initializer
+                });
+            });
+
+            // Load asteroid belts
+            systemData.asteroidBelts.forEach(belt => {
+                solarSystem.asteroidBelts.push({
+                    id: Date.now() + Math.random(),
+                    type: belt.type,
+                    radius: belt.radius
+                });
+            });
+
+            // Load planets
+            systemData.planets.forEach(planet => {
+                nextCelestialId = Math.max(nextCelestialId, planet.id + 1);
+                solarSystem.planets.push(planet);
+            });
+
+            // Update UI
+            updateNeighborSystemsList();
+            updateAsteroidBeltList();
+            updatePlanetList();
+            updateOutput();
+            renderVisualizer();
+        }
+
+        function clearSystem() {
+            solarSystem = {
+                name: 'my_custom_system',
+                displayName: 'Mein Sonnensystem',
+                class: 'sc_g',
+                usage: 'custom_empire',
+                neighborSystems: [],
+                asteroidBelts: [],
+                planets: []
+            };
+            
+            selectedPlanet = null;
+            nextCelestialId = 1;
+            
+            // Reset UI
+            elements.systemName.value = solarSystem.name;
+            elements.systemDisplayName.value = solarSystem.displayName;
+            elements.systemClass.value = solarSystem.class;
+            elements.systemUsage.value = solarSystem.usage;
+            
+            updateNeighborSystemsList();
+            updateAsteroidBeltList();
+            updatePlanetList();
+            updateOutput();
+            renderVisualizer();
+            deselectPlanet();
+            
+            showNotification('System geleert!');
+        }
+
+
+        // Neighbor Systems Management
+        function addNeighborSystem() {
+            const newNeighbor = {
+                id: Date.now(),
+                distance: parseInt(elements.newNeighborDistance.value) || 100,
+                initializer: elements.newNeighborInit.value
+            };
+            
+            solarSystem.neighborSystems.push(newNeighbor);
+            updateNeighborSystemsList();
+            updateOutput();
+            renderVisualizer();
+        }
+
+        function updateNeighborSystemsList() {
+            elements.neighborSystemsList.innerHTML = '';
+            
+            if (solarSystem.neighborSystems.length === 0) {
+                elements.neighborSystemsList.innerHTML = '<p class="text-gray-400 text-sm">Keine Nachbarsysteme definiert</p>';
+                return;
+            }
+
+            solarSystem.neighborSystems.forEach((neighbor, index) => {
+                const neighborItem = document.createElement('div');
+                neighborItem.className = 'neighbor-item';
+                neighborItem.innerHTML = `
+                    <span class="text-sm">
+                        🌌 Distanz: ${neighbor.distance} | System: ${neighbor.initializer || 'Zufällig'}
+                    </span>
+                    <button class="stellaris-btn stellaris-btn-danger text-xs px-2 py-1" onclick="removeNeighborSystem(${neighbor.id})">
+                        Löschen
+                    </button>
+                `;
+                elements.neighborSystemsList.appendChild(neighborItem);
+            });
+        }
+
+        function removeNeighborSystem(neighborId) {
+            solarSystem.neighborSystems = solarSystem.neighborSystems.filter(n => n.id !== neighborId);
+            updateNeighborSystemsList();
+            updateOutput();
+            renderVisualizer();
+        }
+
+        // Asteroid Belt Management
+        function addAsteroidBelt() {
+            const newBelt = {
+                id: Date.now(),
+                type: elements.newAsteroidBeltType.value,
+                radius: parseInt(elements.newAsteroidBeltRadius.value) || 575
+            };
+            
+            solarSystem.asteroidBelts.push(newBelt);
+            updateAsteroidBeltList();
+            updateOutput();
+            renderVisualizer();
+        }
+
+        function updateAsteroidBeltList() {
+            elements.asteroidBeltList.innerHTML = '';
+            
+            if (solarSystem.asteroidBelts.length === 0) {
+                elements.asteroidBeltList.innerHTML = '<p class="text-gray-400 text-sm">Keine Asteroidengürtel definiert</p>';
+                return;
+            }
+
+            solarSystem.asteroidBelts.forEach((belt, index) => {
+                const beltItem = document.createElement('div');
+                beltItem.className = 'flex items-center justify-between bg-gray-700 p-2 rounded';
+                beltItem.innerHTML = `
+                    <span class="text-sm">
+                        ☄️ ${getAsteroidBeltTypeName(belt.type)} (Radius: ${belt.radius})
+                    </span>
+                    <button class="stellaris-btn stellaris-btn-danger text-xs px-2 py-1" onclick="removeAsteroidBelt(${belt.id})">
+                        Löschen
+                    </button>
+                `;
+                elements.asteroidBeltList.appendChild(beltItem);
+            });
+        }
+
+        function removeAsteroidBelt(beltId) {
+            solarSystem.asteroidBelts = solarSystem.asteroidBelts.filter(belt => belt.id !== beltId);
+            updateAsteroidBeltList();
+            updateOutput();
+            renderVisualizer();
+        }
+
+        function getAsteroidBeltTypeName(type) {
+            const names = {
+                'rocky_asteroid_belt': 'Felsiger Asteroidengürtel',
+                'icy_asteroid_belt': 'Eisiger Asteroidengürtel',
+                'crystalline_asteroid_belt': 'Kristalliner Asteroidengürtel'
+            };
+            return names[type] || type;
+        }
+
         // Code Generation with proper modifier system
         function generateStellarisTxt() {
             let txt = `##### Generated by Stellaris Solar System Editor V6 #####\n`;
@@ -1213,9 +1495,27 @@
             txt += `\tname = "${solarSystem.displayName}"\n`;
             txt += `\tclass = "${solarSystem.class}"\n`;
 
+            // Multiple asteroid belts
+            solarSystem.asteroidBelts.forEach(belt => {
+                txt += `\tasteroid_belt = {\n`;
+                txt += `\t\ttype = ${belt.type}\n`;
+                txt += `\t\tradius = ${belt.radius}\n`;
+                txt += `\t}\n`;
+            });
+
             if (solarSystem.usage) {
                 txt += `\tusage = ${solarSystem.usage}\n`;
             }
+
+            // Neighbor systems - HINZUFÜGEN
+            solarSystem.neighborSystems.forEach(neighbor => {
+                txt += `\tneighbor_system = {\n`;
+                txt += `\t\tdistance = ${neighbor.distance}\n`;
+                if (neighbor.initializer) {
+                    txt += `\t\tinitializer = "${neighbor.initializer}"\n`;
+                }
+                txt += `\t}\n`;
+            });
 
             txt += `\tinit_effect = {\n`;
             
@@ -1483,6 +1783,52 @@
             starEl.style.borderRadius = '50%';
             starEl.style.position = 'absolute';
             elements.visualizer.appendChild(starEl);
+
+            // Draw neighbor system indicators - HINZUFÜGEN
+            solarSystem.neighborSystems.forEach((neighbor, index) => {
+                const angle = (index * 360 / solarSystem.neighborSystems.length) * Math.PI / 180;
+                const distance = 200 * visualizerScale;
+                const x = centerX + distance * Math.cos(angle);
+                const y = centerY + distance * Math.sin(angle);
+
+                // Draw connection line
+                const line = document.createElement('div');
+                line.style.position = 'absolute';
+                line.style.width = `${distance}px`;
+                line.style.height = '1px';
+                line.style.background = 'rgba(153, 102, 255, 0.3)';
+                line.style.left = `${centerX}px`;
+                line.style.top = `${centerY}px`;
+                line.style.transformOrigin = '0 0';
+                line.style.transform = `rotate(${angle}rad)`;
+                elements.visualizer.appendChild(line);
+
+                // Draw neighbor system
+                const neighborEl = document.createElement('div');
+                neighborEl.style.position = 'absolute';
+                neighborEl.style.width = '20px';
+                neighborEl.style.height = '20px';
+                neighborEl.style.left = `${x - 10}px`;
+                neighborEl.style.top = `${y - 10}px`;
+                neighborEl.style.background = 'linear-gradient(45deg, #9966ff, #6633cc)';
+                neighborEl.style.borderRadius = '50%';
+                neighborEl.style.border = '2px solid rgba(153, 102, 255, 0.5)';
+                neighborEl.style.boxShadow = '0 0 10px rgba(153, 102, 255, 0.5)';
+                neighborEl.title = neighbor.initializer || 'Random System';
+                elements.visualizer.appendChild(neighborEl);
+            });
+
+            // Draw multiple asteroid belts - HINZUFÜGEN
+            solarSystem.asteroidBelts.forEach(belt => {
+                const beltRadius = belt.radius * visualizerScale;
+                const beltEl = document.createElement('div');
+                beltEl.className = 'asteroid-belt';
+                beltEl.style.width = `${beltRadius * 2}px`;
+                beltEl.style.height = `${beltRadius * 2}px`;
+                beltEl.style.left = `${centerX - beltRadius}px`;
+                beltEl.style.top = `${centerY - beltRadius}px`;
+                elements.visualizer.appendChild(beltEl);
+            });
 
             // Calculate cumulative orbits and draw planets
             const cumulativeOrbits = calculateCumulativeOrbitDistances();
@@ -1808,6 +2154,12 @@
                 updateOutput();
             });
 
+            // Neighbor systems listeners - HINZUFÜGEN
+            elements.addNeighborBtn.addEventListener('click', addNeighborSystem);
+            
+            // Asteroid belt listeners - HINZUFÜGEN
+            elements.addAsteroidBeltBtn.addEventListener('click', addAsteroidBelt);
+
             // Planet management
             elements.addPlanetBtn.addEventListener('click', addPlanet);
 
@@ -1913,11 +2265,15 @@
         // Make functions globally available
         window.selectPlanet = selectPlanet;
         window.removeModifier = removeModifier;
+        window.removeAsteroidBelt = removeAsteroidBelt;
+        window.removeNeighborSystem = removeNeighborSystem;
 
         // Initialize
         document.addEventListener('DOMContentLoaded', () => {
             initializeEventListeners();
             initializeModifierSystem();
+            updateNeighborSystemsList(); // HINZUFÜGEN
+            updateAsteroidBeltList(); // HINZUFÜGEN
             
             // Load default system
             elements.systemName.value = solarSystem.name;
