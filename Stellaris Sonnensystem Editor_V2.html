@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Stellaris Solar System Editor V6 - Modifier System</title>
+    <title>Stellaris Solar System Editor V7 - Modifier System</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;600;700;800;900&family=Exo+2:wght@300;400;500;600&display=swap');
@@ -134,6 +134,40 @@
             box-shadow: 0 4px 15px rgba(72, 187, 120, 0.3);
         }
 
+        /* CSS für das neue Nachbarsystem-Layout */
+        .neighbor-grid-container {
+            display: grid;
+            /* Linke Spalte fix, rechte Spalte flexibel */
+            grid-template-columns: 320px 1fr; 
+            gap: 1.5rem;
+            min-height: 400px; /* Stellt sicher, dass das Layout nicht zusammenfällt */
+        }
+
+        .neighbor-list-column {
+            border-right: 1px solid var(--stellaris-border);
+            padding-right: 1.5rem;
+        }
+
+        .neighbor-list-item {
+            background: linear-gradient(145deg, rgba(74, 85, 104, 0.4) 0%, rgba(45, 55, 72, 0.6) 100%);
+            border: 1px solid var(--stellaris-border);
+            border-radius: 6px;
+            padding: 0.75rem;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            border-left: 4px solid transparent; /* Für den "selected" Indikator */
+        }
+
+        .neighbor-list-item:hover {
+            border-color: var(--stellaris-accent);
+        }
+
+        .neighbor-list-item.selected {
+            background: linear-gradient(145deg, rgba(0, 212, 255, 0.15) 0%, rgba(153, 102, 255, 0.15) 100%);
+            border-left-color: var(--stellaris-blue);
+            box-shadow: 0 0 10px rgba(0, 212, 255, 0.2);
+        }
+
         .celestial-item {
             background: linear-gradient(145deg, rgba(74, 85, 104, 0.6) 0%, rgba(45, 55, 72, 0.8) 100%);
             border: 1px solid var(--stellaris-border);
@@ -172,7 +206,7 @@
             background: radial-gradient(circle at center, #0a0e1a 0%, #000 70%);
             border: 2px solid var(--stellaris-border);
             border-radius: 12px;
-            height: 500px;
+            height: 850px;
             position: relative;
             overflow: hidden;
             box-shadow: inset 0 0 50px rgba(0, 0, 0, 0.8);
@@ -330,11 +364,59 @@
         .overflow-y-auto { overflow-y: auto; }
         .cursor-not-allowed { cursor: not-allowed; }
         .container { max-width: 1400px; margin: 0 auto; padding: 2rem; }
+        .variation-card {
+            transition: all 0.3s ease;
+            position: relative;
+        }
+        
+        .variation-card.enabled .stellaris-panel {
+            background: linear-gradient(145deg, rgba(72, 187, 120, 0.15), rgba(56, 161, 105, 0.15));
+            border: 2px solid rgba(72, 187, 120, 0.5);
+            box-shadow: 0 0 15px rgba(72, 187, 120, 0.3);
+        }
+        
+        .variation-card:not(.enabled) .stellaris-panel {
+            opacity: 0.6;
+        }
+        
+        .variation-card code {
+            background: rgba(0, 0, 0, 0.4);
+            padding: 2px 6px;
+            border-radius: 3px;
+            font-family: 'Courier New', monospace;
+            font-size: 0.85em;
+            color: #ffd700;
+        }
+        
+        .flag-item {
+            background: linear-gradient(145deg, rgba(0, 212, 255, 0.1), rgba(153, 102, 255, 0.1));
+            border: 1px solid rgba(0, 212, 255, 0.3);
+            border-radius: 6px;
+            padding: 0.5rem;
+            margin-bottom: 0.5rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            transition: all 0.2s ease;
+        }
+        
+        .flag-item:hover {
+            border-color: var(--stellaris-blue);
+            box-shadow: 0 0 10px rgba(0, 212, 255, 0.3);
+        }
+        
+        .variation-changes {
+            background: rgba(0, 0, 0, 0.2);
+            border-left: 3px solid var(--stellaris-blue);
+            padding: 0.5rem;
+            margin-top: 0.5rem;
+            font-size: 0.8rem;
+        }
     </style>
 </head>
 <body>
     <div class="container py-8">
-        <h1 class="stellaris-header">Stellaris Solar System Editor V6</h1>
+        <h1 class="stellaris-header">Stellaris Solar System Editor V8</h1>
         <div class="text-center mb-6">
             <span class="text-yellow-400 font-semibold">Enhanced Version mit korrektem Modifier-System für Planetary Diversity</span>
         </div>
@@ -394,38 +476,75 @@
                     </div>
                 </div>
 
+                <!--System Flags Block-->
+                <div class="mt-6 p-4 bg-gradient-to-r from-blue-900/30 to-purple-900/30 rounded-lg border border-blue-500/30">
+                    <h3 class="text-lg font-medium mb-4 text-blue-400">🏴 System Flags</h3>
+                    
+                    <div class="mb-3 p-2 bg-blue-900/20 rounded border border-blue-500/30">
+                        <p class="text-blue-200 text-xs">
+                            <strong>Flags</strong> werden für Event-Trigger, Origin-Checks und Story-Integration verwendet.<br>
+                            Beispiele: <code>empire_home_system</code>, <code>sol_system</code>, <code>special_project</code>
+                        </p>
+                    </div>
+                    
+                    <div id="systemFlagsList" class="space-y-2 mb-4 max-h-40 overflow-y-auto">
+                        <p class="text-gray-400 text-sm">Keine System-Flags gesetzt</p>
+                    </div>
+                    
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                        <div class="md:col-span-2">
+                            <label class="label">Neues Flag</label>
+                            <input type="text" id="newSystemFlag" class="stellaris-input" 
+                                   placeholder="z.B. empire_home_system">
+                        </div>
+                        <div class="flex items-end">
+                            <button id="addSystemFlagBtn" class="stellaris-btn stellaris-btn-secondary w-full">
+                                Flag hinzufügen
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <!-- Quick Add Common Flags -->
+                    <div class="mt-3">
+                        <label class="label text-xs">Häufige Flags:</label>
+                        <div class="flex flex-wrap gap-2 mt-1">
+                            <button onclick="quickAddSystemFlag('empire_home_system')" 
+                                    class="text-xs px-2 py-1 bg-blue-600 rounded hover:bg-blue-700">
+                                empire_home_system
+                            </button>
+                            <button onclick="quickAddSystemFlag('sol_system')" 
+                                    class="text-xs px-2 py-1 bg-blue-600 rounded hover:bg-blue-700">
+                                sol_system
+                            </button>
+                            <button onclick="quickAddSystemFlag('suppress_archaeological_sites')" 
+                                    class="text-xs px-2 py-1 bg-blue-600 rounded hover:bg-blue-700">
+                                suppress_sites
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Visualizer Panel -->
+                <div class="stellaris-panel md:col-span-3" style="height: 1000px;">
+                    <h2 class="section-title">System-Visualisierung</h2>
+                    <div id="visualizer" class="stellaris-visualizer">
+                        <!-- Celestial bodies will be rendered here -->
+                    </div>
+                    <div class="mt-4">
+                        <button id="zoomInBtn" class="stellaris-btn stellaris-btn-secondary text-sm px-2 py-1">Zoom +</button>
+                        <button id="zoomOutBtn" class="stellaris-btn stellaris-btn-secondary text-sm px-2 py-1 ml-2">Zoom -</button>
+                        <button id="resetViewBtn" class="stellaris-btn stellaris-btn-secondary text-sm px-2 py-1 ml-2">Reset</button>
+                    </div>
+                </div>
+            </div>
+
                 <div class="mt-6">
                     <button id="addPlanetBtn" class="stellaris-btn">Planet hinzufügen</button>
                     <button id="moveUpBtn" class="stellaris-btn stellaris-btn-secondary ml-2" disabled>↑ Nach oben</button>
                     <button id="moveDownBtn" class="stellaris-btn stellaris-btn-secondary ml-2" disabled>↓ Nach unten</button>
                 </div>
 
-                <!-- Neighbor Systems Configuration -->
-                <div class="mt-6 p-4 bg-gradient-to-r from-indigo-900/30 to-purple-900/30 rounded-lg border border-indigo-500/30">
-                    <h3 class="text-lg font-medium mb-4 text-indigo-400">🌌 Nachbarsysteme</h3>
-                    <div id="neighborSystemsList" class="space-y-2 mb-4">
-                        <p class="text-gray-400 text-sm">Keine Nachbarsysteme definiert</p>
-                    </div>
-                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-                        <div>
-                            <label class="label">Distanz</label>
-                            <input type="number" id="newNeighborDistance" class="stellaris-input" value="100" min="50" max="200">
-                        </div>
-                        <div>
-                            <label class="label">Initialisierung</label>
-                            <select id="newNeighborInit" class="stellaris-input">
-                                <option value="">Zufällig</option>
-                                <option value="sol_system_initializer">Sol-System</option>
-                                <option value="deneb_system">Deneb</option>
-                                <option value="alpha_centauri_initializer">Alpha Centauri</option>
-                                <option value="custom">Benutzerdefiniert</option>
-                            </select>
-                        </div>
-                        <div class="flex items-end">
-                            <button id="addNeighborBtn" class="stellaris-btn stellaris-btn-secondary">Nachbar hinzufügen</button>
-                        </div>
-                    </div>
-                </div>
+                
                 
                 <!-- Asteroid Belt Configuration -->
                 <div class="mt-6 p-4 bg-gray-800 rounded-lg">
@@ -462,19 +581,7 @@
                 </div>
             </div>
 
-            <!-- Visualizer Panel -->
-            <div class="stellaris-panel md:col-span-3" style="height: 650px;">
-                <h2 class="section-title">System-Visualisierung</h2>
-                <div id="visualizer" class="stellaris-visualizer">
-                    <!-- Celestial bodies will be rendered here -->
-                </div>
-                <div class="mt-4">
-                    <button id="zoomInBtn" class="stellaris-btn stellaris-btn-secondary text-sm px-2 py-1">Zoom +</button>
-                    <button id="zoomOutBtn" class="stellaris-btn stellaris-btn-secondary text-sm px-2 py-1 ml-2">Zoom -</button>
-                    <button id="resetViewBtn" class="stellaris-btn stellaris-btn-secondary text-sm px-2 py-1 ml-2">Reset</button>
-                </div>
-            </div>
-        </div>
+            
 
         <div class="grid grid-cols-1 lg:grid-cols-3 mb-8">
             <!-- Planet List -->
@@ -645,6 +752,63 @@
                         </div>
                     </div>
 
+                    <div class="mt-4 p-4 bg-gradient-to-r from-purple-900/30 to-blue-900/30 rounded-lg border border-purple-500/30">
+                        <h3 class="text-lg font-medium mb-4 text-purple-400">🏴 Planet Flags & Erweitert</h3>
+                        
+                        <div id="planetFlagsList" class="space-y-2 mb-4 max-h-32 overflow-y-auto">
+                            <p class="text-gray-400 text-sm">Keine Planet-Flags gesetzt</p>
+                        </div>
+                        
+                        <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
+                            <div class="md:col-span-2">
+                                <label class="label">Neues Planet Flag</label>
+                                <input type="text" id="newPlanetFlag" class="stellaris-input" 
+                                       placeholder="z.B. planet_earth">
+                            </div>
+                            <div class="flex items-end">
+                                <button id="addPlanetFlagBtn" class="stellaris-btn stellaris-btn-secondary w-full">
+                                    Flag hinzufügen
+                                </button>
+                            </div>
+                        </div>
+                        
+                        <!-- Advanced Options -->
+                        <div class="border-t border-purple-500/30 pt-4">
+                            <h4 class="text-sm font-medium mb-3 text-purple-300">Erweiterte Optionen</h4>
+                            
+                            <div class="space-y-2">
+                                <label class="label flex items-center">
+                                    <input type="checkbox" id="celestialPreventAnomaly" class="mr-2">
+                                    <span>Prevent Anomaly</span>
+                                    <span class="ml-2 text-xs text-gray-400">(verhindert zufällige Anomalien)</span>
+                                </label>
+                                
+                                <div>
+                                    <label class="label">Entity Override (visuelles Modell)</label>
+                                    <select id="celestialEntity" class="stellaris-input">
+                                        <option value="">Standard (automatisch)</option>
+                                        <optgroup label="Spezielle Earth Entities">
+                                            <option value="continental_planet_earth_entity">Earth (Continental)</option>
+                                            <option value="barren_planet_mars_entity">Mars (Barren)</option>
+                                            <option value="cold_barren_planet_luna_entity">Luna (Barren Cold)</option>
+                                        </optgroup>
+                                        <optgroup label="Gas Giants">
+                                            <option value="gas_giant_jupiter_entity">Jupiter</option>
+                                            <option value="gas_giant_05_entity">Saturn Style</option>
+                                            <option value="gas_giant_uranus_entity">Uranus</option>
+                                            <option value="gas_giant_neptune_entity">Neptune</option>
+                                        </optgroup>
+                                        <optgroup label="Molten/Toxic">
+                                            <option value="molten_planet_mercury_entity">Mercury (Molten)</option>
+                                            <option value="toxic_planet_venus_entity">Venus (Toxic)</option>
+                                        </optgroup>
+                                    </select>
+                                    <small class="text-gray-400 text-xs">Überschreibt Standard-Planetenmodell mit spezifischem Entity</small>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
                     <!-- Modifier System -->
                     <div class="modifier-panel">
                         <h3 class="text-lg font-medium mb-4 text-green-400">🌿 Intelligentes Planet-Modifier System</h3>
@@ -687,6 +851,177 @@
                 </div>
                 <p id="noCelestialSelected" class="text-gray-400">Wählen Sie einen Planeten aus der Liste, um seine Details zu bearbeiten.</p>
             </div>
+
+            <!-- Neighbor Systems Configuration -->
+                <div class="md:col-span-3 mt-8">
+                    <h3 class="text-lg font-medium mb-4 text-indigo-400">🌌 Nachbarsysteme</h3>
+
+                    <!-- Neighbor Systems List -->
+                    <div id="neighborSystemsList" class="space-y-2 mb-4 max-h-64 overflow-y-auto">
+                        <p class="text-gray-400 text-sm">Keine Nachbarsysteme definiert</p>
+                    </div>
+
+                    <!-- Add Neighbor System -->
+                    <div class="lg:col-span-2 space-y-6">
+                        <h4 class="text-sm font-medium mb-3 text-blue-300">Neues Nachbarsystem hinzufügen</h4>
+                        
+                        <!-- Modus-Auswahl -->
+                        <div class="mb-4">
+                            <label class="label">Modus</label>
+                            <select id="neighborMode" class="stellaris-input" onchange="toggleNeighborCustomFields()">
+                                <option value="reference">Referenz zu existierendem System</option>
+                                <option value="custom">Benutzerdefiniert (neues System)</option>
+                            </select>
+                        </div>
+                        
+                        <!-- ✅ KORRIGIERT: Hyperlane Jumps statt Distance -->
+                        <div class="mb-4">
+                            <label class="label">Hyperlane Entfernung (Jumps)</label>
+                            <div class="grid grid-cols-2 gap-4">
+                                <div>
+                                    <label class="text-xs text-gray-400">Min</label>
+                                    <input type="number" id="neighborHyperlaneMin" class="stellaris-input" value="1" min="1" max="10">
+                                </div>
+                                <div>
+                                    <label class="text-xs text-gray-400">Max</label>
+                                    <input type="number" id="neighborHyperlaneMax" class="stellaris-input" value="3" min="1" max="10">
+                                </div>
+                            </div>
+                            <p class="text-xs text-gray-400 mt-1">
+                                💡 Tipp: 1-3 Jumps = Nahes Nachbarsystem, 4-6 = Weiter entfernt
+                            </p>
+                        </div>
+                        
+                        <!-- Trigger (Optional) -->
+                        <div class="mb-4">
+                            <label class="label">Trigger (Optional)</label>
+                            <input type="text" id="neighborTrigger" class="stellaris-input" 
+                                   placeholder="z.B. num_guaranteed_colonies >= 1">
+                            <p class="text-xs text-gray-400 mt-1">
+                                💡 Leer lassen für immer aktives Nachbarsystem
+                            </p>
+                        </div>
+                        
+                        <!-- Referenz-Modus Felder -->
+                        <div id="referenceNeighborFields">
+                            <div class="mb-4">
+                                <label class="label">System-Referenz</label>
+                                <input type="text" id="newNeighborReference" class="stellaris-input" 
+                                       placeholder="z.B. sol_neighbor_t1, neighbor_t1_first_colony">
+                                <p class="text-xs text-gray-400 mt-1">
+                                    💡 Vanilla-Systeme: sol_neighbor_t1, neighbor_t1_first_colony, neighbor_t2
+                                </p>
+                            </div>
+                        </div>
+                        
+                        <!-- Custom-Modus Felder -->
+                        <div id="customNeighborFields" class="hidden">
+                            <h4 class="text-sm font-medium mb-3 text-purple-300 border-t border-purple-500/30 pt-4">
+                                Benutzerdefiniertes Nachbarsystem
+                            </h4>
+                            
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                                <div>
+                                    <label class="label">Systemname</label>
+                                    <input type="text" id="customNeighborName" class="stellaris-input" 
+                                           placeholder="z.B. Alpha Proxima">
+                                </div>
+                                <div>
+                                    <label class="label">Sternenklasse</label>
+                                    <select id="customNeighborStarClass" class="stellaris-input">
+                                        <option value="sc_b">B-Klasse (Heißer Riese)</option>
+                                        <option value="sc_a">A-Klasse (Weißer Stern)</option>
+                                        <option value="sc_f">F-Klasse (Gelblich-weiß)</option>
+                                        <option value="sc_g" selected>G-Klasse (Gelber Zwerg)</option>
+                                        <option value="sc_k">K-Klasse (Oranger Zwerg)</option>
+                                        <option value="sc_m">M-Klasse (Roter Zwerg)</option>
+                                        <option value="sc_black_hole">Schwarzes Loch</option>
+                                        <option value="sc_neutron_star">Neutronenstern</option>
+                                        <option value="sc_pulsar">Pulsar</option>
+                                    </select>
+                                </div>
+                            </div>
+                            
+                            <!-- ✅ NEU: Asteroidengürtel -->
+                            <div class="mb-4 p-3 bg-gray-800/50 rounded border border-yellow-500/30">
+                                <div class="flex justify-between items-center mb-2">
+                                    <label class="label mb-0">Asteroidengürtel</label>
+                                    <button onclick="addNeighborAsteroidBelt()" 
+                                            class="stellaris-btn stellaris-btn-secondary text-xs px-2 py-1">
+                                        + Gürtel hinzufügen
+                                    </button>
+                                </div>
+                                <div id="customNeighborAsteroidsList" class="space-y-1 mt-2">
+                                    <p class="text-gray-400 text-xs">Keine Gürtel definiert</p>
+                                </div>
+                            </div>
+                            
+                            <!-- ✅ ERWEITERT: Planeten mit Mond-Support -->
+                            <div class="p-3 bg-gray-800/50 rounded border border-green-500/30">
+                                <div class="flex justify-between items-center mb-2">
+                                    <label class="label mb-0">Planeten im Nachbarsystem</label>
+                                    <div class="flex gap-2">
+                                        <button onclick="addNeighborPlanetDraft('single')" 
+                                                class="stellaris-btn stellaris-btn-secondary text-xs px-2 py-1">
+                                            + Planet
+                                        </button>
+                                        <button onclick="addNeighborPlanetDraft('asteroid_group')" 
+                                                class="stellaris-btn stellaris-btn-secondary text-xs px-2 py-1">
+                                            + Asteroiden
+                                        </button>
+                                    </div>
+                                </div>
+                                <div id="customNeighborPlanetsList" class="space-y-2 mt-2 max-h-64 overflow-y-auto">
+                                    <p class="text-gray-400 text-xs">Keine Planeten definiert</p>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <button id="addNeighborBtn" class="stellaris-btn stellaris-btn-secondary w-full mt-4">
+                            Nachbarsystem hinzufügen
+                        </button>
+                    </div>
+                </div>
+        </div>
+
+        <div class="stellaris-panel md:col-span-3 mt-8">
+            <h2 class="section-title">🌍 System-Variationen (Origin Support)</h2>
+            
+            <div class="mb-6 p-4 bg-gradient-to-r from-green-900/30 to-blue-900/30 rounded-lg border border-green-500/30">
+                <div class="flex items-start gap-3">
+                    <span class="text-3xl">💡</span>
+                    <div>
+                        <p class="text-green-200 font-semibold mb-2">Was sind System-Variationen?</p>
+                        <p class="text-green-200 text-sm">
+                            Viele Stellaris Origins verwenden <strong>modifizierte Versionen</strong> desselben Sonnensystems. 
+                            Zum Beispiel hat das Sol-System 7 verschiedene Varianten für Origins wie "Commonwealth", "Lost Colony", 
+                            "Knights of the Toxic God", etc.<br><br>
+                            Aktiviere die gewünschten Varianten unten - beim Export werden automatisch alle aktivierten Versionen 
+                            als separate System-Initializers generiert!
+                        </p>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Variation Cards Grid -->
+            <div id="variationsList" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mb-6">
+                <!-- Wird dynamisch mit JavaScript gefüllt -->
+            </div>
+            
+            <!-- Status Footer -->
+            <div class="mt-6 p-4 bg-gradient-to-r from-blue-900/30 to-purple-900/30 rounded-lg border border-blue-500/30">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <p class="text-blue-200 font-semibold">Export Status</p>
+                        <p class="text-blue-300 text-sm mt-1">
+                            <span id="variationCount">1</span> System-Initializer(s) werden beim Export generiert
+                        </p>
+                    </div>
+                    <button id="previewVariationsBtn" class="stellaris-btn stellaris-btn-secondary">
+                        Vorschau aller Varianten
+                    </button>
+                </div>
+            </div>
         </div>
 
         <!-- Export Section -->
@@ -705,27 +1040,61 @@
                 </div>
             </div>
             <div class="mt-6 p-4 bg-gradient-to-r from-green-900/30 to-blue-900/30 rounded-lg border border-green-500/30">
-                <p class="font-semibold text-green-300 mb-2">🎯 V6 Features - Intelligentes Basis-Klassen-System:</p>
+                <p class="font-semibold text-green-300 mb-2">🎯 V7 Features - System-Variationen & Erweiterte Kompatibilität:</p>
                 <ul class="list-disc list-inside space-y-1 text-sm">
-                    <li><strong>Basis-Klassen-System:</strong> Nur bewährte Vanilla-Planetenklassen als Grundlage</li>
-                    <li><strong>Intelligente PD-Modifier:</strong> Zeigt nur kompatible Modifier für gewählte Basis-Klasse</li>
-                    <li><strong>Korrekte PD-Struktur:</strong> change_pc + add_modifier mit korrekten Werten</li>
-                    <li><strong>Klassische Struktur:</strong> modifiers = none + init_effect wie gewünscht</li>
-                    <li><strong>Kontextuell:</strong> Modifier-Auswahl passt sich automatisch der Planetenklasse an</li>
-                    <li><strong>Vollständige Kompatibilität:</strong> 100+ authentische PD-Modifier korrekt implementiert</li>
-                    <li><strong>Übersichtlich:</strong> Nur relevante Optionen werden angezeigt</li>
+                    <li><strong>🌍 System-Variationen:</strong> Automatische Origin-Varianten mit einem Klick</li>
+                    <li><strong>🏴 Flags System:</strong> System- und Planet-Flags für Event-Integration</li>
+                    <li><strong>🚫 Prevent Anomaly:</strong> Verhindere zufällige Anomalien auf Planeten</li>
+                    <li><strong>🎨 Entity Override:</strong> Benutzerdefinierte Planeten-Visualisierungen</li>
+                    <li><strong>📦 Multi-Variant Export:</strong> Alle Varianten in einer Datei oder separat</li>
+                    <li><strong>✅ Vanilla-Kompatibilität:</strong> 100% kompatibel mit allen Stellaris Origins</li>
+                    <li><strong>🔄 V6 Features:</strong> Alle bisherigen Features vollständig erhalten</li>
                 </ul>
-                <div class="mt-3 p-3 bg-blue-900/20 rounded border border-blue-500/30">
-                    <p class="text-blue-200 text-sm"><strong>💡 Anleitung:</strong> 
-                    Wählen Sie erst eine Basis-Planetenklasse (z.B. Continental), dann bei Planetary Diversity 
-                    nur die für diese Klasse verfügbaren Modifier (z.B. Retinal World, Lake World, etc.)</p>
+                <div class="mt-4 p-3 bg-blue-900/20 rounded border border-blue-500/30">
+                    <p class="text-blue-200 text-sm">
+                        <strong>💡 Neu in V7:</strong> Erstelle komplexe Origin-Systeme wie "Knights of the Toxic God" 
+                        oder "Fear of the Dark" mit automatischen Planet-Modifikationen und Flags!
+                    </p>
                 </div>
             </div>
         </div>
     </div>
 
     <script>
-        // Enhanced data model with proper modifier system
+        /*
+        ╔══════════════════════════════════════════════════════════════════════╗
+        ║     STELLARIS SOLAR SYSTEM EDITOR V8 - CODE STRUKTUR                ║
+        ╠══════════════════════════════════════════════════════════════════════╣
+        ║                                                                      ║
+        ║  INHALTSVERZEICHNIS (Suche mit Strg+F nach [SECTION-XX])           ║
+        ║                                                                      ║
+        ║  [SECTION-01] Datenmodelle & Konfiguration                          ║
+        ║  [SECTION-02] Modifier & Planetenklassen Datenbank                  ║
+        ║  [SECTION-03] System-Variationen (Origins)                          ║
+        ║  [SECTION-04] DOM Element Referenzen                                ║
+        ║  [SECTION-05] Modifier System Funktionen                            ║
+        ║  [SECTION-06] Flag Management (System & Planeten)                   ║
+        ║  [SECTION-07] System-Variationen Funktionen                         ║
+        ║  [SECTION-08] Planet Management Funktionen                          ║
+        ║  [SECTION-09] Nachbarsystem Management                              ║
+        ║  [SECTION-10] Asteroidengürtel Management                           ║
+        ║  [SECTION-11] Import/Export Funktionen                              ║
+        ║  [SECTION-12] Code-Generierung (Stellaris .txt)                     ║
+        ║  [SECTION-13] UI Update Funktionen                                  ║
+        ║  [SECTION-14] Visualisierung (Canvas)                               ║
+        ║  [SECTION-15] Helper Funktionen (Icons, Farben, etc.)               ║
+        ║  [SECTION-16] Event Listener Initialisierung                        ║
+        ║  [SECTION-17] Globale Funktionen & Initialization                   ║
+        ║                                                                      ║
+        ╚══════════════════════════════════════════════════════════════════════╝
+        */
+
+        // ============================================================
+        // [SECTION-01] DATENMODELLE & KONFIGURATION
+        // ============================================================
+        // HIER: Hauptdatenstruktur des Sonnensystems
+        // ÄNDERN: Wenn du neue Eigenschaften zum System hinzufügen willst
+        
         let solarSystem = {
             name: 'my_custom_system',
             displayName: 'Mein Sonnensystem',
@@ -733,12 +1102,24 @@
             usage: 'custom_empire',
             neighborSystems: [], // Array of neighbor systems
             asteroidBelts: [], // Array of multiple asteroid belts
-            planets: [] // Sequential array of planets
+            planets: [], // Sequential array of planets
+            flags: [],
+            usageOdds: null,
+            maxInstances: null
         };
 
         let selectedPlanet = null;
         let nextCelestialId = 1;
         let visualizerScale = 0.3;
+
+        // ============================================================
+        // [SECTION-02] MODIFIER & PLANETENKLASSEN DATENBANK
+        // ============================================================
+        // HIER: Alle verfügbaren Modifiers für Planeten
+        // ÄNDERN: Um neue Planetary Diversity Modifier hinzuzufügen
+        // TIPP: Füge neue Modifier nach dem gleichen Muster hinzu
+
+        // V7 ADDITION - System Variations Database
 
         // Intelligent Planet-Class-Based Modifier Database
         const MODIFIERS = {
@@ -965,6 +1346,167 @@
             return null;
         }
 
+        // ============================================================
+        // [SECTION-03] SYSTEM-VARIATIONEN (ORIGINS)
+        // ============================================================
+        // HIER: Definition aller Origin-Varianten (Sol Commonwealth, etc.)
+        // ÄNDERN: Um neue Origins hinzuzufügen (z.B. Shattered Ring)
+        // TIPP: Kopiere eine bestehende Variante und passe sie an
+
+        const systemVariations = {
+            standard: {
+                id: 'standard',
+                enabled: true,
+                locked: true,
+                suffix: '',
+                displayName: 'Standard (Custom Empire)',
+                description: 'Standard-Variante für wählbare Custom Empires',
+                icon: '⭐',
+                modifications: {
+                    system: {
+                        usage: 'custom_empire',
+                        flags: ['empire_home_system', 'sol_system', 'sol']
+                    }
+                }
+            },
+            
+            commonwealth: {
+                id: 'commonwealth',
+                enabled: false,
+                suffix: '_commonwealth',
+                systemNameOverride: 'com_sol_system',
+                displayName: 'Commonwealth of Man',
+                description: 'Spawnt als NPC-System wenn Commonwealth gespielt wird',
+                icon: '🏛️',
+                modifications: {
+                    system: {
+                        usage: 'misc_system_init',
+                        flags: ['sol_system', 'com_sol', 'sol', 'empire_home_system'],
+                        usageOdds: {
+                            base: 0,
+                            condition: 'has_country_flag = human_2',
+                            add: 99999
+                        }
+                    }
+                }
+            },
+            
+            lost_colony: {
+                id: 'lost_colony',
+                enabled: false,
+                suffix: '_lost_colony',
+                systemNameOverride: 'lost_colony_sol_system',
+                displayName: 'Lost Colony Origin',
+                description: 'Sol als Parent-System für Lost Colony Origins',
+                icon: '🚀',
+                modifications: {
+                    system: {
+                        usage: 'misc_system_init',
+                        flags: ['sol_system', 'lost_colony_sol', 'sol', 'empire_home_system']
+                    }
+                }
+            },
+            
+            toxic_knights: {
+                id: 'toxic_knights',
+                enabled: false,
+                suffix: '_toxic_knights',
+                systemNameOverride: 'toxic_knights_sol_start',
+                displayName: 'Knights of the Toxic God',
+                description: 'Luna Habitat + Toxic Venus Terraforming',
+                icon: '☠️',
+                modifications: {
+                    system: {
+                        usage: 'origin',
+                        flags: ['empire_home_system', 'sol_system', 'sol']
+                    },
+                    planets: {
+                        venus: {
+                            addFlags: ['toxic_terraforming_candidate']
+                        },
+                        earth: {
+                            addFlags: ['planet_earth', 'toxic_knights_homeworld']
+                        }
+                    }
+                }
+            },
+            
+            fear_dark: {
+                id: 'fear_dark',
+                enabled: false,
+                suffix: '_fear_dark',
+                systemNameOverride: 'sol_system_fear_of_the_dark_system',
+                displayName: 'Fear of the Dark',
+                description: 'Divider (Broken Venus) + Desert Mars Haven',
+                icon: '💀',
+                modifications: {
+                    system: {
+                        usage: 'origin',
+                        flags: ['empire_home_system', 'sol_system', 'sol']
+                    },
+                    planets: {
+                        mars: {
+                            changeClass: 'pc_desert',
+                            addFlags: ['haven_flag', 'planet_mars']
+                        },
+                        earth: {
+                            changeSize: 16
+                        }
+                    }
+                }
+            },
+            
+            nuked: {
+                id: 'nuked',
+                enabled: false,
+                suffix: '_nuked',
+                systemNameOverride: 'special_init_04',
+                displayName: 'Nuclear Wasteland',
+                description: 'Post-Nuclear War Earth - spawnt zufällig',
+                icon: '☢️',
+                modifications: {
+                    system: {
+                        usage: 'misc_system_init',
+                        flags: ['nuked_sol', 'sol']
+                    },
+                    planets: {
+                        earth: {
+                            changeClass: 'pc_nuked',
+                            addFlags: ['nuked_earth']
+                        }
+                    }
+                }
+            },
+            
+            mindwarden: {
+                id: 'mindwarden',
+                enabled: false,
+                suffix: '_mindwarden',
+                systemNameOverride: 'mindwarden_sol_system_init',
+                displayName: 'Exiled (Mindwarden)',
+                description: 'Mars as Shrouded World',
+                icon: '🌀',
+                modifications: {
+                    system: {
+                        usage: 'origin',
+                        flags: ['empire_home_system', 'sol_system', 'sol', 'mindwarden_system']
+                    },
+                    planets: {
+                        mars: {
+                            changeClass: 'pc_shrouded'
+                        }
+                    }
+                }
+            }
+        };
+
+        // ============================================================
+        // [SECTION-04] DOM ELEMENT REFERENZEN
+        // ============================================================
+        // HIER: Alle HTML-Element-Verknüpfungen
+        // ÄNDERN: Wenn du neue Input-Felder im HTML hinzufügst
+        // WICHTIG: ID im HTML muss mit getElementById übereinstimmen
+
         // DOM Elements
         const elements = {
             // Import elements
@@ -974,9 +1516,13 @@
 
             // Neighbor systems elements
             neighborSystemsList: document.getElementById('neighborSystemsList'),
-            newNeighborDistance: document.getElementById('newNeighborDistance'),
-            newNeighborInit: document.getElementById('newNeighborInit'),
+            // ✅ KORRIGIERT: Neue Felder für hyperlane_jumps
+            neighborHyperlaneMin: document.getElementById('neighborHyperlaneMin'),
+            neighborHyperlaneMax: document.getElementById('neighborHyperlaneMax'),
             addNeighborBtn: document.getElementById('addNeighborBtn'),
+            neighborTrigger: document.getElementById('neighborTrigger'),
+            neighborMode: document.getElementById('neighborMode'),
+            newNeighborReference: document.getElementById('newNeighborReference'),
 
             // Asteroid belt elements - HINZUFÜGEN
             asteroidBeltList: document.getElementById('asteroidBeltList'),
@@ -1036,6 +1582,13 @@
             downloadTxtBtn: document.getElementById('downloadTxtBtn'),
             downloadYmlBtn: document.getElementById('downloadYmlBtn')
         };
+
+        // ============================================================
+        // [SECTION-05] MODIFIER SYSTEM FUNKTIONEN
+        // ============================================================
+        // HIER: Logik für Planet-Modifier (Planetary Diversity, etc.)
+        // ÄNDERN: Um Modifier-Verhalten anzupassen
+        // WICHTIG: Achte auf Kompatibilität mit Planetenklassen
 
         // Modifier System Functions
         function initializeModifierSystem() {
@@ -1182,6 +1735,268 @@
             }
         }
 
+        // ============================================================
+        // [SECTION-06] FLAG MANAGEMENT (SYSTEM & PLANETEN)
+        // ============================================================
+        // HIER: Funktionen zum Hinzufügen/Entfernen von Flags
+        // ÄNDERN: Wenn du Flag-Validierung hinzufügen willst
+        // BEISPIEL: Verhindere bestimmte Flag-Kombinationen
+
+        // ============================================
+        // V7 ADDITION - Flag Management Functions
+        // ============================================
+
+        function addSystemFlag() {
+            const flagInput = document.getElementById('newSystemFlag');
+            const flag = flagInput.value.trim().replace(/\s+/g, '_');
+            
+            if (flag && !solarSystem.flags.includes(flag)) {
+                solarSystem.flags.push(flag);
+                updateSystemFlagsList();
+                updateOutput();
+                flagInput.value = '';
+                showNotification(`System-Flag "${flag}" hinzugefügt`);
+            }
+        }
+
+        function quickAddSystemFlag(flag) {
+            if (!solarSystem.flags.includes(flag)) {
+                solarSystem.flags.push(flag);
+                updateSystemFlagsList();
+                updateOutput();
+                showNotification(`System-Flag "${flag}" hinzugefügt`);
+            }
+        }
+
+        function removeSystemFlag(index) {
+            const flag = solarSystem.flags[index];
+            solarSystem.flags.splice(index, 1);
+            updateSystemFlagsList();
+            updateOutput();
+            showNotification(`System-Flag "${flag}" entfernt`);
+        }
+
+        function updateSystemFlagsList() {
+            const list = document.getElementById('systemFlagsList');
+            
+            if (!solarSystem.flags || solarSystem.flags.length === 0) {
+                list.innerHTML = '<p class="text-gray-400 text-sm">Keine System-Flags gesetzt</p>';
+                return;
+            }
+            
+            list.innerHTML = '';
+            solarSystem.flags.forEach((flag, index) => {
+                const item = document.createElement('div');
+                item.className = 'flag-item';
+                item.innerHTML = `
+                    <div class="flex items-center gap-2">
+                        <span class="text-xl">🏴</span>
+                        <code class="text-sm">${flag}</code>
+                    </div>
+                    <button class="stellaris-btn stellaris-btn-danger text-xs px-2 py-1" 
+                            onclick="removeSystemFlag(${index})">
+                        ✕
+                    </button>
+                `;
+                list.appendChild(item);
+            });
+        }
+
+        function addPlanetFlag() {
+            if (!selectedPlanet) return;
+            
+            const flagInput = document.getElementById('newPlanetFlag');
+            const flag = flagInput.value.trim().replace(/\s+/g, '_');
+            
+            if (flag) {
+                if (!selectedPlanet.flags) selectedPlanet.flags = [];
+                
+                if (!selectedPlanet.flags.includes(flag)) {
+                    selectedPlanet.flags.push(flag);
+                    updatePlanetFlagsList();
+                    updatePlanetList();
+                    updateOutput();
+                    flagInput.value = '';
+                    showNotification(`Planet-Flag "${flag}" hinzugefügt`);
+                }
+            }
+        }
+
+        function removePlanetFlag(index) {
+            if (selectedPlanet && selectedPlanet.flags) {
+                const flag = selectedPlanet.flags[index];
+                selectedPlanet.flags.splice(index, 1);
+                updatePlanetFlagsList();
+                updatePlanetList();
+                updateOutput();
+                showNotification(`Planet-Flag "${flag}" entfernt`);
+            }
+        }
+
+        function updatePlanetFlagsList() {
+            const list = document.getElementById('planetFlagsList');
+            
+            if (!selectedPlanet || !selectedPlanet.flags || selectedPlanet.flags.length === 0) {
+                list.innerHTML = '<p class="text-gray-400 text-sm">Keine Planet-Flags gesetzt</p>';
+                return;
+            }
+            
+            list.innerHTML = '';
+            selectedPlanet.flags.forEach((flag, index) => {
+                const item = document.createElement('div');
+                item.className = 'flag-item';
+                item.innerHTML = `
+                    <div class="flex items-center gap-2">
+                        <span class="text-xl">🏴</span>
+                        <code class="text-sm">${flag}</code>
+                    </div>
+                    <button class="stellaris-btn stellaris-btn-danger text-xs px-2 py-1" 
+                            onclick="removePlanetFlag(${index})">
+                        ✕
+                    </button>
+                `;
+                list.appendChild(item);
+            });
+        }
+
+        // ============================================================
+        // [SECTION-07] SYSTEM-VARIATIONEN FUNKTIONEN
+        // ============================================================
+        // HIER: Rendering und Verwaltung von Origin-Varianten
+        // ÄNDERN: Um das Aussehen der Variations-Cards zu ändern
+        // TIPP: Suche nach "variation-card" im CSS
+
+        // ============================================
+        // V7 ADDITION - Variation System Functions
+        // ============================================
+
+        function renderVariationsList() {
+            const container = document.getElementById('variationsList');
+            if (!container) return;
+            
+            container.innerHTML = '';
+            
+            Object.entries(systemVariations).forEach(([key, variation]) => {
+                const card = document.createElement('div');
+                card.className = `variation-card ${variation.enabled ? 'enabled' : ''}`;
+                
+                const isLocked = variation.locked || false;
+                const disabled = isLocked ? 'disabled' : '';
+                const checkedAttr = variation.enabled ? 'checked' : '';
+                
+                card.innerHTML = `
+                    <div class="stellaris-panel p-4">
+                        <div class="flex items-start justify-between mb-3">
+                            <label class="flex items-center cursor-pointer ${isLocked ? 'cursor-not-allowed' : ''}">
+                                <input type="checkbox" 
+                                       ${disabled}
+                                       ${checkedAttr}
+                                       onchange="toggleVariation('${key}')"
+                                       class="mr-3 w-5 h-5">
+                                <div>
+                                    <div class="flex items-center gap-2">
+                                        <span class="text-2xl">${variation.icon}</span>
+                                        <span class="font-semibold text-lg">${variation.displayName}</span>
+                                    </div>
+                                    ${isLocked ? '<span class="text-xs text-yellow-400">⭐ Immer aktiv</span>' : ''}
+                                </div>
+                            </label>
+                        </div>
+                        
+                        ${variation.systemNameOverride ? `
+                            <div class="text-xs text-gray-400 mb-2 font-mono bg-black/20 px-2 py-1 rounded">
+                                → ${variation.systemNameOverride}
+                            </div>
+                        ` : ''}
+                        
+                        <p class="text-sm text-gray-300 mb-3">${variation.description}</p>
+                        
+                        ${renderVariationChanges(variation)}
+                    </div>
+                `;
+                
+                container.appendChild(card);
+            });
+            
+            updateVariationCount();
+        }
+
+        function renderVariationChanges(variation) {
+            const mods = variation.modifications;
+            if (!mods) return '';
+            
+            let html = '<div class="variation-changes">';
+            
+            if (mods.system) {
+                html += '<div class="mb-2"><strong class="text-blue-300">System:</strong></div>';
+                
+                if (mods.system.usage) {
+                    html += `<div class="ml-2 text-xs">📋 usage: <code>${mods.system.usage}</code></div>`;
+                }
+                
+                if (mods.system.flags && mods.system.flags.length > 0) {
+                    const displayFlags = mods.system.flags.slice(0, 2);
+                    const moreCount = mods.system.flags.length - 2;
+                    html += `<div class="ml-2 text-xs">🏴 flags: <code>${displayFlags.join(', ')}</code>`;
+                    if (moreCount > 0) html += ` <span class="text-gray-500">+${moreCount} mehr</span>`;
+                    html += '</div>';
+                }
+                
+                if (mods.system.usageOdds) {
+                    html += `<div class="ml-2 text-xs">🎲 Conditional spawn</div>`;
+                }
+            }
+            
+            if (mods.planets) {
+                const planetCount = Object.keys(mods.planets).length;
+                html += `<div class="mt-2 mb-2"><strong class="text-purple-300">Planeten (${planetCount} geändert):</strong></div>`;
+                
+                Object.entries(mods.planets).forEach(([planetName, changes]) => {
+                    const planetDisplay = planetName.charAt(0).toUpperCase() + planetName.slice(1);
+                    html += `<div class="ml-2 text-xs mb-1">`;
+                    html += `<span class="text-yellow-400">•</span> <strong>${planetDisplay}:</strong> `;
+                    
+                    const changesList = [];
+                    if (changes.changeClass) changesList.push(`Klasse → ${changes.changeClass}`);
+                    if (changes.changeSize) changesList.push(`Size → ${changes.changeSize}`);
+                    if (changes.addFlags) changesList.push(`+${changes.addFlags.length} flags`);
+                    
+                    html += changesList.join(', ');
+                    html += '</div>';
+                });
+            }
+            
+            html += '</div>';
+            return html;
+        }
+
+        function toggleVariation(key) {
+            const variation = systemVariations[key];
+            if (variation.locked) return;
+            
+            variation.enabled = !variation.enabled;
+            renderVariationsList();
+            updateOutput();
+            
+            const status = variation.enabled ? 'aktiviert' : 'deaktiviert';
+            showNotification(`Variante "${variation.displayName}" ${status}`);
+        }
+
+        function updateVariationCount() {
+            const count = Object.values(systemVariations).filter(v => v.enabled).length;
+            const countElement = document.getElementById('variationCount');
+            if (countElement) {
+                countElement.textContent = count;
+            }
+        }
+
+        // ============================================================
+        // [SECTION-08] PLANET MANAGEMENT FUNKTIONEN
+        // ============================================================
+        // HIER: Hinzufügen, Auswählen, Löschen von Planeten
+        // ÄNDERN: Um Standard-Planetenwerte anzupassen
+        // TIPP: Siehe addPlanet() für neue Planet-Defaults
+
         // Planet Management Functions
         function addPlanet() {
             const newPlanet = {
@@ -1199,7 +2014,10 @@
                 hasRing: false,
                 isStartingPlanet: false,
                 modifiers: [],
-                moons: []
+                moons: [],
+                flags: [],
+                preventAnomaly: false,
+                entityOverride: null
             };
 
             solarSystem.planets.push(newPlanet);
@@ -1233,6 +2051,14 @@
                 elements.celestialChangeOrbit.value = selectedPlanet.changeOrbit || 0;
                 elements.celestialHasRing.checked = selectedPlanet.hasRing || false;
                 elements.celestialIsStartingPlanet.checked = selectedPlanet.isStartingPlanet || false;
+
+                // V7 ADDITION - Update new fields
+                if (elements.celestialPreventAnomaly) {
+                    elements.celestialPreventAnomaly.checked = selectedPlanet.preventAnomaly || false;
+                }
+                if (elements.celestialEntity) {
+                    elements.celestialEntity.value = selectedPlanet.entityOverride || '';
+                }
 
                 // Toggle angle controls
                 const isRange = selectedPlanet.orbitAngleType === 'range';
@@ -1287,6 +2113,21 @@
             }
             return null;
         }
+
+        // ============================================================
+        // [SECTION-09] NACHBARSYSTEM MANAGEMENT
+        // ============================================================
+        // HIER: Alle Funktionen für Nachbarsysteme
+        // ÄNDERN: Um neue Nachbarsystem-Features hinzuzufügen
+        // WICHTIG: Unterscheide zwischen 'reference' und 'custom' Modus
+        // 
+        // UNTERFUNKTIONEN:
+        // - addNeighborSystem()           → Nachbarsystem hinzufügen
+        // - updateNeighborSystemsList()   → Liste aktualisieren
+        // - editNeighborSystem()          → Bestehende bearbeiten
+        // - removeNeighborSystem()        → Löschen
+        // - toggleNeighborCustomFields()  → UI zwischen Modi umschalten
+        // - clearNeighborInputs()         → Formular zurücksetzen
 
         // Import/Export Functions
         function importSystem() {
@@ -1390,18 +2231,492 @@
         }
 
 
-        // Neighbor Systems Management
+        // ============================================================
+        // [SECTION-09] NACHBARSYSTEM MANAGEMENT
+        // ============================================================
+        // (Siehe Marker oben für Details)
+
+        /**
+         * ✅ KORRIGIERT: Nachbarsystem hinzufügen mit korrekter Datenstruktur
+         */
         function addNeighborSystem() {
-            const newNeighbor = {
+            const mode = document.getElementById('neighborMode').value;
+            
+            let newNeighbor = {
                 id: Date.now(),
-                distance: parseInt(elements.newNeighborDistance.value) || 100,
-                initializer: elements.newNeighborInit.value
+                mode: mode,
+                // ✅ KORRIGIERT: hyperlaneJumps statt distance
+                hyperlaneJumps: { 
+                    min: parseInt(document.getElementById('neighborHyperlaneMin')?.value || 1),
+                    max: parseInt(document.getElementById('neighborHyperlaneMax')?.value || 3)
+                },
+                trigger: document.getElementById('neighborTrigger')?.value.trim() || null
             };
+            
+            if (mode === 'reference') {
+                // Referenz-Modus
+                const reference = document.getElementById('newNeighborReference').value.trim();
+                if (!reference) {
+                    showNotification('⚠️ Bitte geben Sie eine System-Referenz ein!');
+                    return;
+                }
+                newNeighbor.initializer = reference;
+            } else {
+                // Custom-Modus
+                const customName = document.getElementById('customNeighborName').value.trim();
+                const customStarClass = document.getElementById('customNeighborStarClass').value;
+                
+                if (!customName) {
+                    showNotification('⚠️ Bitte geben Sie einen Systemnamen ein!');
+                    return;
+                }
+                
+                newNeighbor.name = customName;
+                newNeighbor.starClass = customStarClass;
+                
+                // ✅ NEU: Asteroidengürtel sammeln
+                newNeighbor.asteroidBelts = [];
+                document.querySelectorAll('#customNeighborAsteroidsList .neighbor-belt-item').forEach(belt => {
+                    newNeighbor.asteroidBelts.push({
+                        type: belt.querySelector('[data-field="type"]').value,
+                        radius: parseInt(belt.querySelector('[data-field="radius"]').value)
+                    });
+                });
+                
+                // ✅ ERWEITERT: Planeten mit Monden sammeln
+                newNeighbor.planets = [];
+                document.querySelectorAll('#customNeighborPlanetsList .neighbor-planet-item').forEach(planet => {
+                    const planetType = planet.dataset.type;
+                    
+                    if (planetType === 'asteroid_group') {
+                        newNeighbor.planets.push({
+                            type: 'asteroid_group',
+                            class: planet.querySelector('[data-field="class"]').value,
+                            countMin: parseInt(planet.querySelector('[data-field="countMin"]').value),
+                            countMax: parseInt(planet.querySelector('[data-field="countMax"]').value)
+                        });
+                    } else {
+                        const planetData = {
+                            type: 'single',
+                            name: planet.querySelector('[data-field="name"]').value,
+                            class: planet.querySelector('[data-field="class"]').value,
+                            size: parseInt(planet.querySelector('[data-field="size"]').value),
+                            hasRing: false,
+                            moons: []
+                        };
+                        
+                        // Monde sammeln
+                        planet.querySelectorAll('.moon-item').forEach(moon => {
+                            planetData.moons.push({
+                                name: moon.querySelector('[data-field="name"]').value,
+                                class: moon.querySelector('[data-field="class"]').value,
+                                size: parseInt(moon.querySelector('[data-field="size"]').value),
+                                orbitDistance: 5
+                            });
+                        });
+                        
+                        newNeighbor.planets.push(planetData);
+                    }
+                });
+            }
             
             solarSystem.neighborSystems.push(newNeighbor);
             updateNeighborSystemsList();
+            clearNeighborInputs();
             updateOutput();
             renderVisualizer();
+            showNotification(`✅ Nachbarsystem "${newNeighbor.name || newNeighbor.initializer}" hinzugefügt!`);
+        }
+
+        function clearNeighborInputs() {
+            // ✅ KORRIGIERT: Richtige Felder zurücksetzen
+            const hyperlaneMin = document.getElementById('neighborHyperlaneMin');
+            const hyperlaneMax = document.getElementById('neighborHyperlaneMax');
+            const triggerInput = document.getElementById('neighborTrigger');
+            const referenceInput = document.getElementById('newNeighborReference');
+            const customNameInput = document.getElementById('customNeighborName');
+            const customStarClass = document.getElementById('customNeighborStarClass');
+            
+            if (hyperlaneMin) hyperlaneMin.value = 1;
+            if (hyperlaneMax) hyperlaneMax.value = 3;
+            if (triggerInput) triggerInput.value = '';
+            if (referenceInput) referenceInput.value = '';
+            if (customNameInput) customNameInput.value = '';
+            if (customStarClass) customStarClass.value = 'sc_g';
+            
+            // Clear custom asteroid belts
+            const asteroidsList = document.getElementById('customNeighborAsteroidsList');
+            if (asteroidsList) {
+                asteroidsList.innerHTML = '<p class="text-gray-400 text-xs">Keine Gürtel definiert</p>';
+            }
+            
+            // Clear custom planet list
+            const planetsList = document.getElementById('customNeighborPlanetsList');
+            if (planetsList) {
+                planetsList.innerHTML = '<p class="text-gray-400 text-xs">Keine Planeten definiert</p>';
+            }
+        }
+
+        /**
+         * ✅ NEU: Toggle zwischen Reference und Custom Modus
+         */
+        function toggleNeighborCustomFields() {
+            const mode = document.getElementById('neighborMode').value;
+            const referenceFields = document.getElementById('referenceNeighborFields');
+            const customFields = document.getElementById('customNeighborFields');
+            
+            if (mode === 'reference') {
+                referenceFields.classList.remove('hidden');
+                customFields.classList.add('hidden');
+            } else {
+                referenceFields.classList.add('hidden');
+                customFields.classList.remove('hidden');
+            }
+        }
+
+        /**
+         * ✅ NEU: Asteroidengürtel zu Draft-Nachbarsystem hinzufügen
+         */
+        function addNeighborAsteroidBelt() {
+            const beltList = document.getElementById('customNeighborAsteroidsList');
+            const existingBelts = beltList.querySelectorAll('.neighbor-belt-item').length;
+            
+            if (existingBelts === 0) {
+                beltList.innerHTML = '';
+            }
+            
+            const beltItem = document.createElement('div');
+            beltItem.className = 'neighbor-belt-item bg-gray-700/50 p-2 rounded flex justify-between items-center';
+            
+            beltItem.innerHTML = `
+                <div class="flex gap-2 flex-1">
+                    <select class="stellaris-input text-xs py-1 flex-1" data-field="type">
+                        <option value="rocky_asteroid_belt">Rocky Asteroid Belt</option>
+                        <option value="icy_asteroid_belt">Icy Asteroid Belt</option>
+                        <option value="crystal_asteroid_belt">Crystal Asteroid Belt</option>
+                    </select>
+                    <input type="number" placeholder="Radius" value="${90 + existingBelts * 60}" min="30" max="300"
+                           class="stellaris-input text-xs py-1 w-24" data-field="radius">
+                </div>
+                <button onclick="removeNeighborBeltDraft(this)" 
+                        class="stellaris-btn stellaris-btn-danger text-xs px-2 py-1 ml-2">
+                    ✕
+                </button>
+            `;
+            
+            beltList.appendChild(beltItem);
+        }
+
+        function removeNeighborBeltDraft(button) {
+            const beltList = document.getElementById('customNeighborAsteroidsList');
+            button.closest('.neighbor-belt-item').remove();
+            
+            if (beltList.querySelectorAll('.neighbor-belt-item').length === 0) {
+                beltList.innerHTML = '<p class="text-gray-400 text-xs">Keine Gürtel definiert</p>';
+            }
+        }
+
+        /**
+         * ✅ NEU: Planet zu Draft-Nachbarsystem hinzufügen
+         */
+        function addNeighborPlanetDraft(type = 'single') {
+            const planetList = document.getElementById('customNeighborPlanetsList');
+            const existingPlanets = planetList.querySelectorAll('.neighbor-planet-item').length;
+            
+            if (existingPlanets === 0) {
+                planetList.innerHTML = '';
+            }
+            
+            const planetItem = document.createElement('div');
+            planetItem.className = 'neighbor-planet-item bg-gray-700/50 p-3 rounded border border-gray-600';
+            planetItem.dataset.type = type;
+            
+            if (type === 'asteroid_group') {
+                // Asteroiden-Gruppe
+                planetItem.innerHTML = `
+                    <div class="flex justify-between items-center mb-2">
+                        <span class="text-sm font-medium text-yellow-400">☄️ Asteroiden-Gruppe</span>
+                        <button onclick="removeNeighborPlanetDraft(this)" 
+                                class="stellaris-btn stellaris-btn-danger text-xs px-2 py-1">
+                            ✕
+                        </button>
+                    </div>
+                    <div class="grid grid-cols-3 gap-2">
+                        <select class="stellaris-input text-xs py-1" data-field="class">
+                            <option value="pc_asteroid">Rocky Asteroid</option>
+                            <option value="pc_ice_asteroid">Eis-Asteroid</option>
+                        </select>
+                        <input type="number" placeholder="Min" value="2" min="1" max="10"
+                               class="stellaris-input text-xs py-1" data-field="countMin">
+                        <input type="number" placeholder="Max" value="4" min="1" max="10"
+                               class="stellaris-input text-xs py-1" data-field="countMax">
+                    </div>
+                `;
+            } else {
+                // Einzelner Planet
+                planetItem.innerHTML = `
+                    <div class="flex justify-between items-center mb-2">
+                        <span class="text-sm font-medium text-blue-400">🌍 Planet</span>
+                        <button onclick="removeNeighborPlanetDraft(this)" 
+                                class="stellaris-btn stellaris-btn-danger text-xs px-2 py-1">
+                            ✕
+                        </button>
+                    </div>
+                    <div class="grid grid-cols-3 gap-2 mb-2">
+                        <input type="text" placeholder="Name (optional)" value="planet_${existingPlanets + 1}"
+                               class="stellaris-input text-xs py-1" data-field="name">
+                        <select class="stellaris-input text-xs py-1" data-field="class">
+                            <optgroup label="Bewohnbar">
+                                <option value="pc_continental">Kontinental</option>
+                                <option value="pc_ocean">Ozean</option>
+                                <option value="pc_tropical">Tropisch</option>
+                                <option value="pc_arid">Arid</option>
+                                <option value="pc_desert">Wüste</option>
+                                <option value="pc_savannah">Savanne</option>
+                                <option value="pc_arctic">Arktisch</option>
+                                <option value="pc_tundra">Tundra</option>
+                                <option value="pc_alpine">Alpin</option>
+                                <option value="pc_gaia">Gaia</option>
+                            </optgroup>
+                            <optgroup label="Unbewohnbar">
+                                <option value="pc_barren">Karg</option>
+                                <option value="pc_barren_cold">Karg (Kalt)</option>
+                                <option value="pc_frozen">Gefroren</option>
+                                <option value="pc_molten">Geschmolzen</option>
+                                <option value="pc_toxic">Toxisch</option>
+                            </optgroup>
+                            <optgroup label="Gas-Riesen">
+                                <option value="pc_gas_giant">Gasriese</option>
+                                <option value="pc_hot_gas_giant">Heißer Gasriese</option>
+                                <option value="pc_cold_gas_giant">Kalter Gasriese</option>
+                            </optgroup>
+                            <optgroup label="Asteroiden">
+                                <option value="pc_asteroid">Rocky Asteroid</option>
+                                <option value="pc_ice_asteroid">Eis-Asteroid</option>
+                            </optgroup>
+                        </select>
+                        <input type="number" placeholder="Größe" value="16" min="1" max="50"
+                               class="stellaris-input text-xs py-1" data-field="size">
+                    </div>
+                    
+                    <!-- Monde-Bereich -->
+                    <div class="mt-2 p-2 bg-gray-800/50 rounded border-l-2 border-purple-500/50">
+                        <div class="flex justify-between items-center mb-1">
+                            <span class="text-xs text-gray-400">🌙 Monde</span>
+                            <button onclick="addMoonToDraftPlanet(this)" 
+                                    class="stellaris-btn stellaris-btn-secondary text-xs px-2 py-1">
+                                + Mond
+                            </button>
+                        </div>
+                        <div class="moon-list space-y-1 mt-1">
+                            <!-- Monde werden hier eingefügt -->
+                        </div>
+                    </div>
+                `;
+            }
+            
+            planetList.appendChild(planetItem);
+        }
+
+        /**
+         * ✅ NEU: Mond zu Draft-Planet hinzufügen
+         */
+        function addMoonToDraftPlanet(button) {
+            const planetItem = button.closest('.neighbor-planet-item');
+            const moonList = planetItem.querySelector('.moon-list');
+            const existingMoons = moonList.querySelectorAll('.moon-item').length;
+            
+            const moonItem = document.createElement('div');
+            moonItem.className = 'moon-item bg-gray-700/30 p-1 rounded flex gap-1 items-center';
+            
+            moonItem.innerHTML = `
+                <span class="text-xs text-gray-400">🌙</span>
+                <input type="text" placeholder="Name (optional)" value="moon_${existingMoons + 1}"
+                       class="stellaris-input text-xs py-1 flex-1" data-field="name">
+                <select class="stellaris-input text-xs py-1" data-field="class">
+                    <option value="pc_barren_cold">Karg (Kalt)</option>
+                    <option value="pc_frozen">Gefroren</option>
+                    <option value="pc_barren">Karg</option>
+                    <option value="pc_molten">Geschmolzen</option>
+                    <option value="pc_asteroid">Asteroid</option>
+                    <option value="pc_ice_asteroid">Eis-Asteroid</option>
+                </select>
+                <input type="number" placeholder="Größe" value="${8 - existingMoons}" min="1" max="15"
+                       class="stellaris-input text-xs py-1 w-16" data-field="size">
+                <button onclick="removeMoonFromDraft(this)" 
+                        class="stellaris-btn stellaris-btn-danger text-xs px-1 py-1">
+                    ✕
+                </button>
+            `;
+            
+            moonList.appendChild(moonItem);
+        }
+
+        function removeMoonFromDraft(button) {
+            button.closest('.moon-item').remove();
+        }
+
+        function removeNeighborPlanetDraft(button) {
+            const planetList = document.getElementById('customNeighborPlanetsList');
+            button.closest('.neighbor-planet-item').remove();
+            
+            if (planetList.querySelectorAll('.neighbor-planet-item').length === 0) {
+                planetList.innerHTML = '<p class="text-gray-400 text-xs">Keine Planeten definiert</p>';
+            }
+        }
+
+        function addPlanetToNeighbor(neighborId) {
+            const neighbor = solarSystem.neighborSystems.find(n => n.id === neighborId);
+            if (!neighbor || neighbor.mode !== 'custom') return;
+            
+            const newPlanet = {
+                id: Date.now(),
+                name: `planet_${neighbor.planets.length + 1}`,
+                class: 'pc_continental',
+                size: 16,
+                orbitDistance: neighbor.planets.length === 0 ? 40 : 25
+            };
+            
+            neighbor.planets.push(newPlanet);
+            updateNeighborSystemsList();
+            updateOutput();
+            showNotification('✅ Planet zum Nachbarsystem hinzugefügt!');
+        }
+
+        function addPlanetToCustomNeighborDraft() {
+            // This is for the draft neighbor being created
+            const planetList = document.getElementById('customNeighborPlanetsList');
+            const existingPlanets = planetList.querySelectorAll('.neighbor-planet-item').length;
+            
+            const planetItem = document.createElement('div');
+            planetItem.className = 'neighbor-planet-item bg-gray-700/50 p-2 rounded flex justify-between items-center';
+            planetItem.dataset.index = existingPlanets;
+            
+            planetItem.innerHTML = `
+                <div class="grid grid-cols-3 gap-2 flex-1">
+                    <input type="text" placeholder="Planet Name" value="planet_${existingPlanets + 1}"
+                        class="stellaris-input text-xs py-1" data-field="name">
+                    <select class="stellaris-input text-xs py-1" data-field="class">
+                        <option value="pc_continental">Kontinental</option>
+                        <option value="pc_ocean">Ozean</option>
+                        <option value="pc_desert">Wüste</option>
+                        <option value="pc_arctic">Arktisch</option>
+                        <option value="pc_tropical">Tropisch</option>
+                        <option value="pc_arid">Arid</option>
+                        <option value="pc_tundra">Tundra</option>
+                        <option value="pc_barren">Karg</option>
+                        <option value="pc_gas_giant">Gasriese</option>
+                    </select>
+                    <input type="number" placeholder="Größe" value="16" min="1" max="50"
+                        class="stellaris-input text-xs py-1" data-field="size">
+                </div>
+                <button onclick="removeNeighborPlanetDraft(this)" 
+                        class="stellaris-btn stellaris-btn-danger text-xs px-2 py-1 ml-2">
+                    ✕
+                </button>
+            `;
+            
+            if (existingPlanets === 0) {
+                planetList.innerHTML = '';
+            }
+            planetList.appendChild(planetItem);
+        }
+
+        function removeNeighborPlanetDraft(button) {
+            button.closest('.neighbor-planet-item').remove();
+            
+            const planetList = document.getElementById('customNeighborPlanetsList');
+            if (planetList.querySelectorAll('.neighbor-planet-item').length === 0) {
+                planetList.innerHTML = '<p class="text-gray-400 text-xs">Keine Planeten definiert</p>';
+            }
+        }
+
+        function collectCustomNeighborPlanets() {
+            const planetItems = document.querySelectorAll('#customNeighborPlanetsList .neighbor-planet-item');
+            const planets = [];
+            
+            planetItems.forEach(item => {
+                const name = item.querySelector('[data-field="name"]').value.trim();
+                const planetClass = item.querySelector('[data-field="class"]').value;
+                const size = parseInt(item.querySelector('[data-field="size"]').value) || 16;
+                
+                if (name) {
+                    planets.push({
+                        id: Date.now() + Math.random(),
+                        name: name,
+                        class: planetClass,
+                        size: size,
+                        orbitDistance: planets.length === 0 ? 40 : 25
+                    });
+                }
+            });
+            
+            return planets;
+        }
+
+        function removePlanetFromNeighbor(neighborId, planetId) {
+            const neighbor = solarSystem.neighborSystems.find(n => n.id === neighborId);
+            if (!neighbor) return;
+            
+            neighbor.planets = neighbor.planets.filter(p => p.id !== planetId);
+            updateNeighborSystemsList();
+            updateOutput();
+            showNotification('Planet aus Nachbarsystem entfernt!');
+        }
+
+        function editNeighborSystem(neighborId) {
+            const neighbor = solarSystem.neighborSystems.find(n => n.id === neighborId);
+            if (!neighbor) return;
+            
+            // Scroll to neighbor section and populate fields
+            const neighborSection = document.querySelector('.mt-6.p-4.bg-gradient-to-r.from-indigo-900\\/30');
+            neighborSection.scrollIntoView({ behavior: 'smooth' });
+            
+            document.getElementById('neighborMode').value = neighbor.mode;
+            document.getElementById('newNeighborDistance').value = neighbor.distance;
+            
+            if (neighbor.mode === 'reference') {
+                document.getElementById('newNeighborReference').value = neighbor.initializer || '';
+            } else {
+                document.getElementById('customNeighborName').value = neighbor.name || '';
+                document.getElementById('customNeighborStarClass').value = neighbor.starClass || 'sc_g';
+                
+                // Populate planets
+                const planetList = document.getElementById('customNeighborPlanetsList');
+                planetList.innerHTML = '';
+                
+                if (neighbor.planets && neighbor.planets.length > 0) {
+                    neighbor.planets.forEach(planet => {
+                        const planetItem = document.createElement('div');
+                        planetItem.className = 'neighbor-planet-item bg-gray-700/50 p-2 rounded flex justify-between items-center';
+                        
+                        planetItem.innerHTML = `
+                            <div class="grid grid-cols-3 gap-2 flex-1">
+                                <input type="text" value="${planet.name}" class="stellaris-input text-xs py-1" data-field="name">
+                                <select class="stellaris-input text-xs py-1" data-field="class">
+                                    <option value="pc_continental" ${planet.class === 'pc_continental' ? 'selected' : ''}>Kontinental</option>
+                                    <option value="pc_ocean" ${planet.class === 'pc_ocean' ? 'selected' : ''}>Ozean</option>
+                                    <option value="pc_desert" ${planet.class === 'pc_desert' ? 'selected' : ''}>Wüste</option>
+                                    <option value="pc_arctic" ${planet.class === 'pc_arctic' ? 'selected' : ''}>Arktisch</option>
+                                    <option value="pc_tropical" ${planet.class === 'pc_tropical' ? 'selected' : ''}>Tropisch</option>
+                                </select>
+                                <input type="number" value="${planet.size}" min="1" max="50" class="stellaris-input text-xs py-1" data-field="size">
+                            </div>
+                            <button onclick="removeNeighborPlanetDraft(this)" class="stellaris-btn stellaris-btn-danger text-xs px-2 py-1 ml-2">✕</button>
+                        `;
+                        
+                        planetList.appendChild(planetItem);
+                    });
+                } else {
+                    planetList.innerHTML = '<p class="text-gray-400 text-xs">Keine Planeten definiert</p>';
+                }
+            }
+            
+            toggleNeighborCustomFields();
+            
+            // Remove original and user will re-add
+            removeNeighborSystem(neighborId);
+            showNotification('Nachbarsystem zur Bearbeitung geladen. Bitte speichern Sie die Änderungen.');
         }
 
         function updateNeighborSystemsList() {
@@ -1412,19 +2727,110 @@
                 return;
             }
 
-            solarSystem.neighborSystems.forEach((neighbor, index) => {
+            solarSystem.neighborSystems.forEach((neighbor) => {
                 const neighborItem = document.createElement('div');
-                neighborItem.className = 'neighbor-item';
-                neighborItem.innerHTML = `
-                    <span class="text-sm">
-                        🌌 Distanz: ${neighbor.distance} | System: ${neighbor.initializer || 'Zufällig'}
-                    </span>
-                    <button class="stellaris-btn stellaris-btn-danger text-xs px-2 py-1" onclick="removeNeighborSystem(${neighbor.id})">
-                        Löschen
-                    </button>
-                `;
+                neighborItem.className = 'bg-gray-700/50 p-3 rounded border border-indigo-500/30';
+                
+                let content = '';
+                
+                // ✅ KORRIGIERT: Hyperlane Jumps anzeigen
+                const jumpsDisplay = neighbor.hyperlaneJumps 
+                    ? `${neighbor.hyperlaneJumps.min}-${neighbor.hyperlaneJumps.max} Jumps`
+                    : '1-3 Jumps';
+                
+                if (neighbor.mode === 'reference') {
+                    content = `
+                        <div class="flex justify-between items-start">
+                            <div>
+                                <div class="font-medium text-indigo-300">🔎 ${neighbor.initializer}</div>
+                                <div class="text-xs text-gray-400 mt-1">Hyperlane: ${jumpsDisplay} • Modus: Referenz</div>
+                                ${neighbor.trigger ? `<div class="text-xs text-blue-300 mt-1">Trigger: ${neighbor.trigger}</div>` : ''}
+                            </div>
+                            <div class="flex gap-2">
+                                <button onclick="editNeighborSystem(${neighbor.id})" 
+                                        class="stellaris-btn stellaris-btn-secondary text-xs px-2 py-1">
+                                    Bearbeiten
+                                </button>
+                                <button onclick="removeNeighborSystem(${neighbor.id})" 
+                                        class="stellaris-btn stellaris-btn-danger text-xs px-2 py-1">
+                                    Löschen
+                                </button>
+                            </div>
+                        </div>
+                    `;
+                } else {
+                    const planetCount = neighbor.planets ? neighbor.planets.length : 0;
+                    const asteroidCount = neighbor.asteroidBelts ? neighbor.asteroidBelts.length : 0;
+                    const starIcon = getStarIcon(neighbor.starClass);
+                    
+                    content = `
+                        <div class="flex justify-between items-start mb-2">
+                            <div>
+                                <div class="font-medium text-purple-300">${starIcon} ${neighbor.name}</div>
+                                <div class="text-xs text-gray-400 mt-1">
+                                    Hyperlane: ${jumpsDisplay} • Klasse: ${neighbor.starClass} • 
+                                    ${planetCount} Planet${planetCount !== 1 ? 'en' : ''}
+                                    ${asteroidCount > 0 ? ` • ${asteroidCount} Gürtel` : ''}
+                                </div>
+                                ${neighbor.trigger ? `<div class="text-xs text-blue-300 mt-1">Trigger: ${neighbor.trigger}</div>` : ''}
+                            </div>
+                            <div class="flex gap-2">
+                                <button onclick="editNeighborSystem(${neighbor.id})" 
+                                        class="stellaris-btn stellaris-btn-secondary text-xs px-2 py-1">
+                                    Bearbeiten
+                                </button>
+                                <button onclick="removeNeighborSystem(${neighbor.id})" 
+                                        class="stellaris-btn stellaris-btn-danger text-xs px-2 py-1">
+                                    Löschen
+                                </button>
+                            </div>
+                        </div>
+                    `;
+                    
+                    if (neighbor.planets && neighbor.planets.length > 0) {
+                        content += '<div class="mt-2 pl-4 border-l-2 border-purple-500/30 space-y-1">';
+                        neighbor.planets.forEach(planet => {
+                            const planetIcon = getPlanetIcon(planet.class);
+                            content += `
+                                <div class="text-xs flex justify-between items-center bg-gray-800/50 p-1 rounded">
+                                    <span>${planetIcon} ${planet.name} • ${getClassDisplayName(planet.class)} • Größe ${planet.size}</span>
+                                    <button onclick="removePlanetFromNeighbor(${neighbor.id}, ${planet.id})" 
+                                            class="text-red-400 hover:text-red-300 text-xs px-1">
+                                        ✕
+                                    </button>
+                                </div>
+                            `;
+                        });
+                        content += '</div>';
+                    }
+                }
+                
+                neighborItem.innerHTML = content;
                 elements.neighborSystemsList.appendChild(neighborItem);
             });
+        }
+
+        function getStarIcon(starClass) {
+            const icons = {
+                'sc_b': '💙', 'sc_a': '⚪', 'sc_f': '💛',
+                'sc_g': '☉', 'sc_k': '🧡', 'sc_m': '🔴',
+                'sc_black_hole': '⚫', 'sc_neutron_star': '⚫'
+            };
+            return icons[starClass] || '⭐';
+        }
+
+        function toggleNeighborCustomFields() {
+            const mode = document.getElementById('neighborMode').value;
+            const customFields = document.getElementById('customNeighborFields');
+            const referenceField = document.getElementById('neighborReferenceField');
+            
+            if (mode === 'custom') {
+                customFields.classList.remove('hidden');
+                referenceField.classList.add('hidden');
+            } else {
+                customFields.classList.add('hidden');
+                referenceField.classList.remove('hidden');
+            }
         }
 
         function removeNeighborSystem(neighborId) {
@@ -1433,6 +2839,14 @@
             updateOutput();
             renderVisualizer();
         }
+
+        // ============================================================
+        // [SECTION-10] ASTEROIDENGÜRTEL MANAGEMENT
+        // ============================================================
+        // HIER: Funktionen für Asteroidengürtel im Hauptsystem
+        // ÄNDERN: Um neue Asteroidengürtel-Typen hinzuzufügen
+        // TIPP: Siehe auch generateCustomNeighborDefinition() für
+        //       Asteroidengürtel in Nachbarsystemen
 
         // Asteroid Belt Management
         function addAsteroidBelt() {
@@ -1487,37 +2901,255 @@
             return names[type] || type;
         }
 
+        // ============================================================
+        // [SECTION-12] CODE-GENERIERUNG (STELLARIS .TXT)
+        // ============================================================
+        // HIER: Generierung des Stellaris-kompatiblen Codes
+        // ÄNDERN: Um neue Stellaris-Features zu unterstützen
+        // WICHTIG: Achte auf korrekte Einrückung (Tabs!)
+        // 
+        // HAUPTFUNKTIONEN:
+        // - generateStellarisTxt()           → Hauptfunktion für Export
+        // - generateSingleVariant()          → Einzelne Variante generieren
+        // - generateAllVariants()            → Mehrere Varianten kombinieren
+        // - applyVariationModifications()    → Origin-Änderungen anwenden
+        // - generateCustomNeighborDefinition() → Nachbarsystem-Code
+        // - generateStellarisYml()           → Lokalisierung (.yml)
+
         // Code Generation with proper modifier system
         function generateStellarisTxt() {
-            let txt = `##### Generated by Stellaris Solar System Editor V6 #####\n`;
-            txt += `##### With correct modifier system for Planetary Diversity #####\n\n`;
-            txt += `${solarSystem.name} = {\n`;
-            txt += `\tname = "${solarSystem.displayName}"\n`;
-            txt += `\tclass = "${solarSystem.class}"\n`;
+            // Check if multiple variations are enabled
+            const enabledVariations = Object.values(systemVariations).filter(v => v.enabled);
+            
+            if (enabledVariations.length > 1) {
+                return generateAllVariants();
+            }
+            
+            // Single variant generation
+            return generateSingleVariant(enabledVariations[0] || systemVariations.standard);
+        }
+
+        function generateSingleVariant(variation) {
+            const variantSystem = applyVariationModifications(
+                JSON.parse(JSON.stringify(solarSystem)), 
+                variation
+            );
+            
+            let txt = `##### Generated by Stellaris Solar System Editor V7 #####\n`;
+            txt += `##### Variant: ${variation.displayName} #####\n\n`;
+            
+            const systemName = variation.systemNameOverride || solarSystem.name;
+            txt += `${systemName} = {\n`;
+            txt += `\tname = "${variantSystem.displayName}"\n`;
+            txt += `\tclass = "${variantSystem.class}"\n`;
 
             // Multiple asteroid belts
-            solarSystem.asteroidBelts.forEach(belt => {
+            variantSystem.asteroidBelts.forEach(belt => {
                 txt += `\tasteroid_belt = {\n`;
                 txt += `\t\ttype = ${belt.type}\n`;
                 txt += `\t\tradius = ${belt.radius}\n`;
                 txt += `\t}\n`;
             });
 
-            if (solarSystem.usage) {
-                txt += `\tusage = ${solarSystem.usage}\n`;
+            // V7 ADDITION - FLAGS
+            if (variantSystem.flags && variantSystem.flags.length > 0) {
+                txt += `\n\tflags = { ${variantSystem.flags.join(' ')} }\n`;
             }
 
-            // Neighbor systems - HINZUFÜGEN
-            solarSystem.neighborSystems.forEach(neighbor => {
-                txt += `\tneighbor_system = {\n`;
-                txt += `\t\tdistance = ${neighbor.distance}\n`;
-                if (neighbor.initializer) {
-                    txt += `\t\tinitializer = "${neighbor.initializer}"\n`;
-                }
+            if (variantSystem.usage) {
+                txt += `\n\tusage = ${variantSystem.usage}\n`;
+            }
+
+            // V7 ADDITION - USAGE ODDS
+            if (variantSystem.usageOdds) {
+                txt += `\n\tusage_odds = {\n`;
+                txt += `\t\tbase = ${variantSystem.usageOdds.base}\n`;
+                txt += `\t\tmodifier = {\n`;
+                txt += `\t\t\t${variantSystem.usageOdds.condition}\n`;
+                txt += `\t\t\tadd = ${variantSystem.usageOdds.add}\n`;
+                txt += `\t\t}\n`;
                 txt += `\t}\n`;
-            });
+            }
+
+            // V7 ADDITION - MAX INSTANCES
+            if (variantSystem.maxInstances) {
+                txt += `\n\tmax_instances = ${variantSystem.maxInstances}\n`;
+            }
+
+            // ============================================
+            // ✅ CORRECTED: Neighbor Systems Generation
+            // ============================================
+            if (variantSystem.neighborSystems && variantSystem.neighborSystems.length > 0) {
+                variantSystem.neighborSystems.forEach(neighbor => {
+                    txt += `\tneighbor_system = {\n`;
+                    
+                    // ✅ KORRIGIERT: hyperlane_jumps statt distance
+                    const jumps = neighbor.hyperlaneJumps || { min: 1, max: 3 };
+                    txt += `\t\thyperlane_jumps = { min = ${jumps.min} max = ${jumps.max} }\n`;
+                    
+                    // Trigger (optional)
+                    if (neighbor.trigger) {
+                        txt += `\t\ttrigger = { ${neighbor.trigger} }\n`;
+                    }
+                    
+                    // ✅ KORRIGIERT: initializer ist immer ein STRING, niemals ein Objekt
+                    if (neighbor.mode === 'reference') {
+                        // Modus A: Referenz zu existierendem System
+                        txt += `\t\tinitializer = "${neighbor.initializer}"\n`;
+                    } else if (neighbor.mode === 'custom') {
+                        // Modus B: Referenz zu eigenem Custom-System
+                        const customSystemName = neighbor.name.toLowerCase().replace(/\s+/g, '_') + '_neighbor';
+                        txt += `\t\tinitializer = "${customSystemName}"\n`;
+                    }
+
+                    // Generate star
+                    txt += `\t\t\tplanet = {\n`;
+                    txt += `\t\t\t\tname = "${neighbor.name.toLowerCase().replace(/\s+/g, '_')}_star"\n`;
+                    txt += `\t\t\t\tclass = "${getStarClassForSystemClass(neighbor.starClass)}"\n`;
+                    txt += `\t\t\t\torbit_distance = 0\n`;
+                    txt += `\t\t\t\torbit_angle = 1\n`;
+                    txt += `\t\t\t\tsize = 40\n`;
+                    txt += `\t\t\t\thas_ring = no\n`;
+                    txt += `\t\t\t}\n`;
+                   
+                    // Generate planets
+                    if (neighbor.planets && neighbor.planets.length > 0) {
+                        neighbor.planets.forEach(planet => {
+                            txt += `\t\t\tplanet = {\n`;
+                            txt += `\t\t\t\tname = "${planet.name}"\n`;
+                            txt += `\t\t\t\tclass = "${planet.class}"\n`;
+                            txt += `\t\t\t\torbit_distance = ${planet.orbitDistance}\n`;
+                            txt += `\t\t\t\torbit_angle = { min = 90 max = 270 }\n`;
+                            txt += `\t\t\t\tsize = ${planet.size}\n`;
+                            txt += `\t\t\t\thas_ring = no\n`;
+                            txt += `\t\t\t}\n`;
+                        });
+                    }
+                    
+                    txt += `\t}\n`;
+                });
+            }
+        
+            txt += `}\n\n`;
+            
+            // ✅ NEU: Separate Nachbarsystem-Definitionen
+            if (solarSystem.neighborSystems && solarSystem.neighborSystems.length > 0) {
+                solarSystem.neighborSystems.forEach(neighbor => {
+                    if (neighbor.mode === 'custom') {
+                        txt += generateCustomNeighborDefinition(neighbor);
+                        txt += '\n';
+                    }
+                });
+            }
 
             txt += `\tinit_effect = {\n`;
+
+            /**
+            * ✅ NEU: Generiert separate Nachbarsystem-Definition
+            */
+            function generateCustomNeighborDefinition(neighbor) {
+                const systemId = neighbor.name.toLowerCase().replace(/\s+/g, '_') + '_neighbor';
+                
+                let txt = `# Custom Neighbor System: ${neighbor.name}\n`;
+                txt += `${systemId} = {\n`;
+                txt += `\tname = "${neighbor.name}"\n`;
+                txt += `\tclass = "${neighbor.starClass}"\n\n`;
+                
+                // Init Effect für Nachbarsysteme
+                txt += `\tinit_effect = {\n`;
+                txt += `\t\tevery_neighbor_system = { set_star_flag = empire_cluster }\n`;
+                txt += `\t}\n\n`;
+                
+                // Stern
+                txt += `\tplanet = {\n`;
+                txt += `\t\tname = "${systemId}_star"\n`;
+                txt += `\t\tclass = "${getStarClassForSystemClass(neighbor.starClass)}"\n`;
+                txt += `\t\torbit_distance = 0\n`;
+                txt += `\t\torbit_angle = 1\n`;
+                txt += `\t\tsize = 30\n`;
+                txt += `\t\thas_ring = no\n`;
+                txt += `\t}\n\n`;
+                
+                // Asteroidengürtel
+                if (neighbor.asteroidBelts && neighbor.asteroidBelts.length > 0) {
+                    neighbor.asteroidBelts.forEach(belt => {
+                        txt += `\tasteroid_belt = {\n`;
+                        txt += `\t\ttype = ${belt.type}\n`;
+                        txt += `\t\tradius = ${belt.radius}\n`;
+                        txt += `\t}\n`;
+                    });
+                    txt += '\n';
+                }
+                
+                // Planeten
+                if (neighbor.planets && neighbor.planets.length > 0) {
+                    txt += `\tchange_orbit = 45\n\n`;
+                    
+                    neighbor.planets.forEach((planet, index) => {
+                        if (planet.type === 'asteroid_group') {
+                            // Asteroiden-Gruppe
+                            txt += `\tplanet = {\n`;
+                            txt += `\t\tcount = { min = ${planet.countMin || 2} max = ${planet.countMax || 4} }\n`;
+                            txt += `\t\tclass = ${planet.class}\n`;
+                            txt += `\t\torbit_distance = ${index === 0 ? 0 : 20}\n`;
+                            txt += `\t\torbit_angle = { min = 90 max = 270 }\n`;
+                            txt += `\t}\n\n`;
+                        } else {
+                            // Regulärer Planet
+                            txt += `\tplanet = {\n`;
+                            if (planet.name) {
+                                txt += `\t\tname = "${planet.name}"\n`;
+                            }
+                            txt += `\t\tclass = "${planet.class}"\n`;
+                            txt += `\t\torbit_distance = ${planet.orbitDistance || (index === 0 ? 40 : 25)}\n`;
+                            txt += `\t\torbit_angle = { min = 90 max = 270 }\n`;
+                            txt += `\t\tsize = ${planet.size || 16}\n`;
+                            txt += `\t\thas_ring = ${planet.hasRing ? 'yes' : 'no'}\n`;
+                            
+                            // Monde
+                            if (planet.moons && planet.moons.length > 0) {
+                                txt += `\n\t\tchange_orbit = 5\n\n`;
+                                
+                                planet.moons.forEach(moon => {
+                                    txt += `\t\tmoon = {\n`;
+                                    if (moon.name) {
+                                        txt += `\t\t\tname = "${moon.name}"\n`;
+                                    }
+                                    txt += `\t\t\tclass = "${moon.class}"\n`;
+                                    txt += `\t\t\tsize = ${moon.size || 8}\n`;
+                                    txt += `\t\t\torbit_distance = ${moon.orbitDistance || 5}\n`;
+                                    txt += `\t\t\torbit_angle = { min = 90 max = 270 }\n`;
+                                    txt += `\t\t\thas_ring = no\n`;
+                                    txt += `\t\t}\n\n`;
+                                });
+                            }
+                            
+                            txt += `\t}\n\n`;
+                        }
+                    });
+                }
+                
+                txt += `}\n`;
+                return txt;
+            }
+            
+            /**
+            * Konvertiert System-Klasse zu Stern-Klasse
+            */
+            function getStarClassForSystemClass(systemClass) {
+                const mapping = {
+                    'sc_b': 'pc_b_star',
+                    'sc_a': 'pc_a_star',
+                    'sc_f': 'pc_f_star',
+                    'sc_g': 'pc_g_star',
+                    'sc_k': 'pc_k_star',
+                    'sc_m': 'pc_m_star',
+                    'sc_black_hole': 'pc_black_hole',
+                    'sc_neutron_star': 'pc_neutron_star',
+                    'sc_pulsar': 'pc_pulsar'
+                };
+                return mapping[systemClass] || 'pc_g_star';
+            }
             
             // Add empire cluster effects if custom_empire
             if (solarSystem.usage === 'custom_empire') {
@@ -1564,6 +3196,16 @@
                 
                 txt += `\t\thas_ring = ${planet.hasRing ? 'yes' : 'no'}\n`;
                 
+                // V7 ADDITION - PLANET FLAGS
+                if (planet.flags && planet.flags.length > 0) {
+                    txt += `\t\tflags = { ${planet.flags.join(' ')} }\n`;
+                }
+                
+                // V7 ADDITION - ENTITY OVERRIDE
+                if (planet.entityOverride) {
+                    txt += `\t\tentity = "${planet.entityOverride}"\n`;
+                }
+                
                 // Generate modifiers
                 let hasInitEffect = false;
                 let initEffectContent = '';
@@ -1593,9 +3235,17 @@
                     });
                 }
                 
-                if (planet.isStartingPlanet) {
+                // V7 ADDITION - PREVENT ANOMALY
+                if (planet.preventAnomaly) {
                     hasInitEffect = true;
                     initEffectContent += `\t\t\tprevent_anomaly = yes\n`;
+                }
+                
+                if (planet.isStartingPlanet) {
+                    hasInitEffect = true;
+                    if (!planet.preventAnomaly) { // Don't duplicate if already added
+                        initEffectContent += `\t\t\tprevent_anomaly = yes\n`;
+                    }
                     initEffectContent += `\t\t\tgenerate_start_buildings_and_blockers = yes\n`;
                 }
                 
@@ -1640,6 +3290,75 @@
             return txt;
         }
 
+        // V7 ADDITION - Multi-Variant Generation
+        function generateAllVariants() {
+            let combinedTxt = `##### Generated by Stellaris Solar System Editor V7 #####\n`;
+            combinedTxt += `##### Multiple Variants Export #####\n`;
+            combinedTxt += `##### Total Variants: ${Object.values(systemVariations).filter(v => v.enabled).length} #####\n\n`;
+            
+            const enabledVariations = Object.entries(systemVariations).filter(([key, v]) => v.enabled);
+            
+            enabledVariations.forEach(([key, variation], index) => {
+                if (index > 0) {
+                    combinedTxt += `\n\n##########################################################\n`;
+                }
+                combinedTxt += `### Variant ${index + 1}: ${variation.displayName} ###\n`;
+                combinedTxt += `### System: ${variation.systemNameOverride || solarSystem.name} ###\n`;
+                combinedTxt += `##########################################################\n\n`;
+                
+                combinedTxt += generateSingleVariant(variation);
+            });
+            
+            return combinedTxt;
+        }
+
+        function applyVariationModifications(system, variation) {
+            const mods = variation.modifications;
+            if (!mods) return system;
+            
+            // Apply system-level modifications
+            if (mods.system) {
+                if (mods.system.usage) system.usage = mods.system.usage;
+                if (mods.system.flags) system.flags = [...mods.system.flags];
+                if (mods.system.usageOdds) system.usageOdds = mods.system.usageOdds;
+                if (mods.system.maxInstances) system.maxInstances = mods.system.maxInstances;
+            }
+            
+            // Apply planet-level modifications
+            if (mods.planets) {
+                system.planets.forEach(planet => {
+                    // Match planet by normalized name (remove spaces, lowercase)
+                    const planetKey = planet.name.toLowerCase().replace(/[^a-z0-9]/g, '');
+                    
+                    // Check all possible planet name variations
+                    const planetMods = mods.planets[planetKey] || 
+                                      mods.planets[planet.name.toLowerCase()] ||
+                                      mods.planets[planet.displayName.toLowerCase()];
+                    
+                    if (planetMods) {
+                        if (planetMods.changeClass) planet.class = planetMods.changeClass;
+                        if (planetMods.changeSize) planet.size = planetMods.changeSize;
+                        
+                        if (planetMods.addFlags) {
+                            planet.flags = [...(planet.flags || []), ...planetMods.addFlags];
+                        }
+                        
+                        if (planetMods.removeFlags) {
+                            planetMods.removeFlags.forEach(flag => {
+                                planet.flags = (planet.flags || []).filter(f => f !== flag);
+                            });
+                        }
+                        
+                        if (planetMods.addModifiers) {
+                            planet.modifiers = [...(planet.modifiers || []), ...planetMods.addModifiers];
+                        }
+                    }
+                });
+            }
+            
+            return system;
+        }
+
         function generateStellarisYml() {
             let yml = `l_german:\n`;
             yml += ` # Generated by Stellaris Solar System Editor V6\n`;
@@ -1659,6 +3378,13 @@
 
             return yml;
         }
+
+        // ============================================================
+        // [SECTION-13] UI UPDATE FUNKTIONEN
+        // ============================================================
+        // HIER: Aktualisierung der Benutzeroberfläche
+        // ÄNDERN: Um neue UI-Elemente zu aktualisieren
+        // TIPP: Diese Funktionen werden nach jeder Änderung aufgerufen
 
         // Cumulative Orbit Calculation (unchanged from V5)
         function calculateCumulativeOrbitDistances() {
@@ -1764,6 +3490,16 @@
             
             return item;
         }
+
+        // ============================================================
+        // [SECTION-14] VISUALISIERUNG (CANVAS)
+        // ============================================================
+        // HIER: Rendering des Solar Systems im Canvas
+        // ÄNDERN: Um visuelle Darstellung anzupassen
+        // TIPP: 
+        // - visualizerScale für Zoom-Stufe
+        // - getColorForClass() für Planetenfarben
+        // - drawCelestial() für einzelne Objekte
 
         // Visualization (unchanged from V5)
         function renderVisualizer() {
@@ -1923,6 +3659,18 @@
                 });
             }
         }
+
+        // ============================================================
+        // [SECTION-15] HELPER FUNKTIONEN (ICONS, FARBEN, ETC.)
+        // ============================================================
+        // HIER: Hilfsfunktionen für Icons, Farben, Namen
+        // ÄNDERN: 
+        // - getPlanetIcon(): Um neue Planet-Icons hinzuzufügen
+        // - getClassDisplayName(): Für deutsche Übersetzungen
+        // - getColorForClass(): Für Planetenfarben im Visualizer
+        // - getStarIcon(): Für Stern-Icons in Nachbarsystemen
+        // 
+        // TIPP: Emojis können direkt eingefügt werden: 🌍 🔴 ⭐
 
         // Helper Functions
         function getPlanetIcon(planetClass) {
@@ -2087,6 +3835,27 @@
             return mapping[systemClass] || 'pc_g_star';
         }
 
+        // ============================================================
+        // [SECTION-16] EVENT LISTENER INITIALISIERUNG
+        // ============================================================
+        // HIER: Alle Event-Handler für Buttons, Inputs, etc.
+        // ÄNDERN: Um neue Buttons/Felder zu verknüpfen
+        // WICHTIG: 
+        // - Prüfe mit if() ob Element existiert vor addEventListener
+        // - Verwende () => {} für anonyme Funktionen
+        // - Nutze updateOutput() nach jeder Änderung
+        // 
+        // STRUKTUR:
+        // 1. System-Properties (Name, Klasse, Usage)
+        // 2. Nachbarsystem-Controls
+        // 3. Asteroidengürtel-Controls
+        // 4. Planeten-Controls
+        // 5. Planet-Eigenschaften
+        // 6. Modifier-System
+        // 7. Visualizer-Controls
+        // 8. Export-Buttons
+        // 9. V7-Features (Flags, Variationen)
+
         // Event handlers and property updates
         function updateSelectedPlanetProperty(property) {
             return (e) => {
@@ -2128,6 +3897,11 @@
             showNotification(`Datei "${filename}" wurde erfolgreich heruntergeladen!`);
         }
 
+        // ============================================================
+        // [SECTION-16] EVENT LISTENER INITIALISIERUNG
+        // ============================================================
+        // (Siehe Marker oben für Details)
+
         // Event Listeners
         function initializeEventListeners() {
             // System properties
@@ -2154,14 +3928,25 @@
                 updateOutput();
             });
 
-            // Neighbor systems listeners - HINZUFÜGEN
-            elements.addNeighborBtn.addEventListener('click', addNeighborSystem);
+            // ============================================
+            // Neighbor Systems Event Listeners - KORRIGIERT
+            // ============================================
+            if (elements.addNeighborBtn) {
+                elements.addNeighborBtn.addEventListener('click', addNeighborSystem);
+            }
+
+            const neighborModeSelect = document.getElementById('neighborMode');
+            if (neighborModeSelect) {
+                neighborModeSelect.addEventListener('change', toggleNeighborCustomFields);
+            }
             
             // Asteroid belt listeners - HINZUFÜGEN
             elements.addAsteroidBeltBtn.addEventListener('click', addAsteroidBelt);
 
-            // Planet management
-            elements.addPlanetBtn.addEventListener('click', addPlanet);
+            // Planet management - KORRIGIERT
+            if (elements.addPlanetBtn) {
+                elements.addPlanetBtn.addEventListener('click', addPlanet);
+            }
 
             elements.orbitAngleType.addEventListener('change', (e) => {
                 const isRange = e.target.value === 'range';
@@ -2241,7 +4026,7 @@
 
             // Visualizer controls
             elements.zoomInBtn.addEventListener('click', () => {
-                visualizerScale = Math.min(1.0, visualizerScale * 1.2);
+                visualizerScale = Math.min(5.0, visualizerScale * 1.2);
                 renderVisualizer();
             });
             elements.zoomOutBtn.addEventListener('click', () => {
@@ -2254,26 +4039,123 @@
             });
 
             // Export buttons
-            elements.downloadTxtBtn.addEventListener('click', () => 
-                downloadFile(elements.exportTxt.value, `${solarSystem.name}.txt`, 'text/plain'));
+            elements.downloadTxtBtn.addEventListener('click', () => {
+                const enabledCount = Object.values(systemVariations).filter(v => v.enabled).length;
+                const output = elements.exportTxt.value;
+                
+                if (enabledCount > 1) {
+                    const filename = `${solarSystem.name}_${enabledCount}_variants.txt`;
+                    downloadFile(output, filename, 'text/plain');
+                    showNotification(`${enabledCount} Varianten exportiert!`);
+                } else {
+                    downloadFile(output, `${solarSystem.name}.txt`, 'text/plain');
+                }
+            });
+            
             elements.downloadYmlBtn.addEventListener('click', () => {
                 const bom = '\ufeff';
                 downloadFile(bom + elements.exportYml.value, `${solarSystem.name}_l_german.yml`, 'text/plain;charset=utf-8');
             });
+            
+            // ============================================
+            // V7 ADDITIONS - New Event Listeners
+            // ============================================
+            
+            // System Flags
+            const addSystemFlagBtn = document.getElementById('addSystemFlagBtn');
+            if (addSystemFlagBtn) {
+                addSystemFlagBtn.addEventListener('click', addSystemFlag);
+            }
+            
+            const newSystemFlagInput = document.getElementById('newSystemFlag');
+            if (newSystemFlagInput) {
+                newSystemFlagInput.addEventListener('keypress', (e) => {
+                    if (e.key === 'Enter') addSystemFlag();
+                });
+            }
+            
+            // Planet Flags
+            const addPlanetFlagBtn = document.getElementById('addPlanetFlagBtn');
+            if (addPlanetFlagBtn) {
+                addPlanetFlagBtn.addEventListener('click', addPlanetFlag);
+            }
+            
+            const newPlanetFlagInput = document.getElementById('newPlanetFlag');
+            if (newPlanetFlagInput) {
+                newPlanetFlagInput.addEventListener('keypress', (e) => {
+                    if (e.key === 'Enter') addPlanetFlag();
+                });
+            }
+            
+            // Prevent Anomaly
+            const preventAnomalyCheckbox = document.getElementById('celestialPreventAnomaly');
+            if (preventAnomalyCheckbox) {
+                preventAnomalyCheckbox.addEventListener('change', (e) => {
+                    if (selectedPlanet) {
+                        selectedPlanet.preventAnomaly = e.target.checked;
+                        updateOutput();
+                    }
+                });
+            }
+            
+            // Entity Override
+            const entitySelect = document.getElementById('celestialEntity');
+            if (entitySelect) {
+                entitySelect.addEventListener('change', (e) => {
+                    if (selectedPlanet) {
+                        selectedPlanet.entityOverride = e.target.value || null;
+                        updateOutput();
+                        renderVisualizer();
+                    }
+                });
+            }
+            
+            // Preview Variations Button
+            const previewVariationsBtn = document.getElementById('previewVariationsBtn');
+            if (previewVariationsBtn) {
+                previewVariationsBtn.addEventListener('click', () => {
+                    const enabledVariations = Object.values(systemVariations).filter(v => v.enabled);
+                    const names = enabledVariations.map(v => `• ${v.displayName}`).join('\n');
+                    alert(`Aktivierte Varianten (${enabledVariations.length}):\n\n${names}\n\nBeim Export werden alle Varianten in einer kombinierten Datei generiert.`);
+                });
+            }
         }
+
+        // ============================================================
+        // [SECTION-17] GLOBALE FUNKTIONEN & INITIALIZATION
+        // ============================================================
+        // HIER: Funktionen für window-Objekt und DOMContentLoaded
+        // WICHTIG: Alle onclick-Handler im HTML brauchen window.*
+        // ÄNDERN: Neue onclick-Handler hier hinzufügen
+        // 
+        // INITIALISIERUNG:
+        // 1. Event Listener registrieren
+        // 2. Modifier System initialisieren
+        // 3. UI-Listen aktualisieren
+        // 4. Variationen rendern
+        // 5. Output generieren
 
         // Make functions globally available
         window.selectPlanet = selectPlanet;
         window.removeModifier = removeModifier;
         window.removeAsteroidBelt = removeAsteroidBelt;
         window.removeNeighborSystem = removeNeighborSystem;
+        window.editNeighborSystem = editNeighborSystem;
+        window.addPlanetToNeighbor = addPlanetToNeighbor;
+        window.removePlanetFromNeighbor = removePlanetFromNeighbor;
+        window.removeNeighborPlanetDraft = removeNeighborPlanetDraft;
+        window.collectCustomNeighborPlanets = collectCustomNeighborPlanets;
 
         // Initialize
         document.addEventListener('DOMContentLoaded', () => {
             initializeEventListeners();
             initializeModifierSystem();
-            updateNeighborSystemsList(); // HINZUFÜGEN
-            updateAsteroidBeltList(); // HINZUFÜGEN
+            updateNeighborSystemsList();
+            updateAsteroidBeltList();
+            
+            // V7 ADDITION - Initialize Variations and Flags
+            renderVariationsList();
+            updateSystemFlagsList();
             
             // Load default system
             elements.systemName.value = solarSystem.name;
@@ -2285,12 +4167,132 @@
             updateOutput();
             renderVisualizer();
             
-            showNotification('🚀 V6 - Intelligentes Basis-Klassen-System geladen!');
+            showNotification('🚀 V7 - System-Variationen & Erweiterte Kompatibilität geladen!');
         });
 
         window.addEventListener('resize', () => {
             setTimeout(renderVisualizer, 100);
         });
+        
+        // ============================================================
+        // [SECTION-17] GLOBALE FUNKTIONEN & INITIALIZATION
+        // ============================================================
+        // (Siehe Marker oben)
+        
+        // ============================================
+        // V7 ADDITION - Global Functions for onclick handlers
+        // ============================================
+        window.removeSystemFlag = removeSystemFlag;
+        window.removePlanetFlag = removePlanetFlag;
+        window.toggleVariation = toggleVariation;
+        window.quickAddSystemFlag = quickAddSystemFlag;
+
+        /*
+        ╔══════════════════════════════════════════════════════════════════════╗
+        ║              HÄUFIGE ÄNDERUNGEN - QUICK REFERENCE                   ║
+        ╚══════════════════════════════════════════════════════════════════════╝
+        
+        ┌─────────────────────────────────────────────────────────────────────┐
+        │ 1️⃣  NEUEN PLANETARY DIVERSITY MODIFIER HINZUFÜGEN                    │
+        ├─────────────────────────────────────────────────────────────────────┤
+        │ WO:      [SECTION-02] → MODIFIERS → planetary_diversity             │
+        │ SUCHE:   "pc_continental:" (oder andere Planetenklasse)             │
+        │ AKTION:  Füge neuen Modifier nach diesem Muster hinzu:              │
+        │                                                                      │
+        │   "pd_dein_neuer_modifier": {                                       │
+        │       name: "Dein Modifier Name",                                   │
+        │       description: "Beschreibung was er macht"                      │
+        │   }                                                                  │
+        └─────────────────────────────────────────────────────────────────────┘
+        
+        ┌─────────────────────────────────────────────────────────────────────┐
+        │ 2️⃣  NEUE PLANETENKLASSE HINZUFÜGEN                                   │
+        ├─────────────────────────────────────────────────────────────────────┤
+        │ 1. HTML → <select id="celestialClass"> → Neue <option> hinzufügen  │
+        │ 2. [SECTION-15] → getPlanetIcon() → Icon hinzufügen                │
+        │ 3. [SECTION-15] → getClassDisplayName() → Namen hinzufügen         │
+        │ 4. [SECTION-15] → getColorForClass() → Farbe hinzufügen            │
+        └─────────────────────────────────────────────────────────────────────┘
+        
+        ┌─────────────────────────────────────────────────────────────────────┐
+        │ 3️⃣  NEUE ORIGIN-VARIANTE HINZUFÜGEN                                  │
+        ├─────────────────────────────────────────────────────────────────────┤
+        │ WO:      [SECTION-03] → systemVariations                            │
+        │ AKTION:  Kopiere eine bestehende Variante (z.B. commonwealth)      │
+        │          und ändere:                                                 │
+        │   - id: eindeutiger Bezeichner                                      │
+        │   - suffix: wird an Systemnamen angehängt                           │
+        │   - displayName: Anzeigename für User                               │
+        │   - icon: Emoji für die Card                                        │
+        │   - modifications: Welche Änderungen am System                      │
+        └─────────────────────────────────────────────────────────────────────┘
+        
+        ┌─────────────────────────────────────────────────────────────────────┐
+        │ 4️⃣  STANDARD-PLANET-WERTE ÄNDERN                                     │
+        ├─────────────────────────────────────────────────────────────────────┤
+        │ WO:      [SECTION-08] → addPlanet()                                 │
+        │ SUCHE:   "const newPlanet = {"                                      │
+        │ ÄNDERE:  - class: Standard-Planetenklasse                           │
+        │          - size: Standard-Größe                                     │
+        │          - orbitDistance: Anfangsabstand                            │
+        └─────────────────────────────────────────────────────────────────────┘
+        
+        ┌─────────────────────────────────────────────────────────────────────┐
+        │ 5️⃣  STELLARIS CODE-OUTPUT ANPASSEN                                   │
+        ├─────────────────────────────────────────────────────────────────────┤
+        │ WO:      [SECTION-12] → generateSingleVariant()                     │
+        │ TIPP:    Suche nach bestimmten Stellaris-Befehlen (z.B. "flags =") │
+        │ WICHTIG: Achte auf korrekte Tab-Einrückung (\t)                    │
+        └─────────────────────────────────────────────────────────────────────┘
+        
+        ┌─────────────────────────────────────────────────────────────────────┐
+        │ 6️⃣  NEUE BUTTON/INPUT HINZUFÜGEN                                     │
+        ├─────────────────────────────────────────────────────────────────────┤
+        │ 1. HTML → Neues Element mit eindeutiger id="" erstellen            │
+        │ 2. [SECTION-04] → elements → getElementById hinzufügen              │
+        │ 3. [SECTION-16] → initializeEventListeners() → Event hinzufügen    │
+        │ 4. Bei onclick im HTML: Funktion in window.* verfügbar machen      │
+        │    (siehe [SECTION-17] → window.deineFunktion = ...)               │
+        └─────────────────────────────────────────────────────────────────────┘
+        
+        ┌─────────────────────────────────────────────────────────────────────┐
+        │ 7️⃣  VISUALIZER ANPASSEN (FARBEN, GRÖSSEN)                            │
+        ├─────────────────────────────────────────────────────────────────────┤
+        │ WO:      [SECTION-14] → renderVisualizer() & drawCelestial()       │
+        │ ÄNDERN:                                                              │
+        │   - Planetengröße: Suche "size * visualizerScale"                  │
+        │   - Orbit-Ringe: Suche ".orbit-indicator"                           │
+        │   - Zoom-Stufe: Ändere "visualizerScale = 0.3" am Anfang          │
+        │   - Stern-Größe: Suche "const starSize = 30"                       │
+        └─────────────────────────────────────────────────────────────────────┘
+        
+        ┌─────────────────────────────────────────────────────────────────────┐
+        │ 8️⃣  DEBUGGING-TIPPS                                                  │
+        ├─────────────────────────────────────────────────────────────────────┤
+        │ • Browser-Konsole öffnen: F12 → Console Tab                        │
+        │ • Fehler bei Button-Klick: Prüfe ob Funktion in window.* ist      │
+        │ • Daten nicht gespeichert: Prüfe updateOutput() Aufrufe           │
+        │ • UI aktualisiert nicht: Prüfe update...() Funktionsaufrufe       │
+        │ • Export falsch: console.log(solarSystem) vor Export ausführen    │
+        └─────────────────────────────────────────────────────────────────────┘
+        
+        ┌─────────────────────────────────────────────────────────────────────┐
+        │ 9️⃣  SUCHTIPPS FÜR STRG+F                                             │
+        ├─────────────────────────────────────────────────────────────────────┤
+        │ • [SECTION-XX]    → Springe zu Hauptbereichen                      │
+        │ • function add    → Finde alle add..() Funktionen                  │
+        │ • function update → Finde alle update..() Funktionen               │
+        │ • addEventListener → Finde alle Event-Registrierungen              │
+        │ • window.         → Finde alle globalen Funktionen                 │
+        │ • txt +=          → Finde Code-Generierung                         │
+        │ • getElementById  → Finde HTML-Element-Verknüpfungen              │
+        └─────────────────────────────────────────────────────────────────────┘
+        
+        ╔══════════════════════════════════════════════════════════════════════╗
+        ║  Bei Fragen: Suche nach dem relevanten [SECTION-XX] Marker oder    ║
+        ║  durchsuche die Kommentare mit "HIER:", "ÄNDERN:", "WICHTIG:"      ║
+        ╚══════════════════════════════════════════════════════════════════════╝
+        */
     </script>
 </body>
 </html>
