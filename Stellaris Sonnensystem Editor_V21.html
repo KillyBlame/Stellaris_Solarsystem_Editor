@@ -1,9 +1,9 @@
 <!DOCTYPE html>
-<html lang="de">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Stellaris Solar System Editor V20 - Full Editor</title>
+    <title>Stellaris Solar System Editor V21 - Full Editor</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;600;700;800;900&family=Exo+2:wght@300;400;500;600&display=swap');
@@ -345,30 +345,30 @@
 </head>
 <body>
     <div class="container mx-auto py-8 px-4">
-        <h1 class="stellaris-header">🌌 Stellaris Solar System Editor V20</h1>
+        <h1 class="stellaris-header">🌌 Stellaris Solar System Editor V21</h1>
         <div class="text-center mb-6">
-            <span class="text-yellow-400 font-semibold">⭐ Full Editor - Bearbeite Systeme, Planeten und Nachbarn</span>
+            <span class="text-yellow-400 font-semibold">⭐ Full Editor - Edit systems, planets, and neighbors</span>
         </div>
 
         <!-- Import Section -->
         <div class="stellaris-panel mb-6">
-            <h2 class="text-xl font-bold mb-4 text-blue-300">📂 System Import/Export</h2>
+            <h2 class="text-xl font-bold mb-4 text-blue-300">📂 Import/Export System</h2>
             <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
                 <div>
-                    <label class="label">System-Datei laden (.txt)</label>
+                    <label class="label">Load System-File (.txt)</label>
                     <input type="file" id="importFile" class="stellaris-input" accept=".txt" style="padding: 0.5rem;">
                 </div>
                 <div class="flex items-end gap-2">
-                    <button id="importBtn" class="stellaris-btn">System(e) importieren</button>
-                    <button id="clearAllBtn" class="stellaris-btn stellaris-btn-secondary">Alle leeren</button>
+                    <button id="importBtn" class="stellaris-btn">Import System(s)</button>
+                    <button id="clearAllBtn" class="stellaris-btn stellaris-btn-secondary">Remove all</button>
                 </div>
                 <div class="flex items-end">
-                    <button id="exportAllBtn" class="stellaris-btn stellaris-btn-secondary">Alle exportieren</button>
+                    <button id="exportAllBtn" class="stellaris-btn stellaris-btn-secondary">Export all</button>
                 </div>
             </div>
             
             <div id="importInfo" class="mt-4 p-3 bg-blue-900/30 rounded-lg border border-blue-500/30 hidden">
-                <p class="text-blue-300 font-semibold">✅ Importiert: <span id="systemCount">0</span> System(e)</p>
+                <p class="text-blue-300 font-semibold">✅ Imported: <span id="systemCount">0</span> System(s)</p>
             </div>
         </div>
 
@@ -377,12 +377,12 @@
             <!-- Left Panel: System List -->
             <div class="system-list-panel">
                 <div class="stellaris-panel">
-                    <h2 class="text-lg font-bold mb-4 text-purple-300">🌟 Geladene Systeme</h2>
+                    <h2 class="text-lg font-bold mb-4 text-purple-300">🌟 Loaded Systems</h2>
                     <div id="systemList" class="space-y-2">
-                        <p class="text-gray-400 text-sm">Keine Systeme geladen.</p>
+                        <p class="text-gray-400 text-sm">No systems loaded.</p>
                     </div>
                     <button id="addNewSystemBtn" class="stellaris-btn stellaris-btn-secondary mt-4 w-full text-sm py-2">
-                        ➕ Neues System erstellen
+                        ➕ Create New System
                     </button>
                 </div>
             </div>
@@ -391,7 +391,7 @@
             <div class="system-editor-panel">
                 <div id="systemEditorContent">
                     <div class="stellaris-panel text-center py-12">
-                        <p class="text-gray-400 text-lg">👈 Wähle ein System aus der Liste oder importiere eine Datei</p>
+                        <p class="text-gray-400 text-lg">👈 Select a system from the list or import a file</p>
                     </div>
                 </div>
             </div>
@@ -400,12 +400,12 @@
         <!-- Export Preview Modal -->
         <div id="exportPreview" class="modal">
             <div class="modal-content">
-                <h2 class="text-2xl font-bold mb-4 text-green-300">📋 Export-Vorschau</h2>
+                <h2 class="text-2xl font-bold mb-4 text-green-300">📋 Export Preview</h2>
                 <textarea id="exportTextarea" class="stellaris-input font-mono text-sm" rows="20" readonly></textarea>
                 <div class="mt-4 flex gap-2">
-                    <button id="downloadExportBtn" class="stellaris-btn">💾 Datei herunterladen</button>
-                    <button id="copyExportBtn" class="stellaris-btn stellaris-btn-secondary">📋 In Zwischenablage</button>
-                    <button id="closePreviewBtn" class="stellaris-btn stellaris-btn-secondary">✕ Schließen</button>
+                    <button id="downloadExportBtn" class="stellaris-btn">💾 Download Files</button>
+                    <button id="copyExportBtn" class="stellaris-btn stellaris-btn-secondary">📋 Copy to Clipboard</button>
+                    <button id="closePreviewBtn" class="stellaris-btn stellaris-btn-secondary">✕ Close</button>
                 </div>
             </div>
         </div>
@@ -413,7 +413,7 @@
         <!-- Add/Edit Planet Modal -->
         <div id="planetModal" class="modal">
             <div class="modal-content">
-                <h2 class="text-2xl font-bold mb-4 text-blue-300" id="planetModalTitle">🌍 Planet hinzufügen</h2>
+                <h2 class="text-2xl font-bold mb-4 text-blue-300" id="planetModalTitle">🌍 Add Planet</h2>
                 
                 <div class="form-grid">
                     <div class="form-group">
@@ -421,72 +421,72 @@
                         <input type="text" id="planetName" class="stellaris-input" placeholder="z.B. Earth">
                     </div>
                     <div class="form-group">
-                        <label class="label">Planetenklasse</label>
+                        <label class="label">Planet class</label>
                         <select id="planetClass" class="stellaris-input">
-                            <optgroup label="⭐ Sterne">
-                                <option value="pc_g_star">G-Stern (Gelb)</option>
-                                <option value="pc_k_star">K-Stern (Orange)</option>
-                                <option value="pc_m_star">M-Stern (Rot)</option>
-                                <option value="pc_f_star">F-Stern (Gelblich-Weiß)</option>
-                                <option value="pc_a_star">A-Stern (Weiß)</option>
-                                <option value="pc_b_star">B-Stern (Blau)</option>
-                                <option value="pc_o_star">O-Stern (Blau)</option>
-                                <option value="pc_black_hole">Schwarzes Loch</option>
-                                <option value="pc_neutron_star">Neutronenstern</option>
+                            <optgroup label="⭐ Stars">
+                                <option value="pc_g_star">G-Star (Yellow)</option>
+                                <option value="pc_k_star">K-Star (Orange)</option>
+                                <option value="pc_m_star">M-Star (Red)</option>
+                                <option value="pc_f_star">F-Star (Yellowish-White)</option>
+                                <option value="pc_a_star">A-Star (White)</option>
+                                <option value="pc_b_star">B-Star (Blue)</option>
+                                <option value="pc_o_star">O-Star (Blue)</option>
+                                <option value="pc_black_hole">Black Hole</option>
+                                <option value="pc_neutron_star">Neutron Star</option>
                                 <option value="pc_pulsar">Pulsar</option>
                             </optgroup>
-                            <optgroup label="Bewohnbare Planeten">
-                                <option value="pc_continental">Kontinental</option>
-                                <option value="pc_ocean">Ozean</option>
-                                <option value="pc_desert">Wüste</option>
-                                <option value="pc_tropical">Tropisch</option>
-                                <option value="pc_arid">Trocken</option>
+                            <optgroup label="Habitable Planets">
+                                <option value="pc_continental">Continental</option>
+                                <option value="pc_ocean">Ocean</option>
+                                <option value="pc_desert">Desert</option>
+                                <option value="pc_tropical">Tropical</option>
+                                <option value="pc_arid">Arid</option>
                                 <option value="pc_tundra">Tundra</option>
-                                <option value="pc_arctic">Arktisch</option>
-                                <option value="pc_alpine">Alpin</option>
-                                <option value="pc_savannah">Savanne</option>
+                                <option value="pc_arctic">Arctic</option>
+                                <option value="pc_alpine">Alpine</option>
+                                <option value="pc_savannah">Savannah</option>
                             </optgroup>
-                            <optgroup label="Unbewohnbare Planeten">
-                                <option value="pc_gas_giant">Gasriese</option>
-                                <option value="pc_molten">Geschmolzen</option>
-                                <option value="pc_barren">Öde</option>
-                                <option value="pc_barren_cold">Öde (Kalt)</option>
-                                <option value="pc_toxic">Toxisch</option>
-                                <option value="pc_frozen">Gefroren</option>
+                            <optgroup label="Uninhabitable Planets">
+                                <option value="pc_gas_giant">Gas Giant</option>
+                                <option value="pc_molten">Molten</option>
+                                <option value="pc_barren">Barren</option>
+                                <option value="pc_barren_cold">Barren (Cold)</option>
+                                <option value="pc_toxic">Toxic</option>
+                                <option value="pc_frozen">Frozen</option>
                             </optgroup>
                             <optgroup label="Asteroiden">
                                 <option value="pc_asteroid">Asteroid</option>
-                                <option value="pc_ice_asteroid">Eis-Asteroid</option>
-                                <option value="pc_rare_crystal_asteroid">Kristall-Asteroid</option>
+                                <option value="pc_ice_asteroid">Ice Asteroid</option>
+                                <option value="pc_rare_crystal_asteroid">Rare Crystal Asteroid</option>
                             </optgroup>
                         </select>
                     </div>
                     <div class="form-group">
-                        <label class="label">Größe (5-40)</label>
+                        <label class="label">Size (5-40)</label>
                         <input type="number" id="planetSize" class="stellaris-input" value="16" min="5" max="40">
                     </div>
                     <div class="form-group">
-                        <label class="label">Orbit-Distanz</label>
+                        <label class="label">Orbit Distance</label>
                         <input type="number" id="planetOrbit" class="stellaris-input" value="25" min="0" max="200">
                     </div>
                     <div class="form-group" style="grid-column: span 2;">
-                        <label class="label">Orbit-Winkel Modus</label>
+                        <label class="label">Orbit Angle Mode</label>
                         <select id="orbitAngleMode" class="stellaris-input" onchange="window.toggleOrbitAngleFields()">
-                            <option value="preset">Preset (Fixwinkel)</option>
+                            <option value="preset">Preset (Fixed Angle)</option>
                             <option value="range">Range (Min/Max)</option>
                         </select>
                     </div>
 
                     <div id="orbitAnglePreset" class="form-group" style="grid-column: span 2;">
-                        <label class="label">Orbit-Winkel</label>
+                        <label class="label">Orbit Angle</label>
                         <select id="planetAnglePreset" class="stellaris-input">
-                            <option value="0">0° (Oben)</option>
+                            <option value="0">0° (Top)</option>
                             <option value="60">60°</option>
-                            <option value="90" selected>90° (Rechts)</option>
+                            <option value="90" selected>90° (Right)</option>
                             <option value="120">120°</option>
-                            <option value="180">180° (Unten)</option>
+                            <option value="180">180° (Bottom)</option>
                             <option value="240">240°</option>
-                            <option value="270">270° (Links)</option>
+                            <option value="270">270° (Left)</option>
                             <option value="300">300°</option>
                         </select>
                     </div>
@@ -510,13 +510,19 @@
                     <div class="form-group flex items-center">
                         <label class="flex items-center cursor-pointer">
                             <input type="checkbox" id="planetHasRing" class="mr-2">
-                            <span class="text-gray-300">Planet hat Ring</span>
+                            <span class="text-gray-300">Planet has Ring</span>
                         </label>
                     </div>
                     <div class="form-group flex items-center">
                         <label class="flex items-center cursor-pointer">
                             <input type="checkbox" id="planetIsStarting" class="mr-2">
-                            <span class="text-gray-300">🏠 Startplanet</span>
+                            <span class="text-gray-300">🏠 Starting Planet</span>
+                        </label>
+                    </div>
+                    <div class="form-group flex items-center">
+                        <label class="flex items-center cursor-pointer">
+                            <input type="checkbox" id="planetIsGuaranteedHabitable" class="mr-2">
+                            <span class="text-gray-300">🌍 Garantierter bewohnbarer Planet</span>
                         </label>
                     </div>
                 </div>
@@ -524,16 +530,16 @@
                 <!-- Modifier System -->
                 <div class="mt-6 p-4 bg-gradient-to-br from-green-900/30 to-emerald-900/20 rounded-lg border border-green-700/50">
                     <h3 class="text-lg font-semibold text-green-300 mb-3 flex items-center">
-                        🌿 Intelligentes Planet-Modifier System
+                        🌿 Smart Planet Modifier System
                     </h3>
                     
                     <div class="bg-blue-900/20 border border-blue-700/30 rounded p-3 mb-4 text-sm">
-                        <p class="text-blue-300 mb-1"><strong>Planetary Diversity:</strong> Zeigt nur kompatible Modifier für gewählte Basis-Planetenklasse</p>
-                        <p class="text-blue-200"><strong>Andere:</strong> Standard-Modifier funktionieren mit allen Klassen</p>
+                        <p class="text-blue-300 mb-1"><strong>Planetary Diversity:</strong> Shows only compatible modifiers for selected base planet class</p>
+                        <p class="text-blue-200"><strong>Others:</strong> Standard modifiers work with all classes</p>
                     </div>
 
                     <div class="mb-4">
-                        <p id="modifierStatusText" class="text-gray-400 text-sm mb-3">Keine Modifier ausgewählt</p>
+                        <p id="modifierStatusText" class="text-gray-400 text-sm mb-3">No modifiers selected</p>
                         <div id="selectedModifiersList" class="space-y-2">
                             <!-- Selected modifiers will be displayed here -->
                         </div>
@@ -543,36 +549,36 @@
                         
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-3 mb-3">
                             <div>
-                                <label class="label text-xs">MODIFIER KATEGORIE</label>
+                                <label class="label text-xs">MODIFIER CATEGORY</label>
                                 <select id="modifierCategory" class="stellaris-input text-sm" onchange="window.updateModifierOptions()">
-                                    <option value="">-- Kategorie wählen --</option>
-                                    <option value="resources">Ressourcen-Modifier</option>
-                                    <option value="planetary">Planetare Features</option>
-                                    <option value="deposits">Ablagerungen</option>
-                                    <option value="anomalies">Anomalien</option>
-                                    <option value="special">Spezielle Modifier</option>
+                                    <option value="">-- Select Category --</option>
+                                    <option value="resources">Resource Modifiers</option>
+                                    <option value="planetary">Planetary Features</option>
+                                    <option value="deposits">Deposits</option>
+                                    <option value="anomalies">Anomalies</option>
+                                    <option value="special">Special Modifiers</option>
                                     <option value="pd_terraforming">PD: Terraforming</option>
-                                    <option value="pd_climate">PD: Klima</option>
-                                    <option value="pd_unique">PD: Einzigartige</option>
+                                    <option value="pd_climate">PD: Climate</option>
+                                    <option value="pd_unique">PD: Unique</option>
                                 </select>
                             </div>
                             <div>
                                 <label class="label text-xs">MODIFIER</label>
                                 <select id="modifierSelection" class="stellaris-input text-sm" disabled>
-                                    <option value="">-- Modifier wählen --</option>
+                                    <option value="">-- Select Modifier --</option>
                                 </select>
                             </div>
                         </div>
                         
                         <button id="addModifierBtn" class="stellaris-btn stellaris-btn-success w-full" onclick="window.addModifierToPlanet()" disabled>
-                            MODIFIER HINZUFÜGEN
+                            ADD MODIFIER
                         </button>
                     </div>
                 </div>
 
                 <div class="mt-6 flex gap-2">
-                    <button id="savePlanetBtn" class="stellaris-btn stellaris-btn-success">💾 Speichern</button>
-                    <button id="cancelPlanetBtn" class="stellaris-btn stellaris-btn-secondary">✕ Abbrechen</button>
+                    <button id="savePlanetBtn" class="stellaris-btn stellaris-btn-success">💾 Save</button>
+                    <button id="cancelPlanetBtn" class="stellaris-btn stellaris-btn-secondary">✕ Cancel</button>
                 </div>
             </div>
         </div>
@@ -580,69 +586,69 @@
         <!-- Add/Edit Moon Modal -->
         <div id="moonModal" class="modal">
             <div class="modal-content">
-                <h2 class="text-2xl font-bold mb-4 text-purple-300" id="moonModalTitle">🌙 Mond hinzufügen</h2>
+                <h2 class="text-2xl font-bold mb-4 text-purple-300" id="moonModalTitle">🌙 Add Moon</h2>
                 
                 <div class="form-grid">
                     <div class="form-group">
-                        <label class="label">Mond-Name</label>
+                        <label class="label">Moon-Name</label>
                         <input type="text" id="moonName" class="stellaris-input" placeholder="z.B. Luna">
                     </div>
                     <div class="form-group">
                         <label class="label">Mondklasse</label>
                         <select id="moonClass" class="stellaris-input">
-                            <optgroup label="Bewohnbare Monde">
-                                <option value="pc_continental">Kontinental</option>
-                                <option value="pc_ocean">Ozean</option>
-                                <option value="pc_desert">Wüste</option>
-                                <option value="pc_tropical">Tropisch</option>
-                                <option value="pc_arid">Trocken</option>
+                            <optgroup label="Habitable Moons">
+                                <option value="pc_continental">Continental</option>
+                                <option value="pc_ocean">Ocean</option>
+                                <option value="pc_desert">Desert</option>
+                                <option value="pc_tropical">Tropical</option>
+                                <option value="pc_arid">Arid</option>
                                 <option value="pc_tundra">Tundra</option>
-                                <option value="pc_arctic">Arktisch</option>
-                                <option value="pc_alpine">Alpin</option>
-                                <option value="pc_savannah">Savanne</option>
+                                <option value="pc_arctic">Arctic</option>
+                                <option value="pc_alpine">Alpine</option>
+                                <option value="pc_savannah">Savannah</option>
                             </optgroup>
-                            <optgroup label="Unbewohnbare Monde">
-                                <option value="pc_gas_giant">Gasriese</option>
-                                <option value="pc_molten">Geschmolzen</option>
-                                <option value="pc_barren">Öde</option>
-                                <option value="pc_barren_cold">Öde (Kalt)</option>
-                                <option value="pc_toxic">Toxisch</option>
-                                <option value="pc_frozen">Gefroren</option>
+                            <optgroup label="Uninhabitable Moons">
+                                <option value="pc_gas_giant">Gas Giant</option>
+                                <option value="pc_molten">Molten</option>
+                                <option value="pc_barren">Barren</option>
+                                <option value="pc_barren_cold">Barren (Cold)</option>
+                                <option value="pc_toxic">Toxic</option>
+                                <option value="pc_frozen">Frozen</option>
                             </optgroup>
-                            <optgroup label="Asteroiden">
+                            <optgroup label="Asteroids">
                                 <option value="pc_asteroid">Asteroid</option>
-                                <option value="pc_ice_asteroid">Eis-Asteroid</option>
-                                <option value="pc_rare_crystal_asteroid">Kristall-Asteroid</option>
+                                <option value="pc_ice_asteroid">Ice Asteroid</option>
+                                <option value="pc_rare_crystal_asteroid">Rare Crystal Asteroid</option>
                             </optgroup>
                         </select>
                     </div>
                     <div class="form-group">
-                        <label class="label">Größe (3-20)</label>
+                        <label class="label">Size (3-20)</label>
                         <input type="number" id="moonSize" class="stellaris-input" value="8" min="3" max="20">
                     </div>
                     <div class="form-group">
-                        <label class="label">Orbit-Distanz vom Planet</label>
+                        <label class="label">Orbit Distance from Planet</label>
                         <input type="number" id="moonOrbit" class="stellaris-input" value="10" min="5" max="30">
                     </div>
 
                     <div class="form-group" style="grid-column: span 2;">
-                        <label class="label">Orbit-Winkel Modus</label>
+                        <label class="label">Orbit Angle Mode</label>
                         <select id="moonOrbitAngleMode" class="stellaris-input" onchange="window.toggleMoonOrbitAngleFields()">
-                            <option value="preset">Preset (Fixwinkel)</option>
+                            <option value="preset">Preset (Fixed Angle)</option>
                             <option value="range">Range (Min/Max)</option>
                         </select>
                     </div>
 
                     <div id="moonOrbitAnglePreset" class="form-group" style="grid-column: span 2;">
-                        <label class="label">Orbit-Winkel</label>
+                        <label class="label">Orbit Angle</label>
                         <select id="moonAnglePreset" class="stellaris-input">
-                            <option value="0">0° (Oben)</option>
+                            <option value="0">0° (Top)</option>
                             <option value="60">60°</option>
-                            <option value="90" selected>90° (Rechts)</option>
+                            <option value="90" selected>90° (Right)</option>
                             <option value="120">120°</option>
-                            <option value="180">180° (Unten)</option>
+                            <option value="180">180° (Bottom)</option>
                             <option value="240">240°</option>
-                            <option value="270">270° (Links)</option>
+                            <option value="270">270° (Left)</option>
                             <option value="300">300°</option>
                         </select>
                     </div>
@@ -660,14 +666,23 @@
                         </div>
                     </div>
                     
-                    <!-- NEU: Startplanet Checkbox für Monde -->
+                    <!-- NEW: Starting Planet Checkbox for Moons -->
                     <div class="form-group" style="grid-column: span 2;">
                         <label class="flex items-center cursor-pointer">
                             <input type="checkbox" id="moonIsStarting" class="mr-2" style="width: auto;">
-                            <span class="text-gray-300">🏠 Mond als Startplanet markieren</span>
+                            <span class="text-gray-300">🏠 Mark moon as starting planet</span>
                         </label>
                         <p class="text-xs text-gray-400 mt-1">
-                            Für bewohnbare Monde wie Sleipnir (Asgard-System)
+                            For habitable moons like Sleipnir (Asgard system)
+                        </p>
+                    </div>
+                    <div class="form-group" style="grid-column: span 2;">
+                        <label class="flex items-center cursor-pointer">
+                            <input type="checkbox" id="moonIsGuaranteedHabitable" class="mr-2" style="width: auto;">
+                            <span class="text-gray-300">🌍 Mark moon as guaranteed habitable world</span>
+                        </label>
+                        <p class="text-xs text-gray-400 mt-1">
+                            For habitable moons, which are considered ideal colony targets
                         </p>
                     </div>
                 </div>
@@ -675,15 +690,15 @@
                 <!-- Modifier System für Monde -->
                 <div class="mt-6 p-4 bg-gradient-to-br from-purple-900/30 to-pink-900/20 rounded-lg border border-purple-700/50">
                     <h3 class="text-lg font-semibold text-purple-300 mb-3 flex items-center">
-                        🌙 Mond-Modifier System
+                        🌙 Moon Modifier System
                     </h3>
                     
                     <div class="bg-blue-900/20 border border-blue-700/30 rounded p-3 mb-4 text-sm">
-                        <p class="text-blue-300">Monde können die gleichen Modifier wie Planeten haben.</p>
+                        <p class="text-blue-300">Moons can have the same modifiers as planets.</p>
                     </div>
 
                     <div class="mb-4">
-                        <p id="moonModifierStatusText" class="text-gray-400 text-sm mb-3">Keine Modifier ausgewählt</p>
+                        <p id="moonModifierStatusText" class="text-gray-400 text-sm mb-3">No modifiers selected</p>
                         <div id="selectedMoonModifiersList" class="space-y-2">
                             <!-- Selected modifiers will be displayed here -->
                         </div>
@@ -692,36 +707,36 @@
                     <div class="bg-slate-800/50 p-3 rounded border border-slate-700">
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-3 mb-3">
                             <div>
-                                <label class="label text-xs">MODIFIER KATEGORIE</label>
+                                <label class="label text-xs">MODIFIER CATEGORY</label>
                                 <select id="moonModifierCategory" class="stellaris-input text-sm" onchange="window.updateMoonModifierOptions()">
-                                    <option value="">-- Kategorie wählen --</option>
-                                    <option value="resources">Ressourcen-Modifier</option>
-                                    <option value="planetary">Planetare Features</option>
-                                    <option value="deposits">Ablagerungen</option>
-                                    <option value="anomalies">Anomalien</option>
-                                    <option value="special">Spezielle Modifier</option>
+                                    <option value="">-- Select Category --</option>
+                                    <option value="resources">Resource Modifiers</option>
+                                    <option value="planetary">Planetary Features</option>
+                                    <option value="deposits">Deposits</option>
+                                    <option value="anomalies">Anomalies</option>
+                                    <option value="special">Special Modifiers</option>
                                     <option value="pd_terraforming">PD: Terraforming</option>
-                                    <option value="pd_climate">PD: Klima</option>
-                                    <option value="pd_unique">PD: Einzigartige</option>
+                                    <option value="pd_climate">PD: Climate</option>
+                                    <option value="pd_unique">PD: Unique</option>
                                 </select>
                             </div>
                             <div>
                                 <label class="label text-xs">MODIFIER</label>
                                 <select id="moonModifierSelection" class="stellaris-input text-sm" disabled>
-                                    <option value="">-- Modifier wählen --</option>
+                                    <option value="">-- Select Modifier --</option>
                                 </select>
                             </div>
                         </div>
                         
                         <button id="addMoonModifierBtn" class="stellaris-btn stellaris-btn-success w-full" onclick="window.addModifierToMoon()" disabled>
-                            MODIFIER HINZUFÜGEN
+                            ADD MODIFIER
                         </button>
                     </div>
                 </div>
 
                 <div class="mt-6 flex gap-2">
-                    <button id="saveMoonBtn" class="stellaris-btn stellaris-btn-success">💾 Speichern</button>
-                    <button id="cancelMoonBtn" class="stellaris-btn stellaris-btn-secondary">✕ Abbrechen</button>
+                    <button id="saveMoonBtn" class="stellaris-btn stellaris-btn-success">💾 Save</button>
+                    <button id="cancelMoonBtn" class="stellaris-btn stellaris-btn-secondary">✕ Cancel</button>
                 </div>
             </div>
         </div>
@@ -729,26 +744,26 @@
         <!-- Add Neighbor System Modal -->
         <div id="neighborModal" class="modal">
             <div class="modal-content">
-                <h2 class="text-2xl font-bold mb-4 text-yellow-300">🔗 Nachbarsystem hinzufügen</h2>
+                <h2 class="text-2xl font-bold mb-4 text-yellow-300">🔗 Add Neighbor System</h2>
                 
                 <div class="mb-4 p-3 bg-blue-900/30 rounded-lg border border-blue-500/30">
                     <p class="text-sm text-gray-300">
-                        <strong>💡 Hinweis:</strong> Der System-Identifier wird automatisch generiert aus dem Hauptsystem-Namen und dem Anzeigenamen.
+                        <strong>💡 Note:</strong> The system identifier will be automatically generated from the main system name and display name.
                     </p>
                 </div>
 
                 <div class="form-group">
-                    <label class="label">Anzeigename des Nachbarsystems</label>
+                    <label class="label">Display Name of Neighbor System</label>
                     <div class="mb-4">
-                        <label class="label">Nachbarsystem wählen</label>
+                        <label class="label">Select Neighbor System</label>
                         <select id="neighborSystemSelect" class="stellaris-input mb-2">
-                            <option value="">-- Aus Liste wählen --</option>
+                            <option value="">-- Select from List --</option>
                         </select>
-                        <p class="text-xs text-gray-400">Oder manuell eingeben:</p>
+                        <p class="text-xs text-gray-400">Or enter manually:</p>
                     </div>
                     
                     <input type="text" id="neighborDisplayName" class="stellaris-input" placeholder="z.B. Apsu">
-                    <p class="text-xs text-gray-400 mt-1">Wird automatisch zu: <span id="neighborPreviewIdentifier" class="text-blue-300">-</span></p>
+                    <p class="text-xs text-gray-400 mt-1">Will be converted to: <span id="neighborPreviewIdentifier" class="text-blue-300">-</span></p>
                 </div>
 
                 <div class="form-grid mt-4">
@@ -763,8 +778,8 @@
                 </div>
 
                 <div class="mt-6 flex gap-2">
-                    <button id="saveNeighborBtn" class="stellaris-btn stellaris-btn-success">💾 Hinzufügen</button>
-                    <button id="cancelNeighborBtn" class="stellaris-btn stellaris-btn-secondary">✕ Abbrechen</button>
+                    <button id="saveNeighborBtn" class="stellaris-btn stellaris-btn-success">💾 Save</button>
+                    <button id="cancelNeighborBtn" class="stellaris-btn stellaris-btn-secondary">✕ Cancel</button>
                 </div>
             </div>
         </div>
@@ -772,11 +787,11 @@
         <!-- Add Asteroid Belt Modal -->
         <div id="asteroidBeltModal" class="modal">
             <div class="modal-content">
-                <h2 class="text-2xl font-bold mb-4 text-yellow-300">☄️ Asteroidengürtel hinzufügen</h2>
+                <h2 class="text-2xl font-bold mb-4 text-yellow-300">☄️ Add Asteroid Belt</h2>
                 
                 <div class="form-grid">
                     <div class="form-group">
-                        <label class="label">Gürtel-Typ</label>
+                        <label class="label">Belt Typ</label>
                         <select id="beltType" class="stellaris-input">
                             <option value="rocky_asteroid_belt">Rocky Asteroid Belt</option>
                             <option value="icy_asteroid_belt">Icy Asteroid Belt</option>
@@ -784,14 +799,14 @@
                         </select>
                     </div>
                     <div class="form-group">
-                        <label class="label">Radius (30-300)</label>
-                        <input type="number" id="beltRadius" class="stellaris-input" value="90" min="30" max="300">
+                        <label class="label">Radius (30-1500)</label>
+                        <input type="number" id="beltRadius" class="stellaris-input" value="90" min="30" max="1500">
                     </div>
                 </div>
 
                 <div class="mt-6 flex gap-2">
-                    <button id="saveBeltBtn" class="stellaris-btn stellaris-btn-success">💾 Hinzufügen</button>
-                    <button id="cancelBeltBtn" class="stellaris-btn stellaris-btn-secondary">✕ Abbrechen</button>
+                    <button id="saveBeltBtn" class="stellaris-btn stellaris-btn-success">💾 Save</button>
+                    <button id="cancelBeltBtn" class="stellaris-btn stellaris-btn-secondary">✕ Cancel</button>
                 </div>
             </div>
         </div>
@@ -1000,11 +1015,42 @@
                     });
                 }
                 
-                const neighborRegex = /neighbor_system\s*=\s*\{[^}]*\}/g;
-                let neighborMatch;
-                while ((neighborMatch = neighborRegex.exec(blockContent)) !== null) {
-                    const initializerMatch = neighborMatch[0].match(/initializer\s*=\s*"?([^"\s}]+)"?/);
-                    const hyperlaneMatch = neighborMatch[0].match(/hyperlane_jumps\s*=\s*\{\s*min\s*=\s*(\d+)\s*max\s*=\s*(\d+)\s*\}/);
+                // Parse neighbor_systems mit Bracket-Counting
+                let i = 0;
+                while (i < blockContent.length) {
+                    const neighborKeyword = blockContent.indexOf('neighbor_system', i);
+                    if (neighborKeyword === -1) break;
+                    
+                    const equalsSign = blockContent.indexOf('=', neighborKeyword);
+                    if (equalsSign === -1 || equalsSign - neighborKeyword > 20) {
+                        i = neighborKeyword + 15;
+                        continue;
+                    }
+                    
+                    const braceStart = blockContent.indexOf('{', equalsSign);
+                    if (braceStart === -1) break;
+                    
+                    let braceCount = 0;
+                    let blockEnd = -1;
+                    
+                    for (let j = braceStart; j < blockContent.length; j++) {
+                        if (blockContent[j] === '{') braceCount++;
+                        if (blockContent[j] === '}') {
+                            braceCount--;
+                            if (braceCount === 0) {
+                                blockEnd = j;
+                                break;
+                            }
+                        }
+                    }
+                    
+                    if (blockEnd === -1) break;
+                    
+                    const neighborBlock = blockContent.substring(braceStart + 1, blockEnd);
+                    
+                    // Parse Neighbor-Block
+                    const initializerMatch = neighborBlock.match(/initializer\s*=\s*"?([^"\s}]+)"?/);
+                    const hyperlaneMatch = neighborBlock.match(/hyperlane_jumps\s*=\s*\{\s*min\s*=\s*(\d+)\s*max\s*=\s*(\d+)\s*\}/);
                     
                     if (initializerMatch) {
                         system.neighborSystems.push({
@@ -1017,6 +1063,8 @@
                             } : { min: 1, max: 3 }
                         });
                     }
+                    
+                    i = blockEnd + 1;
                 }
                 
                 system.planets = this.extractPlanets(blockContent);
@@ -1103,8 +1151,9 @@
                     orbitAngleMax: 270,
                     changeOrbit: parseInt(this.extractValue(blockContent, 'change_orbit') || '0'),
                     hasRing: this.extractValue(blockContent, 'has_ring') === 'yes',
-                    isStartingPlanet: blockContent.includes('starting_planet') || blockContent.includes('generate_start_buildings'),
-                    modifiers: [],
+                    isStartingPlanet: this.checkStartingPlanetAtTopLevel(blockContent),
+                    isGuaranteedHabitable: blockContent.includes('prescripted_ideal') || blockContent.includes('ideal_design_class'),
+                    modifiers: this.extractModifiers(blockContent),
                     moons: [],
                     flags: []
                 };
@@ -1174,8 +1223,9 @@
                         orbitAngleMax: 270,
                         changeOrbit: 0,
                         hasRing: false,
-                        isStartingPlanet: false,
-                        modifiers: [],
+                        isStartingPlanet: moonBlock.includes('starting_planet') || moonBlock.includes('generate_start_buildings'),
+                        isGuaranteedHabitable: false,
+                        modifiers: this.extractModifiers(moonBlock),
                         moons: [],
                         flags: []
                     };
@@ -1186,6 +1236,63 @@
                 }
                 
                 return moons;
+            }
+
+            extractModifiers(block) {
+                const modifiers = [];
+                const modifierMatch = block.match(/modifiers\s*=\s*\{\s*([^}]+)\s*\}/);
+                
+                if (modifierMatch) {
+                    const modifierString = modifierMatch[1].trim();
+                    if (modifierString && modifierString !== 'none') {
+                        // Split by whitespace and filter out empty strings
+                        const modifierList = modifierString.split(/\s+/).filter(m => m.length > 0);
+                        modifiers.push(...modifierList);
+                    }
+                }
+                
+                return modifiers;
+            }
+
+            checkStartingPlanetAtTopLevel(block) {
+                // Only check for starting_planet at the top level (braceDepth = 0)
+                // to avoid false positives from nested moon blocks
+                let braceDepth = 0;
+                let i = 0;
+                
+                while (i < block.length) {
+                    const char = block[i];
+                    
+                    if (char === '{') {
+                        braceDepth++;
+                        i++;
+                        continue;
+                    }
+                    if (char === '}') {
+                        braceDepth--;
+                        i++;
+                        continue;
+                    }
+                    
+                    // Only check at top level (braceDepth = 0)
+                    if (braceDepth === 0) {
+                        const remaining = block.substring(i);
+                        
+                        // Check for starting_planet = yes
+                        if (/^\s*starting_planet\s*=\s*yes/.test(remaining)) {
+                            return true;
+                        }
+                        
+                        // Check for generate_start_buildings in init_effect
+                        if (/^\s*init_effect\s*=\s*\{[^}]*generate_start_buildings/.test(remaining)) {
+                            return true;
+                        }
+                    }
+                    
+                    i++;
+                }
+                
+                return false;
             }
 
             extractValue(block, key) {
@@ -1256,7 +1363,7 @@
                 });
             });
             
-            showNotification(`✅ ${allSystems.length} Systeme importiert und Nachbarn verknüpft!`);
+            showNotification(`✅ ${allSystems.length} systems imported and neighbors linked!`);
         }
 
         function generateNeighborIdentifier(displayName) {
@@ -1282,7 +1389,7 @@
         document.getElementById('importBtn').addEventListener('click', () => {
             const file = document.getElementById('importFile').files[0];
             if (!file) {
-                showNotification('⚠️ Bitte wähle eine Datei aus!');
+                showNotification('⚠️ Please select a file!');
                 return;
             }
             
@@ -1293,7 +1400,7 @@
                             const systems = parser.parseMultipleSystems(e.target.result);
                             
                             if (systems.length === 0) {
-                                showNotification('⌠Keine System-Initialisierer gefunden!');
+                                showNotification('❌ No system initializers found!');
                                 return;
                             }
                             
@@ -1312,9 +1419,9 @@
                             document.getElementById('importInfo').classList.remove('hidden');
                             document.getElementById('systemCount').textContent = systems.length;
                             
-                            showNotification(`✅ ${systems.length} System(e) erfolgreich importiert!`);
+                            showNotification(`✅ ${systems.length} system(s) successfully imported!`);
                         } catch (error) {
-                            showNotification('❌ Fehler beim Import: ' + error.message);
+                            showNotification('❌ Import error: ' + error.message);
                             console.error(error);
                         }
                     };
@@ -1329,23 +1436,23 @@
             allSystems.push(newSystem);
             updateSystemList();
             selectSystem(allSystems.length - 1);
-            showNotification('✅ Neues System erstellt!');
+            showNotification('✅ New system created!');
         });
 
         document.getElementById('clearAllBtn').addEventListener('click', () => {
-            if (confirm('Möchtest du wirklich alle Systeme löschen?')) {
+            if (confirm('Do you really want to delete all systems?')) {
                 allSystems = [];
                 currentSystemIndex = null;
                 updateSystemList();
                 clearEditor();
                 document.getElementById('importInfo').classList.add('hidden');
-                showNotification('🗑️ Alle Systeme gelöscht!');
+                showNotification('🗑️ All systems deleted!');
             }
         });
 
         document.getElementById('exportAllBtn').addEventListener('click', () => {
             if (allSystems.length === 0) {
-                showNotification('⚠️ Keine Systeme zum Exportieren!');
+                showNotification('⚠️ No systems to export!');
                 return;
             }
             
@@ -1355,22 +1462,38 @@
         });
 
         document.getElementById('downloadExportBtn').addEventListener('click', () => {
+            // Get main system for filename
+            const mainSystem = allSystems.find(s => s.isMain) || allSystems[0];
+            const baseName = mainSystem.name.replace(/_system_initializer$/, '');
+            
+            // Generate .txt file (system initializer)
             const code = document.getElementById('exportTextarea').value;
-            const blob = new Blob([code], { type: 'text/plain' });
-            const url = URL.createObjectURL(blob);
-            const a = document.createElement('a');
-            a.href = url;
-            a.download = 'stellaris_systems_export.txt';
-            a.click();
-            URL.revokeObjectURL(url);
-            showNotification('💾 Datei heruntergeladen!');
+            const txtBlob = new Blob([code], { type: 'text/plain; charset=utf-8' });
+            const txtUrl = URL.createObjectURL(txtBlob);
+            const txtLink = document.createElement('a');
+            txtLink.href = txtUrl;
+            txtLink.download = `${baseName}_system_initializer.txt`;
+            txtLink.click();
+            URL.revokeObjectURL(txtUrl);
+            
+            // Generate .yml file (localization)
+            const ymlContent = generateLocalizationYML(allSystems);
+            const ymlBlob = new Blob([ymlContent], { type: 'text/plain; charset=utf-8' });
+            const ymlUrl = URL.createObjectURL(ymlBlob);
+            const ymlLink = document.createElement('a');
+            ymlLink.href = ymlUrl;
+            ymlLink.download = `l_english_${baseName}_systems.yml`;
+            ymlLink.click();
+            URL.revokeObjectURL(ymlUrl);
+            
+            showNotification('💾 Files downloaded!');
         });
 
         document.getElementById('copyExportBtn').addEventListener('click', () => {
             const textarea = document.getElementById('exportTextarea');
             textarea.select();
             document.execCommand('copy');
-            showNotification('📋 In Zwischenablage kopiert!');
+            showNotification('📋 Copied to clipboard!');
         });
 
         document.getElementById('closePreviewBtn').addEventListener('click', () => {
@@ -1537,17 +1660,17 @@
                 
                 // Visual feedback
                 const addBtn = document.getElementById('addMoonModifierBtn');
-                addBtn.textContent = '✅ HINZUGEFÜGT!';
+                addBtn.textContent = '✅ ADD!';
                 addBtn.style.backgroundColor = '#48bb78';
                 
                 setTimeout(() => {
-                    addBtn.textContent = 'MODIFIER HINZUFÜGEN';
+                    addBtn.textContent = 'ADD MODIFIER';
                     addBtn.style.backgroundColor = '';
                 }, 1000);
                 
                 // Reset selections
                 document.getElementById('moonModifierCategory').value = '';
-                document.getElementById('moonModifierSelection').innerHTML = '<option value="">-- Modifier wählen --</option>';
+                document.getElementById('moonModifierSelection').innerHTML = '<option value="">-- Select Modifier --</option>';
                 document.getElementById('moonModifierSelection').disabled = true;
                 document.getElementById('addMoonModifierBtn').disabled = true;
             } else {
@@ -1575,12 +1698,12 @@
             
             if (currentMoon.modifiers.length === 0) {
                 listContainer.innerHTML = '';
-                statusText.textContent = 'Keine Modifier ausgewählt';
+                statusText.textContent = 'No modifiers selected';
                 statusText.className = 'text-gray-400 text-sm mb-3';
                 return;
             }
 
-            statusText.textContent = `✅ ${currentMoon.modifiers.length} Modifier ausgewählt:`;
+            statusText.textContent = `✅ ${currentMoon.modifiers.length} modifier(s) selected:`;
             statusText.className = 'text-purple-400 text-sm mb-3 font-semibold';
 
             listContainer.innerHTML = currentMoon.modifiers.map(modId => {
@@ -1634,12 +1757,12 @@
             
             if (currentPlanet.modifiers.length === 0) {
                 listContainer.innerHTML = '';
-                statusText.textContent = 'Keine Modifier ausgewählt';
+                statusText.textContent = 'No modifiers selected';
                 statusText.className = 'text-gray-400 text-sm mb-3';
                 return;
             }
 
-            statusText.textContent = `✅ ${currentPlanet.modifiers.length} Modifier ausgewählt:`;
+            statusText.textContent = `✅ ${currentPlanet.modifiers.length} modifier(s) selected:`;
             statusText.className = 'text-green-400 text-sm mb-3 font-semibold';
 
             listContainer.innerHTML = currentPlanet.modifiers.map(modId => {
@@ -1686,7 +1809,7 @@
             const listContainer = document.getElementById('systemList');
             
             if (allSystems.length === 0) {
-                listContainer.innerHTML = '<p class="text-gray-400 text-sm">Keine Systeme geladen.</p>';
+                listContainer.innerHTML = '<p class="text-gray-400 text-sm">No systems loaded.</p>';
                 return;
             }
             
@@ -1698,8 +1821,8 @@
                 item.onclick = () => selectSystem(index);
                 
                 const badge = system.isMain ? 
-                    '<span class="stellaris-badge badge-primary ml-2">Haupt</span>' : 
-                    '<span class="stellaris-badge badge-secondary ml-2">Nachbar</span>';
+                    '<span class="stellaris-badge badge-primary ml-2">Main</span>' : 
+                    '<span class="stellaris-badge badge-secondary ml-2">Neighbor</span>';
                 
                 item.innerHTML = `
                     <div class="flex justify-between items-start">
@@ -1707,7 +1830,7 @@
                             <div class="font-semibold text-blue-300">${system.displayName}</div>
                             <div class="text-xs text-gray-400 mt-1">${system.name}</div>
                             <div class="text-xs text-gray-500 mt-1">
-                                ${system.planets.length} Planeten • ${system.neighborSystems.length} Nachbarn
+                                ${system.planets.length} Planets • ${system.neighborSystems.length} Neighbors
                             </div>
                         </div>
                         ${badge}
@@ -1735,10 +1858,10 @@
                         <h2 class="text-2xl font-bold text-blue-300">🌟 ${system.displayName}</h2>
                         <div class="flex gap-2">
                             <button onclick="editSystemProperties()" class="stellaris-btn text-sm">
-                                ✏️ System bearbeiten
+                                ✏️ Edit System
                             </button>
                             <button onclick="deleteCurrentSystem()" class="stellaris-btn stellaris-btn-danger text-sm">
-                                🗑️ Löschen
+                                🗑️ Delete
                             </button>
                         </div>
                     </div>
@@ -1751,7 +1874,7 @@
                                 <div class="font-mono text-blue-300">${system.name}</div>
                             </div>
                             <div>
-                                <span class="text-gray-400 text-sm">Sternklasse:</span>
+                                <span class="text-gray-400 text-sm">Star Class:</span>
                                 <div class="text-yellow-300">${system.class}</div>
                             </div>
                             <div>
@@ -1760,7 +1883,7 @@
                             </div>
                             <div>
                                 <span class="text-gray-400 text-sm">Typ:</span>
-                                <div class="text-purple-300">${system.isMain ? 'Hauptsystem' : 'Nachbarsystem'}</div>
+                                <div class="text-purple-300">${system.isMain ? 'Main System' : 'Neighbor System'}</div>
                             </div>
                         </div>
                     </div>
@@ -1768,13 +1891,13 @@
                     <!-- Combined Celestial Bodies Section -->
                     <div class="mb-6">
                         <div class="flex justify-between items-center mb-3">
-                            <h3 class="text-lg font-semibold text-yellow-400">🪐 Himmelskörper (${system.planets.length + system.asteroidBelts.length})</h3>
+                            <h3 class="text-lg font-semibold text-yellow-400">🪐 Celestial Bodies (${system.planets.length + system.asteroidBelts.length})</h3>
                             <div class="flex gap-2">
                                 <button onclick="openAddPlanetModal()" class="stellaris-btn stellaris-btn-secondary text-sm">
                                     ➕ Planet
                                 </button>
                                 <button onclick="openAddAsteroidBeltModal()" class="stellaris-btn stellaris-btn-secondary text-sm">
-                                    ➕ Gürtel
+                                    ➕ Belt
                                 </button>
                             </div>
                         </div>
@@ -1786,9 +1909,9 @@
                     <!-- Neighbor Systems Section -->
                     <div class="mb-6">
                         <div class="flex justify-between items-center mb-3">
-                            <h3 class="text-lg font-semibold text-yellow-400">🔗 Nachbarsysteme (${system.neighborSystems.length})</h3>
+                            <h3 class="text-lg font-semibold text-yellow-400">🔗 Neighbor Systems (${system.neighborSystems.length})</h3>
                             <button onclick="openAddNeighborModal()" class="stellaris-btn stellaris-btn-secondary text-sm">
-                                ➕ Nachbar hinzufügen
+                                ➕ Add Neighbor
                             </button>
                         </div>
                         <div id="neighborsList">
@@ -1801,7 +1924,7 @@
 
         function renderPlanetList(planets) {
             if (planets.length === 0) {
-                return '<p class="text-gray-400 text-sm">Keine Planeten. Klicke auf "Planet hinzufügen".</p>';
+                return '<p class="text-gray-400 text-sm">No planets. Click on “Add planet.”</p>';
             }
             
             return planets.map((planet, index) => {
@@ -1818,6 +1941,7 @@
                                     <div class="text-sm text-gray-400">
                                         ${getClassDisplayName(planet.class)} • Größe ${planet.size} • Orbit ${planet.orbitDistance}
                                         ${planet.isStartingPlanet ? ' • <span class="text-green-400">🏠 Startplanet</span>' : ''}
+                                        ${planet.isGuaranteedHabitable ? ' • <span class="text-blue-400">🌍 Garantiert</span>' : ''}
                                     </div>
                                 </div>
                             </div>
@@ -1834,12 +1958,13 @@
                 if (moonCount > 0) {
                     html += '<div class="space-y-2">';
                     planet.moons.forEach((moon, moonIndex) => {
-                        const startingIcon = moon.isStartingPlanet ? ' <span class="text-green-400">🏠</span>' : '';  // NEU
+                        const startingIcon = moon.isStartingPlanet ? ' <span class="text-green-400">🏠 </span>' : ''; 
+                        const guaranteedIcon = moon.isGuaranteedHabitable ? ' <span class="text-blue-400">🌍</span>' : '';
                         html += `
                             <div class="moon-item flex items-center justify-between">
                                 <div class="flex items-center gap-2">
                                     <span class="text-lg">${getPlanetIcon(moon.class)}</span>
-                                    <span class="text-sm">${moon.displayName} (${getClassDisplayName(moon.class)}, Größe ${moon.size})${startingIcon}</span>
+                                    <span class="text-sm">${moon.displayName} (${getClassDisplayName(moon.class)}, Größe ${moon.size})${startingIcon}${guaranteedIcon}</span>
                                 </div>
                                 <div class="flex gap-1">
                                     <button onclick="editMoon(${planet.id}, ${moonIndex})" class="stellaris-btn stellaris-btn-secondary text-xs px-2 py-1">✏️</button>
@@ -1858,7 +1983,7 @@
 
         function renderAsteroidBelts(belts) {
             if (belts.length === 0) {
-                return '<p class="text-gray-400 text-sm">Keine Asteroidengürtel.</p>';
+                return '<p class="text-gray-400 text-sm">No Asteroid Belt.</p>';
             }
             
             return belts.map((belt, index) => {
@@ -1905,7 +2030,7 @@
             combined.sort((a, b) => a.orbit - b.orbit);
                 
                 if (combined.length === 0) {
-                    return '<p class="text-gray-400 text-sm">Keine Himmelskörper. Klicke auf "Planet" oder "Gürtel hinzufügen".</p>';
+                    return '<p class="text-gray-400 text-sm">No celestial bodies. Click on "Planet" or "Belt" to add.</p>';
                 }
                 
                 return combined.map(item => {
@@ -1923,10 +2048,10 @@
                                             <span class="text-2xl">${icon}</span>
                                             <div>
                                                 <div class="font-semibold text-blue-300">${planet.name}</div>
-                                                <div class="text-xs text-gray-400">${getClassDisplayName(planet.class)} • Größe ${planet.size} • Orbit +${item.displayOrbit} (Position: ${item.orbit})</div>
+                                                <div class="text-xs text-gray-400">${getClassDisplayName(planet.class)} • Size ${planet.size} • Orbit +${item.displayOrbit} (Position: ${item.orbit})</div>
                                             </div>
                                         </div>
-                                        ${moonCount > 0 ? `<div class="text-xs text-yellow-400 ml-8">🌙 ${moonCount} Mond(e)</div>` : ''}
+                                        ${moonCount > 0 ? `<div class="text-xs text-yellow-400 ml-8">🌙 ${moonCount} Moon(s)</div>` : ''}
                                     </div>
                                     <div class="flex gap-1">
                                         <button onclick="movePlanetUp(${index})" class="stellaris-btn stellaris-btn-secondary text-xs px-2 py-1" ${index === 0 ? 'disabled' : ''}>⬆️</button>
@@ -1950,7 +2075,7 @@
                                     <div class="flex items-center gap-2">
                                         <span class="text-yellow-500 text-2xl">☄️</span>
                                         <div>
-                                            <div class="font-semibold text-yellow-300">Asteroidengürtel</div>
+                                            <div class="font-semibold text-yellow-300">Asteroid Belt</div>
                                             <div class="text-xs text-gray-400">${belt.type} • Radius: ${item.displayOrbit} (Position: ${item.orbit})</div>
                                         </div>
                                     </div>
@@ -1974,7 +2099,7 @@
                             <div class="bg-gray-900/50 p-2 rounded border border-gray-700 flex items-center justify-between">
                                 <div class="flex items-center gap-2">
                                     <span class="text-lg">${getPlanetIcon(moon.class)}</span>
-                                    <span class="text-sm">${moon.displayName} (${getClassDisplayName(moon.class)}, Größe ${moon.size}, Orbit ${moon.orbitDistance})${startingIcon}</span>
+                                    <span class="text-sm">${moon.displayName} (${getClassDisplayName(moon.class)}, Size ${moon.size}, Orbit ${moon.orbitDistance})${startingIcon}</span>
                                 </div>
                                 <div class="flex gap-1">
                                     <button onclick="editMoon(${parentPlanetId}, ${moonIndex})" class="stellaris-btn stellaris-btn-secondary text-xs px-2 py-1">✏️</button>
@@ -1988,7 +2113,7 @@
 
         function renderNeighborSystems(neighbors) {
             if (neighbors.length === 0) {
-                return '<p class="text-gray-400 text-sm">Keine Nachbarsysteme.</p>';
+                return '<p class="text-gray-400 text-sm">No neighbor systems.</p>';
             }
             
             return neighbors.map((neighbor, index) => {
@@ -2026,7 +2151,7 @@
         function clearEditor() {
             document.getElementById('systemEditorContent').innerHTML = `
                 <div class="stellaris-panel text-center py-12">
-                    <p class="text-gray-400 text-lg">👈 Wähle ein System aus der Liste oder importiere eine Datei</p>
+                    <p class="text-gray-400 text-lg">👈 Select a system from the list or import a file</p>
                 </div>
             `;
         }
@@ -2038,7 +2163,7 @@
         function openAddPlanetModal() {
             editingPlanetId = null;
             editingPlanetIndex = null;
-            document.getElementById('planetModalTitle').textContent = '🌍 Planet hinzufügen';
+            document.getElementById('planetModalTitle').textContent = '🌍 Add Planet';
             
             // Reset form
             document.getElementById('planetName').value = '';
@@ -2065,7 +2190,7 @@
             
             editingPlanetId = planetId;
             editingPlanetIndex = planetIndex;
-            document.getElementById('planetModalTitle').textContent = '✏️ Planet bearbeiten';
+            document.getElementById('planetModalTitle').textContent = '✏️ Edit Planet';
             
             document.getElementById('planetName').value = planet.name;
             document.getElementById('planetClass').value = planet.class;
@@ -2086,6 +2211,7 @@
             document.getElementById('planetChangeOrbit').value = planet.changeOrbit;
             document.getElementById('planetHasRing').checked = planet.hasRing;
             document.getElementById('planetIsStarting').checked = planet.isStartingPlanet;
+            document.getElementById('planetIsGuaranteedHabitable').checked = planet.isGuaranteedHabitable || false;
             
             // Load modifiers
             if (!planet.modifiers) {
@@ -2105,6 +2231,7 @@
             const changeOrbit = parseInt(document.getElementById('planetChangeOrbit').value);
             const hasRing = document.getElementById('planetHasRing').checked;
             const isStarting = document.getElementById('planetIsStarting').checked;
+            const isGuaranteedHabitable = document.getElementById('planetIsGuaranteedHabitable').checked;
             
             // NEU: Orbit Angle basierend auf Modus
             const angleMode = document.getElementById('orbitAngleMode').value;
@@ -2138,6 +2265,7 @@
                 changeOrbit: changeOrbit,
                 hasRing: hasRing,
                 isStartingPlanet: isStarting,
+                isGuaranteedHabitable: isGuaranteedHabitable,
                 modifiers: editingPlanetIndex !== null ? allSystems[currentSystemIndex].planets[editingPlanetIndex].modifiers || [] : [],
                 moons: [],
                 flags: []
@@ -2149,10 +2277,10 @@
                 planetData.moons = existingPlanet.moons || [];
                 planetData.modifiers = existingPlanet.modifiers || [];
                 allSystems[currentSystemIndex].planets[editingPlanetIndex] = planetData;
-                showNotification('✅ Planet aktualisiert!');
+                showNotification('✅ Planet updated!');
             } else {
                 allSystems[currentSystemIndex].planets.push(planetData);
-                showNotification('✅ Planet hinzugefügt!');
+                showNotification('✅ Planet added!');
             }
             
             document.getElementById('planetModal').classList.remove('active');
@@ -2160,9 +2288,9 @@
         }
 
         function deletePlanet(index) {
-            if (confirm('Planet wirklich löschen?')) {
+            if (confirm('Really delete planet?')) {
                 allSystems[currentSystemIndex].planets.splice(index, 1);
-                showNotification('🗑️ Planet gelöscht!');
+                showNotification('🗑️ Planet deleted!');
                 loadSystemIntoEditor(allSystems[currentSystemIndex]);
             }
         }
@@ -2190,13 +2318,14 @@
         function openAddMoonModal(parentPlanetId) {
             editingMoonParentId = parentPlanetId;
             editingMoonIndex = null;
-            document.getElementById('moonModalTitle').textContent = '🌙 Mond hinzufügen';
+            document.getElementById('moonModalTitle').textContent = '🌙 Add Moon';
             
             document.getElementById('moonName').value = '';
             document.getElementById('moonClass').value = 'pc_barren_cold';
             document.getElementById('moonSize').value = '8';
             document.getElementById('moonOrbit').value = '10';
             document.getElementById('moonIsStarting').checked = false;
+            document.getElementById('moonIsGuaranteedHabitable').checked = false;
             
             // NEU: Orbit Angle Standardwerte
             document.getElementById('moonOrbitAngleMode').value = 'range';
@@ -2207,10 +2336,10 @@
             // Reset moon modifiers for new moon
             editingMoonPlanetIndex = allSystems[currentSystemIndex].planets.findIndex(p => p.id === parentPlanetId);
             document.getElementById('selectedMoonModifiersList').innerHTML = '';
-            document.getElementById('moonModifierStatusText').textContent = 'Keine Modifier ausgewählt';
+            document.getElementById('moonModifierStatusText').textContent = 'No modifiers selected';
             document.getElementById('moonModifierStatusText').className = 'text-gray-400 text-sm mb-3';
             document.getElementById('moonModifierCategory').value = '';
-            document.getElementById('moonModifierSelection').innerHTML = '<option value="">-- Modifier wählen --</option>';
+            document.getElementById('moonModifierSelection').innerHTML = '<option value="">-- Select Modifier --</option>';
             document.getElementById('moonModifierSelection').disabled = true;
             document.getElementById('addMoonModifierBtn').disabled = true;
             
@@ -2223,13 +2352,14 @@
             
             editingMoonParentId = parentPlanetId;
             editingMoonIndex = moonIndex;
-            document.getElementById('moonModalTitle').textContent = '✏️ Mond bearbeiten';
+            document.getElementById('moonModalTitle').textContent = '✏️ Edit Moon';
             
             document.getElementById('moonName').value = moon.name;
             document.getElementById('moonClass').value = moon.class;
             document.getElementById('moonSize').value = moon.size;
             document.getElementById('moonOrbit').value = moon.orbitDistance;
             document.getElementById('moonIsStarting').checked = moon.isStartingPlanet || false;
+            document.getElementById('moonIsGuaranteedHabitable').checked = false;
             
             // NEU: Orbit Angle Setup für Monde
             if (moon.orbitAngleType === 'fixed') {
@@ -2259,6 +2389,7 @@
             const size = parseInt(document.getElementById('moonSize').value);
             const orbit = parseInt(document.getElementById('moonOrbit').value);
             const isStarting = document.getElementById('moonIsStarting').checked;
+            const isGuaranteedHabitable = document.getElementById('moonIsGuaranteedHabitable').checked;
             
             // NEU: Orbit Angle basierend auf Modus
             const angleMode = document.getElementById('moonOrbitAngleMode').value;
@@ -2294,6 +2425,7 @@
                 changeOrbit: 0,
                 hasRing: false,
                 isStartingPlanet: isStarting,  // GEÄNDERT: von false zu isStarting
+                isGuaranteedHabitable: isGuaranteedHabitable,
                 modifiers: editingMoonIndex !== null ? planet.moons[editingMoonIndex].modifiers || [] : [],
                 moons: [],
                 flags: []
@@ -2301,10 +2433,10 @@
             
             if (editingMoonIndex !== null) {
                 planet.moons[editingMoonIndex] = moonData;
-                showNotification('✅ Mond aktualisiert!');
+                showNotification('✅ Moon updated!');
             } else {
                 planet.moons.push(moonData);
-                showNotification('✅ Mond hinzugefügt!');
+                showNotification('✅ Moon added!');
             }
             
             document.getElementById('moonModal').classList.remove('active');
@@ -2312,10 +2444,10 @@
         }
 
         function deleteMoon(parentPlanetId, moonIndex) {
-            if (confirm('Mond wirklich löschen?')) {
+            if (confirm('Really delete moon?')) {
                 const planet = allSystems[currentSystemIndex].planets.find(p => p.id === parentPlanetId);
                 planet.moons.splice(moonIndex, 1);
-                showNotification('🗑️ Mond gelöscht!');
+                showNotification('🗑️ Moon deleted!');
                 loadSystemIntoEditor(allSystems[currentSystemIndex]);
             }
         }
@@ -2366,7 +2498,7 @@
             
             // Fülle System-Auswahl
             const select = document.getElementById('neighborSystemSelect');
-            select.innerHTML = '<option value="">-- Aus Liste wählen oder manuell eingeben --</option>';
+            select.innerHTML = '<option value="">-- Select from list or enter manually --</option>';
             
             allSystems.forEach((system, index) => {
                 if (index !== currentSystemIndex) { // Nicht das aktuelle System anzeigen
@@ -2398,7 +2530,7 @@
             const jumpsMax = parseInt(document.getElementById('neighborJumpsMax').value);
             
             if (!displayName) {
-                showNotification('⚠️ Bitte gib einen Anzeigenamen ein!');
+                showNotification('⚠️ Please enter a display name!');
                 return;
             }
             
@@ -2417,14 +2549,14 @@
             allSystems[currentSystemIndex].neighborSystems.push(neighborData);
             
             document.getElementById('neighborModal').classList.remove('active');
-            showNotification(`✅ Nachbarsystem "${identifier}" hinzugefügt!`);
+            showNotification(`✅ Neighbor system "${identifier}" added!`);
             loadSystemIntoEditor(allSystems[currentSystemIndex]);
         }
 
         function deleteNeighborSystem(index) {
-            if (confirm('Nachbarsystem wirklich entfernen?')) {
+            if (confirm('Really remove neighbor system?')) {
                 allSystems[currentSystemIndex].neighborSystems.splice(index, 1);
-                showNotification('🗑️ Nachbarsystem entfernt!');
+                showNotification('🗑️ Neighbor system removed!');
                 loadSystemIntoEditor(allSystems[currentSystemIndex]);
             }
         }
@@ -2453,14 +2585,14 @@
             allSystems[currentSystemIndex].asteroidBelts.push(beltData);
             
             document.getElementById('asteroidBeltModal').classList.remove('active');
-            showNotification('✅ Asteroidengürtel hinzugefügt!');
+            showNotification('✅ Asteroid belt added!');
             loadSystemIntoEditor(allSystems[currentSystemIndex]);
         }
 
         function deleteAsteroidBelt(index) {
-            if (confirm('Asteroidengürtel wirklich löschen?')) {
+            if (confirm('Really delete asteroid belt?')) {
                 allSystems[currentSystemIndex].asteroidBelts.splice(index, 1);
-                showNotification('🗑️ Asteroidengürtel gelöscht!');
+                showNotification('🗑️ Asteroid belt deleted!');
                 loadSystemIntoEditor(allSystems[currentSystemIndex]);
             }
         }
@@ -2472,30 +2604,30 @@
         function editSystemProperties() {
             const system = allSystems[currentSystemIndex];
             
-            const newDisplayName = prompt('Anzeigename des Systems:', system.displayName);
+            const newDisplayName = prompt('System display name:', system.displayName);
             if (newDisplayName && newDisplayName.trim()) {
                 system.displayName = newDisplayName.trim();
             }
             
-            const newClass = prompt('Sternklasse (z.B. sc_g, sc_m, sc_k):', system.class);
+            const newClass = prompt('Star class (e.g. sc_g, sc_m, sc_k):', system.class);
             if (newClass && newClass.trim()) {
                 system.class = newClass.trim();
             }
             
-            const newUsage = prompt('Usage (z.B. custom_empire, misc_system):', system.usage);
+            const newUsage = prompt('Usage (e.g. custom_empire, misc_system):', system.usage);
             if (newUsage && newUsage.trim()) {
                 system.usage = newUsage.trim();
             }
             
             updateSystemList();
             loadSystemIntoEditor(system);
-            showNotification('✅ Systemeigenschaften aktualisiert!');
+            showNotification('✅ System properties updated!');
         }
 
         function deleteCurrentSystem() {
             if (currentSystemIndex === null) return;
             
-            if (confirm(`System "${allSystems[currentSystemIndex].displayName}" wirklich löschen?`)) {
+            if (confirm(`Really delete system "${allSystems[currentSystemIndex].displayName}"?`)) {
                 allSystems.splice(currentSystemIndex, 1);
                 
                 if (allSystems.length > 0) {
@@ -2507,7 +2639,7 @@
                 }
                 
                 updateSystemList();
-                showNotification('🗑️ System gelöscht!');
+                showNotification('🗑️ System deleted!');
             }
         }
 
@@ -2578,7 +2710,12 @@
             let code = `\n${tab}planet = {\n`;
             
             code += `${tab}\tname = "${planet.name}"\n`;
-            code += `${tab}\tclass = "${planet.class}"\n`;
+            // Verwende ideal_design_class für garantierte bewohnbare Planeten
+            if (planet.isGuaranteedHabitable) {
+                code += `${tab}\tclass = ideal_design_class\n`;
+            } else {
+                code += `${tab}\tclass = "${planet.class}"\n`;
+            }
             code += `${tab}\torbit_distance = ${planet.orbitDistance}\n`;
             
             // Export orbit_angle based on type
@@ -2615,16 +2752,25 @@
                 code += `${tab}\t\tgenerate_start_buildings_and_blockers = yes\n`;
                 code += `${tab}\t}\n`;
             }
+
+            if (planet.isGuaranteedHabitable) {
+                code += `${tab}\tmodifiers = none\n`;
+                code += `${tab}\tanomaly = none\n`;
+                code += `${tab}\tinit_effect = {\n`;
+                code += `${tab}\t\tprevent_anomaly = yes\n`;
+                code += `${tab}\t\tset_planet_flag = prescripted_ideal\n`;
+                code += `${tab}\t}\n`;
+            }
     //
     //
-    // Diese Änderung bewirkt:
+    // This change does the following:
 
-    // 1. ✅ **Für normale Planeten mit Modifiern**: Exportiert `modifiers = { pm_xyz pm_abc }`
-    // 2. ✅ **Für normale Planeten ohne Modifier**: Keine Modifier-Zeile (wie in Stellaris üblich)
-    // 3. ✅ **Für Startplaneten mit Modifiern**: Exportiert die Modifier und NICHT `modifiers = none`
-    // 4. ✅ **Für Startplaneten ohne Modifier**: Exportiert `modifiers = none` (wie von Stellaris erwartet)
+    // 1. ✅ **For normal planets with modifiers**: Exports `modifiers = { pm_xyz pm_abc }`
+    // 2. ✅ **For normal planets without modifiers**: No modifier line (as is usual in Stellaris)
+    // 3. ✅ **For starting planets with modifiers**: Exports the modifiers and NOT `modifiers = none`
+    // 4. ✅ **For starting planets without modifiers**: Exports `modifiers = none` (as expected by Stellaris)
 
-    // Jetzt sollte der Export korrekt funktionieren! Teste es bitte nochmal und schau dir die Export-Vorschau an. Die Modifier sollten jetzt erscheinen wie:
+    // Now the export should work correctly! Please test it again and check the export preview. The modifiers should now appear as:
     
     //  planet = {
     //      name = "Balder"
@@ -2644,6 +2790,24 @@
             code += `${tab}}\n`;
             
             return code;
+        }
+
+        function generateLocalizationYML(systems) {
+            let yml = 'l_english:\n';
+            
+            systems.forEach(system => {
+                const baseName = system.name.replace(/_system_initializer$/, '');
+                const identifier = `${baseName}_system_initializer`;
+                
+                // NAME entry
+                yml += ` ${identifier}_NAME:0 "${system.displayName}"\n`;
+                
+                // DESC entry - create a default description
+                const description = `${system.displayName} Description: A custom star system created with the Stellaris Solar System Editor.`;
+                yml += ` ${identifier}_DESC:0 "${description}"\n`;
+            });
+            
+            return yml;
         }
 
         // =====================================================
@@ -2667,17 +2831,17 @@
 
         function getClassDisplayName(planetClass) {
             const names = {
-                'pc_g_star': 'G-Stern', 'pc_k_star': 'K-Stern', 'pc_m_star': 'M-Stern',
-                'pc_f_star': 'F-Stern', 'pc_a_star': 'A-Stern', 'pc_b_star': 'B-Stern',
-                'pc_black_hole': 'Schwarzes Loch', 'pc_neutron_star': 'Neutronenstern', 
+                'pc_g_star': 'G-Star', 'pc_k_star': 'K-Star', 'pc_m_star': 'M-Star',
+                'pc_f_star': 'F-Star', 'pc_a_star': 'A-Star', 'pc_b_star': 'B-Star',
+                'pc_black_hole': 'Black Hole', 'pc_neutron_star': 'Neutron Star', 
                 'pc_pulsar': 'Pulsar',
-                'pc_continental': 'Kontinental', 'pc_ocean': 'Ozean', 'pc_desert': 'Wüste',
-                'pc_tropical': 'Tropisch', 'pc_arid': 'Trocken', 'pc_tundra': 'Tundra',
-                'pc_arctic': 'Arktisch', 'pc_alpine': 'Alpin', 'pc_savannah': 'Savanne',
-                'pc_gas_giant': 'Gasriese', 'pc_molten': 'Geschmolzen', 'pc_barren': 'Öde',
-                'pc_barren_cold': 'Öde (Kalt)', 'pc_toxic': 'Toxisch', 'pc_frozen': 'Gefroren',
-                'pc_asteroid': 'Asteroid', 'pc_ice_asteroid': 'Eis-Asteroid', 
-                'pc_rare_crystal_asteroid': 'Kristall-Asteroid'
+                'pc_continental': 'Continental', 'pc_ocean': 'Ocean', 'pc_desert': 'Desert',
+                'pc_tropical': 'Tropical', 'pc_arid': 'Arid', 'pc_tundra': 'Tundra',
+                'pc_arctic': 'Arctic', 'pc_alpine': 'Alpine', 'pc_savannah': 'Savannah',
+                'pc_gas_giant': 'Gas Giant', 'pc_molten': 'Molten', 'pc_barren': 'Barren',
+                'pc_barren_cold': 'Barren (Cold)', 'pc_toxic': 'Toxic', 'pc_frozen': 'Frozen',
+                'pc_asteroid': 'Asteroid', 'pc_ice_asteroid': 'Ice Asteroid', 
+                'pc_rare_crystal_asteroid': 'Rare Crystal Asteroid'
             };
             return names[planetClass] || planetClass;
         }
