@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Stellaris Solar System Editor V21 - Full Editor</title>
+    <title>Stellaris Solar System Editor V22 - Full Editor</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;600;700;800;900&family=Exo+2:wght@300;400;500;600&display=swap');
@@ -345,7 +345,7 @@
 </head>
 <body>
     <div class="container mx-auto py-8 px-4">
-        <h1 class="stellaris-header">🌌 Stellaris Solar System Editor V21</h1>
+        <h1 class="stellaris-header">🌌 Stellaris Solar System Editor V22</h1>
         <div class="text-center mb-6">
             <span class="text-yellow-400 font-semibold">⭐ Full Editor - Edit systems, planets, and neighbors</span>
         </div>
@@ -446,6 +446,11 @@
                                 <option value="pc_alpine">Alpine</option>
                                 <option value="pc_savannah">Savannah</option>
                             </optgroup>
+                            <optgroup label="Unique Planets">
+                                <option value="pc_gaia">Gaia</option>
+                                <option value="pc_machine">Machine World</option>
+                                <option value="pc_hive">Hive World</option>
+                            </optgroup>
                             <optgroup label="Uninhabitable Planets">
                                 <option value="pc_gas_giant">Gas Giant</option>
                                 <option value="pc_molten">Molten</option>
@@ -458,6 +463,12 @@
                                 <option value="pc_asteroid">Asteroid</option>
                                 <option value="pc_ice_asteroid">Ice Asteroid</option>
                                 <option value="pc_rare_crystal_asteroid">Rare Crystal Asteroid</option>
+                            </optgroup>
+                            <optgroup label="Custome">
+                                <option value="CUSTOM">🔧 Custom Class...</option>
+                                </select>
+                                <!-- ✅ NEW: Custom class input -->
+                                <input type="text" id="planetClassCustom" class="stellaris-input mt-2 hidden" placeholder="Enter custom class (e.g. pc_my_planet)">
                             </optgroup>
                         </select>
                     </div>
@@ -573,6 +584,63 @@
                         <button id="addModifierBtn" class="stellaris-btn stellaris-btn-success w-full" onclick="window.addModifierToPlanet()" disabled>
                             ADD MODIFIER
                         </button>
+                        
+                        <!-- ✅ NEW: Custom Modifier Input -->
+                        <div class="mt-3 p-3 bg-purple-900/20 rounded border border-purple-500/30">
+                            <label class="label text-xs">OR ENTER CUSTOM MODIFIER</label>
+                            <input type="text" id="customModifierInput" class="stellaris-input text-sm" placeholder="e.g. pm_custom_modifier">
+                            <button class="stellaris-btn stellaris-btn-secondary w-full mt-2 text-sm" onclick="window.addCustomModifierToPlanet()">
+                                ➕ Add Custom Modifier
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ✅ NEW: Deposit Management -->
+                <div class="mt-4">
+                    <h3 class="text-lg font-bold mb-2 text-yellow-300">💎 Deposits</h3>
+                    <div class="p-3 bg-gray-800/50 rounded-lg border border-gray-700">
+                        <div id="selectedDepositsList" class="mb-3 min-h-[40px]">
+                            <!-- Deposits will be listed here -->
+                        </div>
+                        <p id="depositStatusText" class="text-xs text-gray-400 mb-3">No deposits added</p>
+                        
+                        <div class="mb-2">
+                            <label class="label text-xs">SELECT DEPOSIT</label>
+                            <select id="depositSelection" class="stellaris-input text-sm">
+                                <option value="">-- Select Deposit --</option>
+                                <optgroup label="Resources">
+                                    <option value="d_minerals_1">Minerals +1</option>
+                                    <option value="d_minerals_2">Minerals +2</option>
+                                    <option value="d_minerals_3">Minerals +3</option>
+                                    <option value="d_minerals_4">Minerals +4</option>
+                                    <option value="d_energy_1">Energy +1</option>
+                                    <option value="d_energy_2">Energy +2</option>
+                                    <option value="d_energy_3">Energy +3</option>
+                                    <option value="d_alloys_1">Alloys +1</option>
+                                    <option value="d_alloys_2">Alloys +2</option>
+                                </optgroup>
+                                <optgroup label="Strategic">
+                                    <option value="d_exotic_gases_1">Exotic Gases +1</option>
+                                    <option value="d_rare_crystals_1">Rare Crystals +1</option>
+                                    <option value="d_volatile_motes_1">Volatile Motes +1</option>
+                                    <option value="d_zro_deposit_1">Zro +1</option>
+                                    <option value="d_dark_matter_deposit_1">Dark Matter +1</option>
+                                </optgroup>
+                            </select>
+                        </div>
+                        
+                        <button class="stellaris-btn stellaris-btn-success w-full text-sm mb-2" onclick="window.addDepositToPlanet()">
+                            ADD DEPOSIT
+                        </button>
+                        
+                        <div class="p-2 bg-purple-900/20 rounded border border-purple-500/30">
+                            <label class="label text-xs">OR CUSTOM DEPOSIT</label>
+                            <input type="text" id="customDepositInput" class="stellaris-input text-sm" placeholder="e.g. d_custom_deposit">
+                            <button class="stellaris-btn stellaris-btn-secondary w-full mt-2 text-sm" onclick="window.addCustomDepositToPlanet()">
+                                ➕ Add Custom Deposit
+                            </button>
+                        </div>
                     </div>
                 </div>
 
@@ -594,7 +662,7 @@
                         <input type="text" id="moonName" class="stellaris-input" placeholder="z.B. Luna">
                     </div>
                     <div class="form-group">
-                        <label class="label">Mondklasse</label>
+                        <label class="label">Moon Class</label>
                         <select id="moonClass" class="stellaris-input">
                             <optgroup label="Habitable Moons">
                                 <option value="pc_continental">Continental</option>
@@ -606,6 +674,11 @@
                                 <option value="pc_arctic">Arctic</option>
                                 <option value="pc_alpine">Alpine</option>
                                 <option value="pc_savannah">Savannah</option>
+                            </optgroup>
+                            <optgroup label="Unique Moons">
+                                <option value="pc_gaia">Gaia</option>
+                                <option value="pc_machine">Machine World</option>
+                                <option value="pc_hive">Hive World</option>
                             </optgroup>
                             <optgroup label="Uninhabitable Moons">
                                 <option value="pc_gas_giant">Gas Giant</option>
@@ -619,6 +692,12 @@
                                 <option value="pc_asteroid">Asteroid</option>
                                 <option value="pc_ice_asteroid">Ice Asteroid</option>
                                 <option value="pc_rare_crystal_asteroid">Rare Crystal Asteroid</option>
+                            </optgroup>
+                            <optgroup label="Custome">
+                                <option value="CUSTOM">🔧 Custom Class...</option>
+                                </select>
+                                <!-- ✅ NEW: Custom class input -->
+                                <input type="text" id="moonClassCustom" class="stellaris-input mt-2 hidden" placeholder="Enter custom class (e.g. pc_my_moon)">
                             </optgroup>
                         </select>
                     </div>
@@ -731,6 +810,15 @@
                         <button id="addMoonModifierBtn" class="stellaris-btn stellaris-btn-success w-full" onclick="window.addModifierToMoon()" disabled>
                             ADD MODIFIER
                         </button>
+                        
+                        <!-- ✅ NEW: Custom Modifier Input for Moons -->
+                        <div class="mt-3 p-3 bg-purple-900/20 rounded border border-purple-500/30">
+                            <label class="label text-xs">OR ENTER CUSTOM MODIFIER</label>
+                            <input type="text" id="customMoonModifierInput" class="stellaris-input text-sm" placeholder="e.g. pm_custom_modifier">
+                            <button class="stellaris-btn stellaris-btn-secondary w-full mt-2 text-sm" onclick="window.addCustomModifierToMoon()">
+                                ➕ Add Custom Modifier
+                            </button>
+                        </div>
                     </div>
                 </div>
 
@@ -766,7 +854,7 @@
                     <p class="text-xs text-gray-400 mt-1">Will be converted to: <span id="neighborPreviewIdentifier" class="text-blue-300">-</span></p>
                 </div>
 
-                <div class="form-grid mt-4">
+               <div class="form-grid mt-4">
                     <div class="form-group">
                         <label class="label">Hyperlane Jumps (Min)</label>
                         <input type="number" id="neighborJumpsMin" class="stellaris-input" value="1" min="1" max="10">
@@ -777,6 +865,60 @@
                     </div>
                 </div>
 
+                <!-- ✅ NEW: Advanced Neighbor Parameters -->
+                <div class="mt-4 p-4 bg-blue-900/20 rounded-lg border border-blue-500/30">
+                    <h3 class="text-lg font-bold mb-3 text-blue-300">⚙️ Advanced Parameters</h3>
+                    
+                    <!-- Distance -->
+                    <div class="mb-3">
+                        <label class="flex items-center gap-2 cursor-pointer">
+                            <input type="checkbox" id="neighborUseDistance" class="stellaris-checkbox">
+                            <span class="text-sm font-semibold">Euclidean Distance</span>
+                        </label>
+                        <input type="number" id="neighborDistance" class="stellaris-input text-sm mt-1" value="50" min="1" max="500" disabled>
+                        <p class="text-xs text-gray-400 mt-1">Straight-line distance between systems</p>
+                    </div>
+                    
+                    <!-- Orientation Angles -->
+                    <div class="mb-3">
+                        <label class="flex items-center gap-2 cursor-pointer">
+                            <input type="checkbox" id="neighborUseOrientation" class="stellaris-checkbox">
+                            <span class="text-sm font-semibold">Orientation Angles</span>
+                        </label>
+                        <div class="grid grid-cols-2 gap-2 mt-1">
+                            <div>
+                                <label class="text-xs text-gray-400">Min Angle</label>
+                                <input type="number" id="neighborMinOrientation" class="stellaris-input text-sm" value="0" min="0" max="360" disabled>
+                            </div>
+                            <div>
+                                <label class="text-xs text-gray-400">Max Angle</label>
+                                <input type="number" id="neighborMaxOrientation" class="stellaris-input text-sm" value="360" min="0" max="360" disabled>
+                            </div>
+                        </div>
+                        <p class="text-xs text-gray-400 mt-1">Precise location control (0-360°)</p>
+                    </div>
+                    
+                    <!-- Hyperlane Distance -->
+                    <div class="mb-3">
+                        <label class="flex items-center gap-2 cursor-pointer">
+                            <input type="checkbox" id="neighborUseHyperlaneDistance" class="stellaris-checkbox">
+                            <span class="text-sm font-semibold">Hyperlane Distance</span>
+                        </label>
+                        <input type="number" id="neighborHyperlaneDistance" class="stellaris-input text-sm mt-1" value="3" min="1" max="20" disabled>
+                        <p class="text-xs text-gray-400 mt-1">Total distance via hyperlanes</p>
+                    </div>
+                    
+                    <!-- Spawn Chance -->
+                    <div class="mb-3">
+                        <label class="flex items-center gap-2 cursor-pointer">
+                            <input type="checkbox" id="neighborUseSpawnChance" class="stellaris-checkbox">
+                            <span class="text-sm font-semibold">Spawn Chance</span>
+                        </label>
+                        <input type="number" id="neighborSpawnChance" class="stellaris-input text-sm mt-1" value="100" min="0" max="100" disabled>
+                        <p class="text-xs text-gray-400 mt-1">Probability of neighbor spawning (0-100%)</p>
+                    </div>
+                </div>
+
                 <div class="mt-6 flex gap-2">
                     <button id="saveNeighborBtn" class="stellaris-btn stellaris-btn-success">💾 Save</button>
                     <button id="cancelNeighborBtn" class="stellaris-btn stellaris-btn-secondary">✕ Cancel</button>
@@ -784,7 +926,93 @@
             </div>
         </div>
 
+            <!-- System Properties Modal -->
+            <div id="systemPropertiesModal" class="modal">
+                <div class="modal-content">
+                    <h2 class="text-2xl font-bold mb-4 text-purple-300">⚙️ Edit System Properties</h2>
+                    
+                    <div class="form-group mb-4">
+                        <label class="label">System Display Name</label>
+                        <input type="text" id="systemDisplayName" class="stellaris-input" placeholder="e.g. Sol System">
+                    </div>
+
+                    <div class="form-group mb-4">
+                        <label class="label">Star Class</label>
+                        <select id="systemStarClass" class="stellaris-input" onchange="window.toggleCustomStarClass()">
+                            <optgroup label="⭐ Main Sequence Stars">
+                                <option value="sc_o">O-Star (Hot Blue)</option>
+                                <option value="sc_b">B-Star (Blue)</option>
+                                <option value="sc_a">A-Star (White)</option>
+                                <option value="sc_f">F-Star (Yellow-White)</option>
+                                <option value="sc_g" selected>G-Star (Yellow - Sun-like)</option>
+                                <option value="sc_k">K-Star (Orange)</option>
+                                <option value="sc_m">M-Star (Red)</option>
+                            </optgroup>
+                            <optgroup label="🌑 Special Objects">
+                                <option value="sc_t">T-Star (Brown Dwarf)</option>
+                                <option value="sc_black_hole">Black Hole</option>
+                                <option value="sc_neutron_star">Neutron Star</option>
+                                <option value="sc_pulsar">Pulsar</option>
+                            </optgroup>
+                            <optgroup label="🌟 Binary Systems">
+                                <option value="sc_binary_1">Binary 1 (Both Main Sequence)</option>
+                                <option value="sc_binary_2">Binary 2 (Main Sequence + Compact)</option>
+                                <option value="sc_binary_3">Binary 3 (Main Sequence + Neutron)</option>
+                                <option value="sc_binary_4">Binary 4 (Both Compact)</option>
+                                <option value="sc_binary_5">Binary 5 (Main Sequence + Black Hole)</option>
+                                <option value="sc_binary_6">Binary 6 (Neutron + Black Hole)</option>
+                                <option value="sc_binary_7">Binary 7 (Both Black Holes)</option>
+                                <option value="sc_binary_8">Binary 8 (Both Neutron Stars)</option>
+                                <option value="sc_binary_9">Binary 9 (Both Pulsars)</option>
+                                <option value="sc_binary_10">Binary 10 (Pulsar + Black Hole)</option>
+                            </optgroup>
+                            <optgroup label="✨ Trinary Systems">
+                                <option value="sc_trinary_1">Trinary 1 (Three Main Sequence)</option>
+                                <option value="sc_trinary_2">Trinary 2 (Two Main Sequence + Compact)</option>
+                                <option value="sc_trinary_3">Trinary 3 (Two Main Sequence + Neutron)</option>
+                                <option value="sc_trinary_4">Trinary 4 (Main Sequence + Two Compact)</option>
+                            </optgroup>
+                            <optgroup label="🔧 Custom">
+                                <option value="CUSTOM">🔧 Custom Star Class...</option>
+                            </optgroup>
+                        </select>
+                    </div>
+
+                    <div id="customStarClassField" class="form-group mb-4 hidden">
+                        <label class="label">Custom Star Class</label>
+                        <input type="text" id="customStarClassInput" class="stellaris-input" placeholder="e.g. sc_custom_star">
+                        <p class="text-xs text-gray-400 mt-1">Enter a custom star class ID (e.g. for mods)</p>
+                    </div>
+
+                    <div class="form-group mb-4">
+                        <label class="label">Usage</label>
+                        <select id="systemUsage" class="stellaris-input">
+                            <option value="custom_empire">Custom Empire (Player Start)</option>
+                            <option value="empire_init">Empire Init (AI Start)</option>
+                            <option value="fallen_empire_init">Fallen Empire Init</option>
+                            <option value="misc_system_init">Misc System Init (Random Galaxy)</option>
+                            <option value="origin">Origin (Specific Origins)</option>
+                        </select>
+                        <p class="text-xs text-gray-400 mt-1">💡 Tip: "Custom Empire" for player starts, "Misc System Init" for random galaxy systems</p>
+                    </div>
+
+                    <div class="form-group mb-4">
+                        <label class="flex items-center cursor-pointer">
+                            <input type="checkbox" id="systemMandatoryNeighbors" class="mr-2">
+                            <span class="label mb-0">Enable Mandatory Neighbors</span>
+                        </label>
+                        <p class="text-xs text-gray-400 mt-1">If enabled: Game engine creates new systems if no matching ones are found</p>
+                    </div>
+
+                    <div class="mt-6 flex gap-2">
+                        <button id="saveSystemPropertiesBtn" class="stellaris-btn stellaris-btn-success">💾 Save</button>
+                        <button id="cancelSystemPropertiesBtn" class="stellaris-btn stellaris-btn-secondary">✕ Cancel</button>
+                    </div>
+                </div>
+            </div>
+
         <!-- Add Asteroid Belt Modal -->
+        <div id="asteroidBeltModal" class="modal">
         <div id="asteroidBeltModal" class="modal">
             <div class="modal-content">
                 <h2 class="text-2xl font-bold mb-4 text-yellow-300">☄️ Add Asteroid Belt</h2>
@@ -836,7 +1064,8 @@
                 neighborSystems: [],
                 planets: [],
                 flags: [],
-                isMain: false
+                isMain: false,
+                mandatoryNeighbors: false  // ✅ NEU: Mandatory Neighbors Option
             };
         }
 
@@ -1528,8 +1757,33 @@
             document.getElementById('neighborModal').classList.remove('active');
         });
 
+        // ✅ NEW: Neighbor advanced parameters toggle
+        document.getElementById('neighborUseDistance')?.addEventListener('change', (e) => {
+            document.getElementById('neighborDistance').disabled = !e.target.checked;
+        });
+        
+        document.getElementById('neighborUseOrientation')?.addEventListener('change', (e) => {
+            const disabled = !e.target.checked;
+            document.getElementById('neighborMinOrientation').disabled = disabled;
+            document.getElementById('neighborMaxOrientation').disabled = disabled;
+        });
+        
+        document.getElementById('neighborUseHyperlaneDistance')?.addEventListener('change', (e) => {
+            document.getElementById('neighborHyperlaneDistance').disabled = !e.target.checked;
+        });
+        
+        document.getElementById('neighborUseSpawnChance')?.addEventListener('change', (e) => {
+            document.getElementById('neighborSpawnChance').disabled = !e.target.checked;
+        });
+        
         document.getElementById('saveNeighborBtn').addEventListener('click', () => {
             saveNeighborSystem();
+        });
+
+        // System Properties Modal Event Listeners
+        document.getElementById('saveSystemPropertiesBtn').addEventListener('click', saveSystemProperties);
+        document.getElementById('cancelSystemPropertiesBtn').addEventListener('click', () => {
+            document.getElementById('systemPropertiesModal').classList.remove('active');
         });
 
         // Asteroid Belt Modal Events
@@ -1572,10 +1826,8 @@
                 alert('Bitte wählen Sie einen Modifier aus.');
                 return;
             }
-
             const currentPlanet = getCurrentPlanet();
             if (!currentPlanet) return;
-
             // Avoid duplicates
             if (!currentPlanet.modifiers.includes(modifierId)) {
                 currentPlanet.modifiers.push(modifierId);
@@ -1583,11 +1835,11 @@
                 
                 // Visual feedback
                 const addBtn = document.getElementById('addModifierBtn');
-                addBtn.textContent = '✅ HINZUGEFÜGT!';
+                addBtn.textContent = '✅ Add';
                 addBtn.style.backgroundColor = '#48bb78';
                 
                 setTimeout(() => {
-                    addBtn.textContent = 'MODIFIER HINZUFÜGEN';
+                    addBtn.textContent = 'Add MODIFIER';
                     addBtn.style.backgroundColor = '';
                 }, 1000);
                 
@@ -1599,11 +1851,38 @@
             } else {
                 alert('Dieser Modifier wurde bereits hinzugefügt.');
             }
-
             // Scroll to modifiers list
             const modifiersList = document.getElementById('selectedModifiersList');
             if (modifiersList && modifiersList.lastElementChild) {
                 modifiersList.lastElementChild.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+            }
+        };
+
+        // ✅ NEW: Add custom modifier function
+        window.addCustomModifierToPlanet = function() {
+            const customModifier = document.getElementById('customModifierInput').value.trim();
+            
+            if (!customModifier) {
+                alert('Please enter a modifier ID.');
+                return;
+            }
+            
+            const currentPlanet = getCurrentPlanet();
+            if (!currentPlanet) return;
+            
+            if (!currentPlanet.modifiers.includes(customModifier)) {
+                currentPlanet.modifiers.push(customModifier);
+                updateSelectedModifiersList();
+                document.getElementById('customModifierInput').value = '';
+                showNotification(`✅ Custom modifier "${customModifier}" added!`);
+                
+                // Scroll to modifiers list
+                const modifiersList = document.getElementById('selectedModifiersList');
+                if (modifiersList && modifiersList.lastElementChild) {
+                    modifiersList.lastElementChild.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+                }
+            } else {
+                alert('This modifier is already added.');
             }
         };
 
@@ -1617,6 +1896,83 @@
                 updateSelectedModifiersList();
             }
         };
+
+        // ✅ NEW: Deposit management functions
+        window.addDepositToPlanet = function() {
+            const depositId = document.getElementById('depositSelection').value;
+            
+            if (!depositId) {
+                alert('Please select a deposit.');
+                return;
+            }
+            
+            const currentPlanet = getCurrentPlanet();
+            if (!currentPlanet) return;
+            
+            if (!currentPlanet.deposits) currentPlanet.deposits = [];
+            
+            if (!currentPlanet.deposits.includes(depositId)) {
+                currentPlanet.deposits.push(depositId);
+                updateSelectedDepositsList();
+                document.getElementById('depositSelection').value = '';
+                showNotification(`✅ Deposit "${depositId}" added!`);
+            } else {
+                alert('This deposit is already added.');
+            }
+        };
+        
+        window.addCustomDepositToPlanet = function() {
+            const customDeposit = document.getElementById('customDepositInput').value.trim();
+            
+            if (!customDeposit) {
+                alert('Please enter a deposit ID.');
+                return;
+            }
+            
+            const currentPlanet = getCurrentPlanet();
+            if (!currentPlanet) return;
+            
+            if (!currentPlanet.deposits) currentPlanet.deposits = [];
+            
+            if (!currentPlanet.deposits.includes(customDeposit)) {
+                currentPlanet.deposits.push(customDeposit);
+                updateSelectedDepositsList();
+                document.getElementById('customDepositInput').value = '';
+                showNotification(`✅ Custom deposit "${customDeposit}" added!`);
+            } else {
+                alert('This deposit is already added.');
+            }
+        };
+        
+        window.removeDepositFromPlanet = function(depositId) {
+            const currentPlanet = getCurrentPlanet();
+            if (!currentPlanet) return;
+            
+            currentPlanet.deposits = currentPlanet.deposits.filter(d => d !== depositId);
+            updateSelectedDepositsList();
+        };
+        
+        function updateSelectedDepositsList() {
+            const currentPlanet = getCurrentPlanet();
+            if (!currentPlanet) return;
+            
+            const container = document.getElementById('selectedDepositsList');
+            const statusText = document.getElementById('depositStatusText');
+            
+            if (!currentPlanet.deposits || currentPlanet.deposits.length === 0) {
+                container.innerHTML = '';
+                statusText.textContent = 'No deposits added';
+                return;
+            }
+            
+            statusText.textContent = `${currentPlanet.deposits.length} deposit(s) added`;
+            container.innerHTML = currentPlanet.deposits.map(dep => `
+                <div class="flex items-center justify-between bg-gray-900/50 p-2 rounded mb-1">
+                    <span class="text-sm">💎 ${dep}</span>
+                    <button onclick="window.removeDepositFromPlanet('${dep}')" class="stellaris-btn stellaris-btn-danger text-xs px-2 py-1">✕</button>
+                </div>
+            `).join('');
+        }
 
         // Moon Modifier Management Functions
         window.updateMoonModifierOptions = function() {
@@ -1649,10 +2005,8 @@
                 alert('Bitte wählen Sie einen Modifier aus.');
                 return;
             }
-
             const currentMoon = getCurrentMoon();
             if (!currentMoon) return;
-
             // Avoid duplicates
             if (!currentMoon.modifiers.includes(modifierId)) {
                 currentMoon.modifiers.push(modifierId);
@@ -1675,6 +2029,28 @@
                 document.getElementById('addMoonModifierBtn').disabled = true;
             } else {
                 alert('Dieser Modifier wurde bereits hinzugefügt.');
+            }
+        };
+
+        // ✅ NEW: Add custom modifier to moon
+        window.addCustomModifierToMoon = function() {
+            const customModifier = document.getElementById('customMoonModifierInput').value.trim();
+            
+            if (!customModifier) {
+                alert('Please enter a modifier ID.');
+                return;
+            }
+            
+            const currentMoon = getCurrentMoon();
+            if (!currentMoon) return;
+            
+            if (!currentMoon.modifiers.includes(customModifier)) {
+                currentMoon.modifiers.push(customModifier);
+                updateSelectedMoonModifiersList();
+                document.getElementById('customMoonModifierInput').value = '';
+                showNotification(`✅ Custom modifier "${customModifier}" added to moon!`);
+            } else {
+                alert('This modifier is already added.');
             }
         };
 
@@ -2219,13 +2595,29 @@
             }
             updateSelectedModifiersList();
             
+            // ✅ NEW: Load deposits
+            if (!planet.deposits) {
+                planet.deposits = [];
+            }
+            updateSelectedDepositsList();
+            
             document.getElementById('planetModal').classList.add('active');
-            // Load modifiers  
         }
 
         function savePlanet() {
             const name = document.getElementById('planetName').value.trim() || `planet_${nextPlanetId}`;
-            const planetClass = document.getElementById('planetClass').value;
+            let planetClass = document.getElementById('planetClass').value;
+            
+            // ✅ NEW: Handle custom planet class
+            if (planetClass === 'CUSTOM') {
+                const customClass = document.getElementById('planetClassCustom').value.trim();
+                if (!customClass) {
+                    showNotification('⚠️ Please enter a custom planet class!');
+                    return;
+                }
+                planetClass = customClass;
+            }
+            
             const size = parseInt(document.getElementById('planetSize').value);
             const orbit = parseInt(document.getElementById('planetOrbit').value);
             const changeOrbit = parseInt(document.getElementById('planetChangeOrbit').value);
@@ -2267,6 +2659,7 @@
                 isStartingPlanet: isStarting,
                 isGuaranteedHabitable: isGuaranteedHabitable,
                 modifiers: editingPlanetIndex !== null ? allSystems[currentSystemIndex].planets[editingPlanetIndex].modifiers || [] : [],
+                deposits: editingPlanetIndex !== null ? (allSystems[currentSystemIndex].planets[editingPlanetIndex].deposits || []) : [], // ✅ NEW
                 moons: [],
                 flags: []
             };
@@ -2385,7 +2778,18 @@
 
         function saveMoon() {
             const name = document.getElementById('moonName').value.trim() || 'moon';
-            const moonClass = document.getElementById('moonClass').value;
+            let moonClass = document.getElementById('moonClass').value;
+            
+            // ✅ NEW: Handle custom moon class
+            if (moonClass === 'CUSTOM') {
+                const customClass = document.getElementById('moonClassCustom').value.trim();
+                if (!customClass) {
+                    showNotification('⚠️ Please enter a custom moon class!');
+                    return;
+                }
+                moonClass = customClass;
+            }
+            
             const size = parseInt(document.getElementById('moonSize').value);
             const orbit = parseInt(document.getElementById('moonOrbit').value);
             const isStarting = document.getElementById('moonIsStarting').checked;
@@ -2427,6 +2831,7 @@
                 isStartingPlanet: isStarting,  // GEÄNDERT: von false zu isStarting
                 isGuaranteedHabitable: isGuaranteedHabitable,
                 modifiers: editingMoonIndex !== null ? planet.moons[editingMoonIndex].modifiers || [] : [],
+                deposits: editingPlanetIndex !== null ? (allSystems[currentSystemIndex].planets[editingPlanetIndex].deposits || []) : [], // ✅ NEW
                 moons: [],
                 flags: []
             };
@@ -2496,12 +2901,31 @@
             document.getElementById('neighborJumpsMax').value = '3';
             document.getElementById('neighborPreviewIdentifier').textContent = '-';
             
+            // ✅ NEW: Reset advanced parameters
+            document.getElementById('neighborUseDistance').checked = false;
+            document.getElementById('neighborDistance').disabled = true;
+            document.getElementById('neighborDistance').value = '50';
+            
+            document.getElementById('neighborUseOrientation').checked = false;
+            document.getElementById('neighborMinOrientation').disabled = true;
+            document.getElementById('neighborMaxOrientation').disabled = true;
+            document.getElementById('neighborMinOrientation').value = '0';
+            document.getElementById('neighborMaxOrientation').value = '360';
+            
+            document.getElementById('neighborUseHyperlaneDistance').checked = false;
+            document.getElementById('neighborHyperlaneDistance').disabled = true;
+            document.getElementById('neighborHyperlaneDistance').value = '3';
+            
+            document.getElementById('neighborUseSpawnChance').checked = false;
+            document.getElementById('neighborSpawnChance').disabled = true;
+            document.getElementById('neighborSpawnChance').value = '100';
+            
             // Fülle System-Auswahl
             const select = document.getElementById('neighborSystemSelect');
             select.innerHTML = '<option value="">-- Select from list or enter manually --</option>';
             
             allSystems.forEach((system, index) => {
-                if (index !== currentSystemIndex) { // Nicht das aktuelle System anzeigen
+                if (index !== currentSystemIndex) {
                     const option = document.createElement('option');
                     option.value = index;
                     option.textContent = `${system.displayName} (${system.name})`;
@@ -2528,22 +2952,52 @@
             const displayName = document.getElementById('neighborDisplayName').value.trim();
             const jumpsMin = parseInt(document.getElementById('neighborJumpsMin').value);
             const jumpsMax = parseInt(document.getElementById('neighborJumpsMax').value);
+            const selectedSystemIndex = document.getElementById('neighborSystemSelect').value;
+            
+            // ✅ NEW: Advanced neighbor parameters
+            const useDistance = document.getElementById('neighborUseDistance')?.checked || false;
+            const distance = useDistance ? parseInt(document.getElementById('neighborDistance')?.value || 0) : null;
+            
+            const useOrientation = document.getElementById('neighborUseOrientation')?.checked || false;
+            const minOrientation = useOrientation ? parseInt(document.getElementById('neighborMinOrientation')?.value || 0) : null;
+            const maxOrientation = useOrientation ? parseInt(document.getElementById('neighborMaxOrientation')?.value || 360) : null;
+            
+            const useHyperlaneDistance = document.getElementById('neighborUseHyperlaneDistance')?.checked || false;
+            const hyperlaneDistance = useHyperlaneDistance ? parseInt(document.getElementById('neighborHyperlaneDistance')?.value || 0) : null;
+            
+            const useSpawnChance = document.getElementById('neighborUseSpawnChance')?.checked || false;
+            const spawnChance = useSpawnChance ? parseInt(document.getElementById('neighborSpawnChance')?.value || 100) : null;
             
             if (!displayName) {
                 showNotification('⚠️ Please enter a display name!');
                 return;
             }
             
-            const identifier = generateNeighborIdentifier(displayName);
+            // ✅ FIX: Verwende echten System-Identifier wenn aus Liste gewählt, sonst generiere neu
+            let identifier;
+            if (selectedSystemIndex !== '') {
+                // Benutzer hat existierendes System aus Dropdown gewählt
+                identifier = allSystems[selectedSystemIndex].name;
+            } else {
+                // Benutzer hat manuell einen Namen eingegeben
+                identifier = generateNeighborIdentifier(displayName);
+            }
             
             const neighborData = {
                 id: Date.now() + Math.random(),
                 mode: 'reference',
                 initializer: identifier,
+                linkedSystemIndex: selectedSystemIndex !== '' ? parseInt(selectedSystemIndex) : undefined,
                 hyperlaneJumps: {
                     min: jumpsMin,
                     max: jumpsMax
-                }
+                },
+                // ✅ NEW: Advanced parameters
+                distance: distance,
+                minOrientationAngle: minOrientation,
+                maxOrientationAngle: maxOrientation,
+                hyperlaneDistance: hyperlaneDistance,
+                spawnChance: spawnChance
             };
             
             allSystems[currentSystemIndex].neighborSystems.push(neighborData);
@@ -2602,26 +3056,82 @@
         // =====================================================
         
         function editSystemProperties() {
+            if (currentSystemIndex === null) return;
+            
             const system = allSystems[currentSystemIndex];
             
-            const newDisplayName = prompt('System display name:', system.displayName);
-            if (newDisplayName && newDisplayName.trim()) {
-                system.displayName = newDisplayName.trim();
+            // Populate modal with current system data
+            document.getElementById('systemDisplayName').value = system.displayName || '';
+            document.getElementById('systemUsage').value = system.usage || 'custom_empire';
+            document.getElementById('systemMandatoryNeighbors').checked = system.mandatoryNeighbors || false;
+            
+            // Handle star class (check if custom or vanilla)
+            const starClassDropdown = document.getElementById('systemStarClass');
+            const vanillaClasses = Array.from(starClassDropdown.options)
+                .filter(opt => opt.value !== 'CUSTOM')
+                .map(opt => opt.value);
+            
+            if (vanillaClasses.includes(system.class)) {
+                starClassDropdown.value = system.class;
+                document.getElementById('customStarClassField').classList.add('hidden');
+            } else {
+                starClassDropdown.value = 'CUSTOM';
+                document.getElementById('customStarClassField').classList.remove('hidden');
+                document.getElementById('customStarClassInput').value = system.class;
             }
             
-            const newClass = prompt('Star class (e.g. sc_g, sc_m, sc_k):', system.class);
-            if (newClass && newClass.trim()) {
-                system.class = newClass.trim();
+            // Show modal
+            document.getElementById('systemPropertiesModal').classList.add('active');
+        }
+
+        function saveSystemProperties() {
+            if (currentSystemIndex === null) return;
+            
+            const system = allSystems[currentSystemIndex];
+            
+            // Get display name
+            const newDisplayName = document.getElementById('systemDisplayName').value.trim();
+            if (newDisplayName) {
+                system.displayName = newDisplayName;
             }
             
-            const newUsage = prompt('Usage (e.g. custom_empire, misc_system):', system.usage);
-            if (newUsage && newUsage.trim()) {
-                system.usage = newUsage.trim();
+            // Get star class
+            const starClassDropdown = document.getElementById('systemStarClass');
+            if (starClassDropdown.value === 'CUSTOM') {
+                const customClass = document.getElementById('customStarClassInput').value.trim();
+                if (customClass) {
+                    system.class = customClass;
+                } else {
+                    showNotification('⚠️ Please enter a custom star class!', 'error');
+                    return;
+                }
+            } else {
+                system.class = starClassDropdown.value;
             }
             
+            // Get usage
+            system.usage = document.getElementById('systemUsage').value;
+            
+            // Get mandatory neighbors
+            system.mandatoryNeighbors = document.getElementById('systemMandatoryNeighbors').checked;
+            
+            // Close modal and update UI
+            document.getElementById('systemPropertiesModal').classList.remove('active');
             updateSystemList();
             loadSystemIntoEditor(system);
             showNotification('✅ System properties updated!');
+        }
+
+        function toggleCustomStarClass() {
+            const dropdown = document.getElementById('systemStarClass');
+            const customField = document.getElementById('customStarClassField');
+            
+            if (dropdown.value === 'CUSTOM') {
+                customField.classList.remove('hidden');
+                document.getElementById('customStarClassInput').focus();
+            } else {
+                customField.classList.add('hidden');
+            }
         }
 
         function deleteCurrentSystem() {
@@ -2643,9 +3153,37 @@
             }
         }
 
+        // ✅ NEW: Toggle custom planet class input
+        window.toggleCustomPlanetClass = function() {
+            const select = document.getElementById('planetClass');
+            const customInput = document.getElementById('planetClassCustom');
+            
+            if (select.value === 'CUSTOM') {
+                customInput.classList.remove('hidden');
+                customInput.focus();
+            } else {
+                customInput.classList.add('hidden');
+            }
+        };
+
+        // ✅ NEW: Toggle custom moon class input
+        window.toggleCustomMoonClass = function() {
+            const select = document.getElementById('moonClass');
+            const customInput = document.getElementById('moonClassCustom');
+            
+            if (select.value === 'CUSTOM') {
+                customInput.classList.remove('hidden');
+                customInput.focus();
+            } else {
+                customInput.classList.add('hidden');
+            }
+        };
+
         // Make functions globally accessible
         window.deleteCurrentSystem = deleteCurrentSystem;
         window.editSystemProperties = editSystemProperties;
+        window.saveSystemProperties = saveSystemProperties;
+        window.toggleCustomStarClass = toggleCustomStarClass;
         window.openAddPlanetModal = openAddPlanetModal;
         window.openEditPlanetModal = openEditPlanetModal;
         window.deletePlanet = deletePlanet;
@@ -2677,6 +3215,11 @@
             
             code += `\tusage = ${system.usage}\n`;
             
+            // ✅ NEU: Mandatory Neighbors Export
+            if (system.mandatoryNeighbors && system.neighborSystems.length > 0) {
+                code += `\tmandatory_neighbors = yes\n`;
+            }
+            
             if (system.isMain) {
                 code += `\tinit_effect = {\n`;
                 code += `\t\tevery_neighbor_system = {\n`;
@@ -2696,6 +3239,25 @@
             system.neighborSystems.forEach(neighbor => {
                 code += `\n\tneighbor_system = {\n`;
                 code += `\t\thyperlane_jumps = { min = ${neighbor.hyperlaneJumps.min} max = ${neighbor.hyperlaneJumps.max} }\n`;
+                
+                // ✅ NEW: Export advanced parameters if set
+                if (neighbor.distance !== null && neighbor.distance !== undefined) {
+                    code += `\t\tdistance = ${neighbor.distance}\n`;
+                }
+                
+                if (neighbor.minOrientationAngle !== null && neighbor.maxOrientationAngle !== null) {
+                    code += `\t\tmin_orientation_angle = ${neighbor.minOrientationAngle}\n`;
+                    code += `\t\tmax_orientation_angle = ${neighbor.maxOrientationAngle}\n`;
+                }
+                
+                if (neighbor.hyperlaneDistance !== null && neighbor.hyperlaneDistance !== undefined) {
+                    code += `\t\thyperlane_distance = ${neighbor.hyperlaneDistance}\n`;
+                }
+                
+                if (neighbor.spawnChance !== null && neighbor.spawnChance !== undefined && neighbor.spawnChance < 100) {
+                    code += `\t\tspawn_chance = ${neighbor.spawnChance}\n`;
+                }
+                
                 code += `\t\tinitializer = "${neighbor.initializer}"\n`;
                 code += `\t}\n`;
             });
@@ -2747,10 +3309,27 @@
                 }
                 code += `${tab}\tinit_effect = {\n`;
                 code += `${tab}\t\tprevent_anomaly = yes\n`;
+                
+                // ✅ NEW: Export deposits in init_effect
+                if (planet.deposits && planet.deposits.length > 0) {
+                    planet.deposits.forEach(deposit => {
+                        code += `${tab}\t\tadd_deposit = ${deposit}\n`;
+                    });
+                }
+                
                 code += `${tab}\t}\n`;
                 code += `${tab}\tinit_effect = {\n`;
                 code += `${tab}\t\tgenerate_start_buildings_and_blockers = yes\n`;
                 code += `${tab}\t}\n`;
+            } else {
+                // ✅ NEW: For non-starting planets, deposits go in separate init_effect
+                if (planet.deposits && planet.deposits.length > 0) {
+                    code += `${tab}\tinit_effect = {\n`;
+                    planet.deposits.forEach(deposit => {
+                        code += `${tab}\t\tadd_deposit = ${deposit}\n`;
+                    });
+                    code += `${tab}\t}\n`;
+                }
             }
 
             if (planet.isGuaranteedHabitable) {
