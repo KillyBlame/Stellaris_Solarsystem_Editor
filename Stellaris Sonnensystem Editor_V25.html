@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Stellaris Solar System Editor V24 - Full Editor</title>
+    <title>Stellaris Solar System Editor V25 - Full Editor</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;600;700;800;900&family=Exo+2:wght@300;400;500;600&display=swap');
@@ -395,7 +395,7 @@
 </head>
 <body>
     <div class="container mx-auto py-8 px-4">
-        <h1 class="stellaris-header">🌌 Stellaris Solar System Editor V24</h1>
+        <h1 class="stellaris-header">🌌 Stellaris Solar System Editor V25</h1>
         <div class="text-center mb-6">
             <span class="text-yellow-400 font-semibold">⭐ Full Editor - Edit systems, planets, and neighbors</span>
         </div>
@@ -992,6 +992,41 @@
             </div>
         </div>
 
+            <!-- Star Configuration Wizard Modal -->
+            <div id="starConfigModal" class="modal">
+                <div class="modal-content" style="max-width: 700px;">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+                        <h2 style="margin: 0; color: var(--stellaris-accent);">🌟 Star Configuration Wizard</h2>
+                        <button onclick="closeStarConfigWizard()" class="modal-close" style="background: none; border: none; font-size: 28px; cursor: pointer; color: #94a3b8;">&times;</button>
+                    </div>
+
+                    <div style="background: rgba(0, 212, 255, 0.1); padding: 15px; border-radius: 8px; margin-bottom: 20px; border-left: 4px solid var(--stellaris-accent);">
+                        <p style="margin: 0; color: #94a3b8;">
+                            <strong>Selected Star Class:</strong> <span id="wizardStarClassName" style="color: var(--stellaris-accent);">-</span><br>
+                            <strong>Number of Stars:</strong> <span id="wizardStarCount" style="color: var(--stellaris-accent);">-</span>
+                        </p>
+                    </div>
+
+                    <div style="display: flex; gap: 10px; margin-bottom: 15px; flex-wrap: wrap;">
+                        <button onclick="resetStarAngles()" class="stellaris-btn stellaris-btn-secondary" style="flex: 1; min-width: 150px;">
+                            🔄 Reset to Smart Distribution
+                        </button>
+                        <button onclick="randomizeStarAngles()" class="stellaris-btn stellaris-btn-secondary" style="flex: 1; min-width: 150px;">
+                            🎲 Randomize Angles
+                        </button>
+                    </div>
+
+                    <div id="starConfigList" style="max-height: 400px; overflow-y: auto; margin-bottom: 20px;">
+                        <!-- Stars will be dynamically added here -->
+                    </div>
+
+                    <div style="display: flex; gap: 10px; justify-content: flex-end;">
+                        <button onclick="closeStarConfigWizard()" class="stellaris-btn stellaris-btn-secondary">❌ Cancel</button>
+                        <button onclick="applyStarConfiguration()" class="stellaris-btn stellaris-btn-success">✅ Apply Configuration</button>
+                    </div>
+                </div>
+            </div>
+            
             <!-- System Properties Modal -->
             <div id="systemPropertiesModal" class="modal">
                 <div class="modal-content">
@@ -1048,6 +1083,12 @@
                         <label class="label">Custom Star Class</label>
                         <input type="text" id="customStarClassInput" class="stellaris-input" placeholder="e.g. sc_custom_star">
                         <p class="text-xs text-gray-400 mt-1">Enter a custom star class ID (e.g. for mods)</p>
+                    </div>
+
+                    <div class="form-group mb-4" id="starConfigWizardButton" style="display: none;">
+                        <button onclick="openStarConfigWizard()" class="stellaris-btn stellaris-btn-secondary" style="width: 100%;">
+                            🌟 Configure Stars (Multi-Star System)
+                        </button>
                     </div>
 
                     <div class="form-group mb-4">
@@ -1118,6 +1159,48 @@
         // =====================================================
         // DATA MODEL & STATE
         // =====================================================
+
+        // ==================== STAR CONFIGURATION DATABASE ====================
+        
+        const STAR_CLASS_CONFIG = {
+            // Single Stars
+            'sc_a': { count: 1, types: ['pc_a_star'] },
+            'sc_b': { count: 1, types: ['pc_b_star'] },
+            'sc_f': { count: 1, types: ['pc_f_star'] },
+            'sc_g': { count: 1, types: ['pc_g_star'] },
+            'sc_k': { count: 1, types: ['pc_k_star'] },
+            'sc_m': { count: 1, types: ['pc_m_star'] },
+            'sc_t': { count: 1, types: ['pc_t_star'] },
+            'sc_black_hole': { count: 1, types: ['pc_black_hole'] },
+            'sc_neutron_star': { count: 1, types: ['pc_neutron_star'] },
+            'sc_pulsar': { count: 1, types: ['pc_pulsar'] },
+            
+            // Binary Systems
+            'sc_binary_1': { count: 2, types: ['pc_g_star', 'pc_k_star'] },
+            'sc_binary_2': { count: 2, types: ['pc_g_star', 'pc_m_star'] },
+            'sc_binary_3': { count: 2, types: ['pc_g_star', 'pc_neutron_star'] },
+            'sc_binary_4': { count: 2, types: ['pc_m_star', 'pc_m_star'] },
+            'sc_binary_5': { count: 2, types: ['pc_g_star', 'pc_black_hole'] },
+            'sc_binary_6': { count: 2, types: ['pc_neutron_star', 'pc_black_hole'] },
+            'sc_binary_7': { count: 2, types: ['pc_black_hole', 'pc_black_hole'] },
+            'sc_binary_8': { count: 2, types: ['pc_neutron_star', 'pc_neutron_star'] },
+            'sc_binary_9': { count: 2, types: ['pc_pulsar', 'pc_pulsar'] },
+            'sc_binary_10': { count: 2, types: ['pc_pulsar', 'pc_black_hole'] },
+            
+            // Trinary Systems
+            'sc_trinary_1': { count: 3, types: ['pc_g_star', 'pc_k_star', 'pc_m_star'] },
+            'sc_trinary_2': { count: 3, types: ['pc_g_star', 'pc_k_star', 'pc_m_star'] },
+            'sc_trinary_3': { count: 3, types: ['pc_g_star', 'pc_k_star', 'pc_neutron_star'] },
+            'sc_trinary_4': { count: 3, types: ['pc_g_star', 'pc_neutron_star', 'pc_black_hole'] }
+        };
+        
+        // Calculate star orbits for multi-star systems
+        function calculateStarOrbits(starCount) {
+            if (starCount === 1) return [0];
+            if (starCount === 2) return [0, 25];
+            if (starCount === 3) return [0, 25, -50];
+            return [0]; // Fallback
+        }
         
         let allSystems = [];
         let currentSystemIndex = null;
@@ -2356,6 +2439,9 @@
                         <div class="flex justify-between items-center mb-3">
                             <h3 class="text-lg font-semibold text-yellow-400">🪐 Celestial Bodies (${system.planets.length + system.asteroidBelts.length})</h3>
                             <div class="flex gap-2">
+                                <button onclick="openAddStarModal()" class="stellaris-btn stellaris-btn-secondary text-sm" style="background: linear-gradient(135deg, #FFD700, #FFA500);">
+                                    ⭐ Star
+                                </button>
                                 <button onclick="openAddPlanetModal()" class="stellaris-btn stellaris-btn-secondary text-sm">
                                     ➕ Planet
                                 </button>
@@ -2529,7 +2615,7 @@
                                         <div class="flex items-center gap-2 mb-2">
                                             <span class="text-2xl">${icon}</span>
                                             <div>
-                                                <div class="font-semibold text-blue-300">${planet.name}</div>
+                                                <div class="font-semibold text-blue-300">${planet.class === 'star' ? '⭐ ' : ''}${planet.name}</div>
                                                 <div class="text-xs text-gray-400">${getClassDisplayName(planet.class)} • Size ${planet.size} • Orbit +${item.displayOrbit} (Position: ${item.orbit})</div>
                                             </div>
                                         </div>
@@ -2647,6 +2733,14 @@
             editingPlanetIndex = null;
             document.getElementById('planetModalTitle').textContent = '🌍 Add Planet';
             
+            // ✅ FEATURE 8: Warn if no stars exist
+            const system = allSystems[currentSystemIndex];
+            if (system && !system.planets.some(p => p.class === 'star')) {
+                if (!confirm('⚠️ WARNING: No stars in system!\n\nStars must be added before planets. Stars are the first objects in Stellaris systems.\n\nDo you want to add a planet anyway?\n\n(Recommended: Cancel and add a star first)')) {
+                    return;
+                }
+            }
+            
             // Reset form
             document.getElementById('planetName').value = '';
             document.getElementById('planetClass').value = 'pc_continental';
@@ -2665,6 +2759,62 @@
             document.getElementById('planetIsStarting').checked = false;
             
             document.getElementById('planetModal').classList.add('active');
+        }
+
+        // ✅ FEATURE 8: Add Star as Planet with class = star
+        function openAddStarModal() {
+            editingPlanetId = null;
+            editingPlanetIndex = null;
+            document.getElementById('planetModalTitle').textContent = '⭐ Add Star';
+            
+            // Pre-fill star parameters
+            document.getElementById('planetName').value = 'Star';
+            document.getElementById('planetClass').value = 'star';
+            document.getElementById('planetSize').value = '30';  // Default star size
+            document.getElementById('planetOrbit').value = '0';   // Primary star at center
+            
+            // Orbit angle
+            document.getElementById('orbitAngleMode').value = 'preset';
+            document.getElementById('planetAnglePreset').value = '0';
+            document.getElementById('planetAngleMin').value = '0';
+            document.getElementById('planetAngleMax').value = '360';
+            toggleOrbitAngleFields();
+            
+            document.getElementById('planetChangeOrbit').value = '0';
+            document.getElementById('planetHasRing').checked = false;
+            document.getElementById('planetIsStarting').checked = false;
+            document.getElementById('planetIsGuaranteedHabitable').checked = false;
+            
+            // Show info banner
+            showStarInfoBanner();
+            
+            document.getElementById('planetModal').classList.add('active');
+        }
+        
+        function showStarInfoBanner() {
+            const modalContent = document.querySelector('#planetModal .modal-content');
+            
+            // Remove existing banner if present
+            const existingBanner = document.getElementById('starInfoBanner');
+            if (existingBanner) existingBanner.remove();
+            
+            // Create info banner
+            const banner = document.createElement('div');
+            banner.id = 'starInfoBanner';
+            banner.className = 'mb-4 p-3 bg-yellow-900/30 rounded-lg border border-yellow-500/30';
+            banner.innerHTML = `
+                <p class="text-sm text-gray-300">
+                    <strong>⭐ Star Parameters:</strong>
+                </p>
+                <ul class="text-xs text-gray-400 mt-2 space-y-1">
+                    <li>• <strong>Primary Star:</strong> orbit_distance = 0</li>
+                    <li>• <strong>Companion Stars:</strong> orbit_distance = 25, 50, -50 (can be negative!)</li>
+                    <li>• <strong>Size:</strong> 15-35 (larger than planets)</li>
+                    <li>• <strong>Class:</strong> Set to "star" (will be exported as <code>class = star</code>)</li>
+                </ul>
+            `;
+            
+            modalContent.insertBefore(banner, modalContent.firstChild.nextSibling);
         }
 
         function openEditPlanetModal(planetId, planetIndex) {
@@ -3216,6 +3366,18 @@
                 }
             } else {
                 system.class = starClassDropdown.value;
+                
+                // Auto-trigger Star Config Wizard for multi-star systems
+                const config = STAR_CLASS_CONFIG[starClassDropdown.value];
+                if (config && config.count > 1) {
+                    // Close system properties modal first
+                    document.getElementById('systemPropertiesModal').classList.remove('active');
+                    
+                    // Open wizard after short delay
+                    setTimeout(() => {
+                        openStarConfigWizard();
+                    }, 300);
+                }
             }
             
             // Get usage
@@ -3233,15 +3395,217 @@
             showNotification('✅ System properties updated!');
         }
 
+        // ==================== STAR CONFIGURATION WIZARD ====================
+        
+        let wizardStarConfig = null;
+        
+        function openStarConfigWizard() {
+            const starClassDropdown = document.getElementById('systemStarClass');
+            const selectedClass = starClassDropdown.value;
+            
+            // Check if this is a multi-star system
+            const config = STAR_CLASS_CONFIG[selectedClass];
+            
+            if (!config || config.count === 1) {
+                showNotification('⚠️ Single star systems don\'t need configuration', 'warning');
+                return;
+            }
+            
+            wizardStarConfig = {
+                starClass: selectedClass,
+                starCount: config.count,
+                stars: []
+            };
+            
+            // Initialize stars with suggested types
+            const orbits = calculateStarOrbits(config.count);
+            const angles = calculateSmartAngles(config.count); // ✅ Smart default angles
+            
+            for (let i = 0; i < config.count; i++) {
+                wizardStarConfig.stars.push({
+                    index: i,
+                    name: `Star ${i + 1}`,
+                    class: config.types[i] || 'pc_g_star',
+                    orbitDistance: orbits[i],
+                    orbitAngle: angles[i],
+                    size: 25
+                });
+            }
+
+            // Calculate smart default angles for multi-star systems
+            function calculateSmartAngles(starCount) {
+                if (starCount === 1) return [0];
+                if (starCount === 2) return [0, 180];      // Opposite sides
+                if (starCount === 3) return [0, 120, 240]; // Evenly distributed
+                return [0]; // Fallback
+            }
+            
+            // Update modal info
+            document.getElementById('wizardStarClassName').textContent = selectedClass;
+            document.getElementById('wizardStarCount').textContent = config.count;
+            
+            // Render star configuration list
+            renderStarConfigList();
+            
+            // Show modal
+            document.getElementById('starConfigModal').classList.add('active');
+        }
+        
+        function renderStarConfigList() {
+            const container = document.getElementById('starConfigList');
+            container.innerHTML = '';
+            
+            wizardStarConfig.stars.forEach((star, index) => {
+                const starDiv = document.createElement('div');
+                starDiv.style.cssText = 'background: rgba(255,255,255,0.05); padding: 15px; border-radius: 8px; margin-bottom: 10px; border: 2px solid rgba(0,212,255,0.2);';
+                
+                starDiv.innerHTML = `
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
+                        <div>
+                            <label class="label">Star Name</label>
+                            <input type="text" value="${star.name}" 
+                                   onchange="updateStarConfig(${index}, 'name', this.value)"
+                                   class="stellaris-input" placeholder="Star ${index + 1}">
+                        </div>
+                        
+                        <div>
+                            <label class="label">Star Type</label>
+                            <select onchange="updateStarConfig(${index}, 'class', this.value)" 
+                                    class="stellaris-input">
+                                <option value="pc_a_star" ${star.class === 'pc_a_star' ? 'selected' : ''}>A-Star (White)</option>
+                                <option value="pc_b_star" ${star.class === 'pc_b_star' ? 'selected' : ''}>B-Star (Blue)</option>
+                                <option value="pc_f_star" ${star.class === 'pc_f_star' ? 'selected' : ''}>F-Star (Yellowish-White)</option>
+                                <option value="pc_g_star" ${star.class === 'pc_g_star' ? 'selected' : ''}>G-Star (Yellow)</option>
+                                <option value="pc_k_star" ${star.class === 'pc_k_star' ? 'selected' : ''}>K-Star (Orange)</option>
+                                <option value="pc_m_star" ${star.class === 'pc_m_star' ? 'selected' : ''}>M-Star (Red)</option>
+                                <option value="pc_black_hole" ${star.class === 'pc_black_hole' ? 'selected' : ''}>Black Hole</option>
+                                <option value="pc_neutron_star" ${star.class === 'pc_neutron_star' ? 'selected' : ''}>Neutron Star</option>
+                                <option value="pc_pulsar" ${star.class === 'pc_pulsar' ? 'selected' : ''}>Pulsar</option>
+                            </select>
+                        </div>
+                        
+                        <div>
+                            <label class="label">Orbit Distance</label>
+                            <input type="number" value="${star.orbitDistance}" 
+                                   onchange="updateStarConfig(${index}, 'orbitDistance', parseFloat(this.value))"
+                                   class="stellaris-input" step="5">
+                        </div>
+                        
+                        <div>
+                            <label class="label">Orbit Angle (°)</label>
+                            <input type="number" value="${star.orbitAngle}" 
+                                   onchange="updateStarConfig(${index}, 'orbitAngle', parseFloat(this.value))"
+                                   class="stellaris-input" min="0" max="360">
+                        </div>
+                        
+                        <div>
+                            <label class="label">Star Size</label>
+                            <input type="number" value="${star.size}" 
+                                   onchange="updateStarConfig(${index}, 'size', parseInt(this.value))"
+                                   class="stellaris-input" min="10" max="50">
+                        </div>
+                    </div>
+                `;
+                
+                container.appendChild(starDiv);
+            });
+        }
+        
+        function updateStarConfig(index, property, value) {
+            if (wizardStarConfig && wizardStarConfig.stars[index]) {
+                wizardStarConfig.stars[index][property] = value;
+            }
+        }
+
+        function resetStarAngles() {
+            if (!wizardStarConfig) return;
+            
+            const smartAngles = calculateSmartAngles(wizardStarConfig.starCount);
+            wizardStarConfig.stars.forEach((star, index) => {
+                star.orbitAngle = smartAngles[index];
+            });
+            
+            renderStarConfigList();
+            showNotification('🔄 Angles reset to smart distribution', 'success');
+        }
+        
+        function randomizeStarAngles() {
+            if (!wizardStarConfig) return;
+            
+            wizardStarConfig.stars.forEach(star => {
+                star.orbitAngle = Math.floor(Math.random() * 360);
+            });
+            
+            renderStarConfigList();
+            showNotification('🎲 Angles randomized!', 'success');
+        }
+        
+        function applyStarConfiguration() {
+            if (!wizardStarConfig || currentSystemIndex === null) return;
+            
+            const system = allSystems[currentSystemIndex];
+            
+            // Clear existing stars
+            system.planets = system.planets.filter(p => !p.class.includes('star') && !p.class.includes('black_hole'));
+            
+            // Add configured stars
+            wizardStarConfig.stars.forEach(star => {
+                system.planets.unshift({
+                    name: star.name,
+                    displayName: star.name, // ✅ FIX: Add displayName for visualizer
+                    class: star.class,
+                    size: star.size,
+                    orbitDistance: star.orbitDistance,
+                    // ✅ FIX: Set orbitAngleType for proper export
+                    orbitAngleType: 'fixed',
+                    orbitAngle: star.orbitAngle,
+                    orbitAngleMin: 90,
+                    orbitAngleMax: 270,
+                    hasRing: false,
+                    changeOrbit: 0,
+                    moons: [],
+                    modifiers: [],
+                    flags: [],
+                    deposits: [],
+                    surveyTime: 1,
+                    colonizable: false,
+                    isStartingPlanet: false,
+                    isGuaranteedHabitable: false,
+                    isHomePlanet: false
+                });
+            });
+            
+            // Close modal and update
+            closeStarConfigWizard();
+            loadSystemIntoEditor(system);
+            drawSystem();
+            showNotification(`✅ ${wizardStarConfig.starCount} stars configured successfully!`, 'success');
+        }
+        
+        function closeStarConfigWizard() {
+            document.getElementById('starConfigModal').classList.remove('active');
+            wizardStarConfig = null;
+        }
+
         function toggleCustomStarClass() {
             const dropdown = document.getElementById('systemStarClass');
             const customField = document.getElementById('customStarClassField');
+            const wizardButton = document.getElementById('starConfigWizardButton');
             
             if (dropdown.value === 'CUSTOM') {
                 customField.classList.remove('hidden');
                 document.getElementById('customStarClassInput').focus();
+                wizardButton.style.display = 'none';
             } else {
                 customField.classList.add('hidden');
+                
+                // Show wizard button for multi-star systems
+                const config = STAR_CLASS_CONFIG[dropdown.value];
+                if (config && config.count > 1) {
+                    wizardButton.style.display = 'block';
+                } else {
+                    wizardButton.style.display = 'none';
+                }
             }
         }
 
@@ -3324,11 +3688,25 @@
                 code += `\t}\n`;
             });
             
-            // ⭐ STAR GENERATION (MUST be before planets!)
-            code += `\n\tplanet = {\n`;
-            code += `\t\tclass = star\n`;
-            code += `\t\torbit_distance = 0\n`;
-            code += `\t}\n`;
+            // ✅ FEATURE 8: Export stars (planets with class = star or pc_*_star) FIRST
+            const starClasses = ['star', 'pc_g_star', 'pc_k_star', 'pc_m_star', 'pc_f_star', 
+                                 'pc_a_star', 'pc_b_star', 'pc_o_star', 'pc_black_hole', 
+                                 'pc_neutron_star', 'pc_pulsar'];
+            const starPlanets = system.planets.filter(p => starClasses.includes(p.class));
+            const regularPlanets = system.planets.filter(p => !starClasses.includes(p.class));
+            
+            // If no star planets exist, generate default primary star
+            if (starPlanets.length === 0) {
+                code += `\n\tplanet = {\n`;
+                code += `\t\tclass = star\n`;
+                code += `\t\torbit_distance = 0\n`;
+                code += `\t}\n`;
+            } else {
+                // Export all star planets first
+                starPlanets.forEach(starPlanet => {
+                    code += generatePlanetCode(starPlanet, 1);
+                });
+            }
             
             // ✅ NEW: Skip usage line if set to 'none'
             if (system.usage !== 'none') {
@@ -3355,7 +3733,8 @@
                 code += `\t}\n`;
             }
             
-            system.planets.forEach(planet => {
+            // Export regular planets (non-stars)
+            regularPlanets.forEach(planet => {
                 code += generatePlanetCode(planet, 1);
             });
             
@@ -3538,6 +3917,7 @@
 
         function getClassDisplayName(planetClass) {
             const names = {
+                'star': '⭐ Star',
                 'pc_g_star': 'G-Star', 'pc_k_star': 'K-Star', 'pc_m_star': 'M-Star',
                 'pc_f_star': 'F-Star', 'pc_a_star': 'A-Star', 'pc_b_star': 'B-Star',
                 'pc_black_hole': 'Black Hole', 'pc_neutron_star': 'Neutron Star', 
@@ -3661,8 +4041,10 @@
             const actualPlanets = system.planets.filter(p => !starClasses.includes(p.class));
             const starPlanets = system.planets.filter(p => starClasses.includes(p.class));
             
-            // Draw main system star (from system.class)
-            drawStar(system.class);
+            // Draw main system star (from system.class) - ONLY if no stars in planets list
+            if (starPlanets.length === 0) {
+                drawStar(system.class);
+            }
             
             // ✅ Draw additional stars as "planets" (binary/trinary systems)
             starPlanets.forEach(starPlanet => {
