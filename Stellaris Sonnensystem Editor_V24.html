@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Stellaris Solar System Editor V23 - Full Editor</title>
+    <title>Stellaris Solar System Editor V24 - Full Editor</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;600;700;800;900&family=Exo+2:wght@300;400;500;600&display=swap');
@@ -395,7 +395,7 @@
 </head>
 <body>
     <div class="container mx-auto py-8 px-4">
-        <h1 class="stellaris-header">🌌 Stellaris Solar System Editor V23</h1>
+        <h1 class="stellaris-header">🌌 Stellaris Solar System Editor V24</h1>
         <div class="text-center mb-6">
             <span class="text-yellow-400 font-semibold">⭐ Full Editor - Edit systems, planets, and neighbors</span>
         </div>
@@ -482,7 +482,7 @@
                     </div>
                     <div class="form-group">
                         <label class="label">Planet class</label>
-                        <select id="planetClass" class="stellaris-input">
+                        <select id="planetClass" class="stellaris-input" onchange="window.toggleCustomPlanetClass()">
                             <optgroup label="⭐ Stars">
                                 <option value="pc_g_star">G-Star (Yellow)</option>
                                 <option value="pc_k_star">K-Star (Orange)</option>
@@ -533,8 +533,8 @@
                         </select>
                     </div>
                     <div class="form-group">
-                        <label class="label">Size (5-40)</label>
-                        <input type="number" id="planetSize" class="stellaris-input" value="16" min="5" max="40">
+                        <label class="label">Size (5-50)</label>
+                        <input type="number" id="planetSize" class="stellaris-input" value="16" min="5" max="50">
                     </div>
                     <div class="form-group">
                         <label class="label">Orbit Distance</label>
@@ -592,8 +592,14 @@
                     </div>
                     <div class="form-group flex items-center">
                         <label class="flex items-center cursor-pointer">
+                            <input type="checkbox" id="planetIsHomePlanet" class="mr-2">
+                            <span class="text-gray-300">🌍 Home Planet (Random Empire)</span>
+                        </label>
+                    </div>
+                    <div class="form-group flex items-center">
+                        <label class="flex items-center cursor-pointer">
                             <input type="checkbox" id="planetIsGuaranteedHabitable" class="mr-2">
-                            <span class="text-gray-300">🌍 Garantierter bewohnbarer Planet</span>
+                            <span class="text-gray-300">🌿 Garantierter bewohnbarer Planet</span>
                         </label>
                     </div>
                 </div>
@@ -762,8 +768,8 @@
                         </select>
                     </div>
                     <div class="form-group">
-                        <label class="label">Size (3-20)</label>
-                        <input type="number" id="moonSize" class="stellaris-input" value="8" min="3" max="20">
+                        <label class="label">Size (3-50)</label>
+                        <input type="number" id="moonSize" class="stellaris-input" value="8" min="3" max="50">
                     </div>
                     <div class="form-group">
                         <label class="label">Orbit Distance from Planet</label>
@@ -1052,8 +1058,9 @@
                             <option value="fallen_empire_init">Fallen Empire Init</option>
                             <option value="misc_system_init">Misc System Init (Random Galaxy)</option>
                             <option value="origin">Origin (Specific Origins)</option>
+                            <option value="none">None (Neighbor-only, not selectable)</option>
                         </select>
-                        <p class="text-xs text-gray-400 mt-1">💡 Tip: "Custom Empire" for player starts, "Misc System Init" for random galaxy systems</p>
+                        <p class="text-xs text-gray-400 mt-1">💡 Tip: "Custom Empire" for player starts, "None" for neighbor-only systems</p>
                     </div>
 
                     <div class="form-group mb-4">
@@ -1062,6 +1069,14 @@
                             <span class="label mb-0">Enable Mandatory Neighbors</span>
                         </label>
                         <p class="text-xs text-gray-400 mt-1">If enabled: Game engine creates new systems if no matching ones are found</p>
+                    </div>
+
+                    <div class="form-group mb-4">
+                        <label class="flex items-center cursor-pointer">
+                            <input type="checkbox" id="systemGenerateHomeResources" class="mr-2" checked>
+                            <span class="label mb-0">Generate Home System Resources</span>
+                        </label>
+                        <p class="text-xs text-gray-400 mt-1">If enabled: Automatically generates strategic resources near homeworld (recommended for player empires)</p>
                     </div>
 
                     <div class="mt-6 flex gap-2">
@@ -1124,7 +1139,8 @@
                 planets: [],
                 flags: [],
                 isMain: false,
-                mandatoryNeighbors: false  // ✅ NEU: Mandatory Neighbors Option
+                mandatoryNeighbors: false,  // ✅ NEU: Mandatory Neighbors Option
+                generateHomeResources: true  // ✅ FIX 9: Generate Home System Resources
             };
         }
 
@@ -1398,6 +1414,13 @@
                     
                     try {
                         const planet = this.parsePlanetBlock(planetBlock, planetId);
+                        
+                        // ✅ FIX: Skip dummy star entries (syntax-only, not real planets)
+                        if (planet.class === 'star' && planet.orbitDistance === 0 && (!planet.size || planet.size <= 16)) {
+                            // This is just a Stellaris syntax requirement, not an actual planet
+                            i = blockEnd + 1;
+                            continue;
+                        }
                         
                         if (this.isStarClass(planet.class)) {
                             if (planet.size > 30 || (planet.orbitDistance === 0 && planetId === 1)) {
@@ -1768,11 +1791,12 @@
             const skipLocalization = document.getElementById('skipLocalizationCheckbox').checked;
             if (!skipLocalization) {
                 const ymlContent = generateLocalizationYML(allSystems);
-                const ymlBlob = new Blob([ymlContent], { type: 'text/plain; charset=utf-8' });
+                // ✅ UTF-8 with BOM (required by Stellaris)
+                const ymlBlob = new Blob(['\ufeff' + ymlContent], { type: 'text/plain; charset=utf-8' });
                 const ymlUrl = URL.createObjectURL(ymlBlob);
                 const ymlLink = document.createElement('a');
                 ymlLink.href = ymlUrl;
-                ymlLink.download = `l_english_${baseName}_systems.yml`;
+                ymlLink.download = `initializers_names_l_english.yml`;
                 ymlLink.click();
                 URL.revokeObjectURL(ymlUrl);
             }
@@ -2705,6 +2729,7 @@
             const changeOrbit = parseInt(document.getElementById('planetChangeOrbit').value);
             const hasRing = document.getElementById('planetHasRing').checked;
             const isStarting = document.getElementById('planetIsStarting').checked;
+            const isHomePlanet = document.getElementById('planetIsHomePlanet').checked;
             const isGuaranteedHabitable = document.getElementById('planetIsGuaranteedHabitable').checked;
             
             // NEU: Orbit Angle basierend auf Modus
@@ -2739,6 +2764,7 @@
                 changeOrbit: changeOrbit,
                 hasRing: hasRing,
                 isStartingPlanet: isStarting,
+                isHomePlanet: isHomePlanet,
                 isGuaranteedHabitable: isGuaranteedHabitable,
                 modifiers: editingPlanetIndex !== null ? allSystems[currentSystemIndex].planets[editingPlanetIndex].modifiers || [] : [],
                 deposits: editingPlanetIndex !== null ? (allSystems[currentSystemIndex].planets[editingPlanetIndex].deposits || []) : [], // ✅ NEW
@@ -3146,6 +3172,7 @@
             document.getElementById('systemDisplayName').value = system.displayName || '';
             document.getElementById('systemUsage').value = system.usage || 'custom_empire';
             document.getElementById('systemMandatoryNeighbors').checked = system.mandatoryNeighbors || false;
+            document.getElementById('systemGenerateHomeResources').checked = system.generateHomeResources !== false;
             
             // Handle star class (check if custom or vanilla)
             const starClassDropdown = document.getElementById('systemStarClass');
@@ -3196,6 +3223,8 @@
             
             // Get mandatory neighbors
             system.mandatoryNeighbors = document.getElementById('systemMandatoryNeighbors').checked;
+            // Get generate home resources flag
+            system.generateHomeResources = document.getElementById('systemGenerateHomeResources').checked;
             
             // Close modal and update UI
             document.getElementById('systemPropertiesModal').classList.remove('active');
@@ -3295,7 +3324,16 @@
                 code += `\t}\n`;
             });
             
-            code += `\tusage = ${system.usage}\n`;
+            // ⭐ STAR GENERATION (MUST be before planets!)
+            code += `\n\tplanet = {\n`;
+            code += `\t\tclass = star\n`;
+            code += `\t\torbit_distance = 0\n`;
+            code += `\t}\n`;
+            
+            // ✅ NEW: Skip usage line if set to 'none'
+            if (system.usage !== 'none') {
+                code += `\tusage = ${system.usage}\n`;
+            }
             
             // ✅ NEU: Mandatory Neighbors Export
             if (system.mandatoryNeighbors && system.neighborSystems.length > 0) {
@@ -3310,7 +3348,10 @@
                 code += `\t\t\t\tset_star_flag = empire_cluster\n`;
                 code += `\t\t\t}\n`;
                 code += `\t\t}\n`;
-                code += `\t\tgenerate_home_system_resources = yes\n`;
+                // ✅ FIX 9: Only export if checkbox is enabled
+                if (system.generateHomeResources !== false) {
+                    code += `\t\tgenerate_home_system_resources = yes\n`;
+                }
                 code += `\t}\n`;
             }
             
@@ -3382,9 +3423,14 @@
                 code += `${tab}\tmodifiers = { ${planet.modifiers.join(' ')} }\n`;
             }
             
+            // ✅ NEW: Home planet for random empires
+            if (planet.isHomePlanet) {
+                code += `${tab}\thome_planet = yes\n`;
+            }
+            
             if (planet.isStartingPlanet) {
                 code += `${tab}\tstarting_planet = yes\n`;
-                code += `${tab}\ttile_blockers = none\n`;
+                code += `${tab}\tdeposit_blockers = none\n`;
                 // Only add "modifiers = none" if no modifiers exist
                 if (!planet.modifiers || planet.modifiers.length === 0) {
                     code += `${tab}\tmodifiers = none\n`;
@@ -3401,7 +3447,7 @@
                 
                 code += `${tab}\t}\n`;
                 code += `${tab}\tinit_effect = {\n`;
-                code += `${tab}\t\tgenerate_start_buildings_and_blockers = yes\n`;
+                code += `${tab}\t\tgenerate_empire_home_planet = yes\n`;
                 code += `${tab}\t}\n`;
             } else {
                 // ✅ NEW: For non-starting planets, deposits go in separate init_effect
