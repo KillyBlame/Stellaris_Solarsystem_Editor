@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Stellaris Solar System Editor V22 - Full Editor</title>
+    <title>Stellaris Solar System Editor V23 - Full Editor</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;600;700;800;900&family=Exo+2:wght@300;400;500;600&display=swap');
@@ -341,11 +341,61 @@
         .hidden {
             display: none !important;
         }
+
+        /* ===== VISUALIZATION CANVAS ===== */
+        .visualization-container {
+            position: relative;
+            background: linear-gradient(135deg, #0a0e1a 0%, #1a1f2e 100%);
+            border: 2px solid var(--stellaris-border);
+            border-radius: 12px;
+            overflow: hidden;
+            height: 600px;
+            box-shadow: 
+                0 8px 32px rgba(0, 0, 0, 0.4),
+                inset 0 0 100px rgba(0, 212, 255, 0.05);
+        }
+        
+        #systemCanvas {
+            display: block;
+            width: 100%;
+            height: 100%;
+            cursor: grab;
+        }
+        
+        #systemCanvas:active {
+            cursor: grabbing;
+        }
+        
+        .canvas-controls {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            background: rgba(26, 35, 50, 0.95);
+            border: 1px solid var(--stellaris-border);
+            border-radius: 8px;
+            padding: 10px;
+            z-index: 10;
+            backdrop-filter: blur(10px);
+        }
+        
+        .canvas-info {
+            position: absolute;
+            bottom: 15px;
+            left: 15px;
+            background: rgba(26, 35, 50, 0.95);
+            border: 1px solid var(--stellaris-border);
+            border-radius: 8px;
+            padding: 8px 12px;
+            font-size: 0.75rem;
+            z-index: 10;
+            color: var(--stellaris-blue);
+            font-family: 'Orbitron', monospace;
+        }
     </style>
 </head>
 <body>
     <div class="container mx-auto py-8 px-4">
-        <h1 class="stellaris-header">🌌 Stellaris Solar System Editor V22</h1>
+        <h1 class="stellaris-header">🌌 Stellaris Solar System Editor V23</h1>
         <div class="text-center mb-6">
             <span class="text-yellow-400 font-semibold">⭐ Full Editor - Edit systems, planets, and neighbors</span>
         </div>
@@ -365,6 +415,16 @@
                 <div class="flex items-end">
                     <button id="exportAllBtn" class="stellaris-btn stellaris-btn-secondary">Export all</button>
                 </div>
+            </div>
+            
+            <div class="mt-4 p-3 bg-purple-900/20 rounded-lg border border-purple-500/30">
+                <label class="flex items-center gap-2 cursor-pointer">
+                    <input type="checkbox" id="skipLocalizationCheckbox" class="w-4 h-4 rounded border-purple-500 bg-gray-700 text-purple-600 focus:ring-purple-500">
+                    <span class="text-purple-300">
+                        <span class="font-semibold">📝 Skip localization file</span> 
+                        <span class="text-gray-400 text-sm">(Use if localization already exists in your mod)</span>
+                    </span>
+                </label>
             </div>
             
             <div id="importInfo" class="mt-4 p-3 bg-blue-900/30 rounded-lg border border-blue-500/30 hidden">
@@ -1012,7 +1072,6 @@
             </div>
 
         <!-- Add Asteroid Belt Modal -->
-        <div id="asteroidBeltModal" class="modal">
         <div id="asteroidBeltModal" class="modal">
             <div class="modal-content">
                 <h2 class="text-2xl font-bold mb-4 text-yellow-300">☄️ Add Asteroid Belt</h2>
@@ -1705,17 +1764,21 @@
             txtLink.click();
             URL.revokeObjectURL(txtUrl);
             
-            // Generate .yml file (localization)
-            const ymlContent = generateLocalizationYML(allSystems);
-            const ymlBlob = new Blob([ymlContent], { type: 'text/plain; charset=utf-8' });
-            const ymlUrl = URL.createObjectURL(ymlBlob);
-            const ymlLink = document.createElement('a');
-            ymlLink.href = ymlUrl;
-            ymlLink.download = `l_english_${baseName}_systems.yml`;
-            ymlLink.click();
-            URL.revokeObjectURL(ymlUrl);
+            // Generate .yml file (localization) - only if not skipped
+            const skipLocalization = document.getElementById('skipLocalizationCheckbox').checked;
+            if (!skipLocalization) {
+                const ymlContent = generateLocalizationYML(allSystems);
+                const ymlBlob = new Blob([ymlContent], { type: 'text/plain; charset=utf-8' });
+                const ymlUrl = URL.createObjectURL(ymlBlob);
+                const ymlLink = document.createElement('a');
+                ymlLink.href = ymlUrl;
+                ymlLink.download = `l_english_${baseName}_systems.yml`;
+                ymlLink.click();
+                URL.revokeObjectURL(ymlUrl);
+            }
             
-            showNotification('💾 Files downloaded!');
+            const fileCount = skipLocalization ? 1 : 2;
+            showNotification(`💾 ${fileCount} file${fileCount > 1 ? 's' : ''} downloaded!`);
         });
 
         document.getElementById('copyExportBtn').addEventListener('click', () => {
@@ -2294,8 +2357,27 @@
                             ${renderNeighborSystems(system.neighborSystems)}
                         </div>
                     </div>
+                    
+                    <!-- System Visualization Canvas -->
+                    <div class="mb-6">
+                        <h3 class="text-lg font-semibold text-yellow-400 mb-3">🔭 System Visualization</h3>
+                        <div class="visualization-container">
+                            <canvas id="systemCanvas"></canvas>
+                            <div class="canvas-controls">
+                                <button onclick="resetCanvasView()" class="stellaris-btn text-xs px-2 py-1">
+                                    🔄 Reset View
+                                </button>
+                            </div>
+                            <div class="canvas-info">
+                                🖱️ Drag to Pan | 🖲️ Scroll to Zoom
+                            </div>
+                        </div>
+                    </div>
                 </div>
             `;
+            
+            // Render visualization after DOM is ready
+            setTimeout(() => renderSystemVisualization(), 50);
         }
 
         function renderPlanetList(planets) {
@@ -3434,6 +3516,565 @@
             setTimeout(() => {
                 notification.remove();
             }, 3000);
+        }
+
+        // ===== SYSTEM VISUALIZATION =====
+        let canvas, ctx;
+        let canvasScale = 1;
+        let canvasOffsetX = 0;
+        let canvasOffsetY = 0;
+        let isDragging = false;
+        let lastMouseX = 0;
+        let lastMouseY = 0;
+        
+        function renderSystemVisualization() {
+            canvas = document.getElementById('systemCanvas');
+            if (!canvas) return;
+            
+            ctx = canvas.getContext('2d');
+            canvas.width = canvas.offsetWidth;
+            canvas.height = canvas.offsetHeight;
+            
+            // Reset view
+            canvasScale = 1;
+            canvasOffsetX = canvas.width / 2;
+            canvasOffsetY = canvas.height / 2;
+            
+            // Setup event listeners
+            setupCanvasControls();
+            
+            // Draw system
+            drawSystem();
+        }
+        
+        function setupCanvasControls() {
+            // Mouse wheel zoom
+            canvas.addEventListener('wheel', (e) => {
+                e.preventDefault();
+                const delta = e.deltaY > 0 ? 0.9 : 1.1;
+                canvasScale *= delta;
+                canvasScale = Math.max(0.1, Math.min(5, canvasScale));
+                drawSystem();
+            });
+            
+            // Mouse drag pan
+            canvas.addEventListener('mousedown', (e) => {
+                isDragging = true;
+                lastMouseX = e.clientX;
+                lastMouseY = e.clientY;
+            });
+            
+            canvas.addEventListener('mousemove', (e) => {
+                if (isDragging) {
+                    const dx = e.clientX - lastMouseX;
+                    const dy = e.clientY - lastMouseY;
+                    canvasOffsetX += dx;
+                    canvasOffsetY += dy;
+                    lastMouseX = e.clientX;
+                    lastMouseY = e.clientY;
+                    drawSystem();
+                }
+            });
+            
+            canvas.addEventListener('mouseup', () => {
+                isDragging = false;
+            });
+            
+            canvas.addEventListener('mouseleave', () => {
+                isDragging = false;
+            });
+        }
+        
+        function resetCanvasView() {
+            canvasScale = 1;
+            canvasOffsetX = canvas.width / 2;
+            canvasOffsetY = canvas.height / 2;
+            drawSystem();
+        }
+        
+        function drawSystem() {
+            if (!canvas || !ctx || !allSystems[currentSystemIndex]) return;
+            
+            const system = allSystems[currentSystemIndex];
+            
+            // Clear canvas
+            ctx.fillStyle = '#0a0e1a';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+            
+            // Draw background grid
+            drawGrid();
+            
+            // ✅ STERN-KLASSEN: Diese Planet-Classes sind eigentlich Sterne
+            const starClasses = [
+                'pc_g_star', 'pc_k_star', 'pc_m_star', 'pc_f_star', 
+                'pc_a_star', 'pc_b_star', 'pc_black_hole', 
+                'pc_neutron_star', 'pc_pulsar'
+            ];
+            
+            // ✅ Filter: Trenne Sterne von echten Planeten
+            const actualPlanets = system.planets.filter(p => !starClasses.includes(p.class));
+            const starPlanets = system.planets.filter(p => starClasses.includes(p.class));
+            
+            // Draw main system star (from system.class)
+            drawStar(system.class);
+            
+            // ✅ Draw additional stars as "planets" (binary/trinary systems)
+            starPlanets.forEach(starPlanet => {
+                // Stars in planet list get drawn with special handling
+                let cumulativeStarOrbit = 0;
+                // Calculate cumulative orbit for this star
+                const starIndex = system.planets.indexOf(starPlanet);
+                for (let i = 0; i <= starIndex; i++) {
+                    if (system.planets[i].orbitDistance > 0) {
+                        cumulativeStarOrbit += system.planets[i].orbitDistance;
+                    }
+                }
+                
+                const distance = cumulativeStarOrbit * canvasScale;
+                const angle = (starPlanet.orbitAngleType === 'fixed' ? starPlanet.orbitAngle : 90) * Math.PI / 180;
+                const x = canvasOffsetX + Math.cos(angle) * distance;
+                const y = canvasOffsetY + Math.sin(angle) * distance;
+                
+                // Draw companion star
+                const colors = {
+                    'pc_g_star': '#FFD700',
+                    'pc_k_star': '#FFA500',
+                    'pc_m_star': '#FF4500',
+                    'pc_f_star': '#F0E68C',
+                    'pc_a_star': '#FFFFFF',
+                    'pc_b_star': '#87CEEB',
+                    'pc_black_hole': '#000000',
+                    'pc_neutron_star': '#9370DB',
+                    'pc_pulsar': '#FF1493'
+                };
+                
+                const color = colors[starPlanet.class] || '#FFD700';
+                const radius = 12 * canvasScale;
+                
+                // Draw glow
+                const gradient = ctx.createRadialGradient(x, y, 0, x, y, radius * 2);
+                gradient.addColorStop(0, color + '80');
+                gradient.addColorStop(1, color + '00');
+                ctx.fillStyle = gradient;
+                ctx.fillRect(x - radius * 2, y - radius * 2, radius * 4, radius * 4);
+                
+                // Draw star
+                ctx.fillStyle = color;
+                ctx.beginPath();
+                ctx.arc(x, y, radius, 0, Math.PI * 2);
+                ctx.fill();
+                
+                // Label
+                if (canvasScale > 0.8) {
+                    ctx.fillStyle = '#e2e8f0';
+                    ctx.font = `${10 * canvasScale}px 'Exo 2', sans-serif`;
+                    ctx.textAlign = 'center';
+                    ctx.fillText(starPlanet.displayName, x, y - radius - 8);
+                }
+            });
+            
+            // ✅ KUMULATIVE Orbit-Berechnung für ECHTE Planeten mit orbit_distance = 0 Support
+            let cumulativePlanetOrbit = 0;
+            let sharedOrbitGroup = []; // Gruppe von Planeten auf derselben Bahn
+            let globalPlanetAngleIndex = 0; // ✅ Globaler Winkel-Counter für visuelle Verteilung
+            
+            actualPlanets.forEach((planet, index) => {
+                // Berechne kumulative Orbit-Position
+                if (planet.orbitDistance > 0) {
+                    // Zeichne vorherige Gruppe mit orbit_distance = 0
+                    if (sharedOrbitGroup.length > 0) {
+                        drawPlanetsAndMoons(sharedOrbitGroup, cumulativePlanetOrbit, globalPlanetAngleIndex);
+                        globalPlanetAngleIndex += sharedOrbitGroup.length; // Erhöhe Counter
+                        sharedOrbitGroup = [];
+                    }
+                    
+                    cumulativePlanetOrbit += planet.orbitDistance;
+                    drawOrbit(cumulativePlanetOrbit);
+                }
+                
+                // Erster Planet mit orbit_distance = 0
+                if (index === 0 && planet.orbitDistance === 0) {
+                    cumulativePlanetOrbit = 30;
+                    drawOrbit(cumulativePlanetOrbit);
+                }
+                
+                // Füge Planet zur aktuellen Orbit-Gruppe hinzu
+                sharedOrbitGroup.push({
+                    planet: planet,
+                    orbitDistance: cumulativePlanetOrbit
+                });
+            });
+            
+            // Zeichne letzte Gruppe
+            if (sharedOrbitGroup.length > 0) {
+                drawPlanetsAndMoons(sharedOrbitGroup, cumulativePlanetOrbit, globalPlanetAngleIndex);
+            }
+            
+            // ✅ ABSOLUTE Position für Asteroid-Gürtel
+            system.asteroidBelts.forEach(belt => {
+                drawAsteroidBelt(belt.radius);
+            });
+        }
+        
+        // ✅ NEW: Zeichne Planeten-Gruppe und ihre Monde
+        function drawPlanetsAndMoons(planetGroup, orbitDistance, startAngleIndex) {
+            // ✅ Wenn Gruppe nur 1 Planet hat: Verwende globale Verteilung (0°, 90°, 180°, 270°)
+            // ✅ Wenn Gruppe mehrere Planeten hat: Verteile sie gleichmäßig auf dieser Bahn
+            const useGlobalDistribution = planetGroup.length === 1;
+            const angleStep = useGlobalDistribution ? 90 : (360 / planetGroup.length);
+            
+            planetGroup.forEach((item, index) => {
+                const planet = item.planet;
+                const angleIndex = useGlobalDistribution ? startAngleIndex : index;
+                const planetAngle = (angleIndex * angleStep) * Math.PI / 180;
+                //```
+                //
+                //---
+
+                //## ✅ **Was wurde gefixt:**
+
+                //### **Neue Winkelverteilung:**
+                //1. ✅ **Einzelne Planeten auf verschiedenen Orbits**: 0°, 90°, 180°, 270°, 0°, 90°, ...
+                //2. ✅ **Mehrere Planeten auf demselben Orbit**: Gleichmäßig verteilt auf 360° / Anzahl
+                //3. ✅ **Globaler Counter** zählt alle Planeten für bessere visuelle Verteilung
+
+                //### **Beispiele:**
+                //```
+                //System mit 8 Planeten auf verschiedenen Orbits:
+                //- Planet 1 (Orbit 10): 0°
+                //- Planet 2 (Orbit 25): 90°
+                //- Planet 3 (Orbit 40): 180°
+                //- Planet 4 (Orbit 60): 270°
+                //- Planet 5 (Orbit 80): 0°
+                //- Planet 6 (Orbit 100): 90°
+                //- Planet 7 (Orbit 120): 180°
+                //- Planet 8 (Orbit 150): 270°
+
+                //System mit 3 Planeten auf EINEM Orbit (orbit_distance = 0):
+                //- Planet 1: 0°
+                //- Planet 2: 120°
+                //- Planet 3: 240°//
+                
+                // ✅ Zeichne Planeten an seiner Position
+                drawPlanet(planet, orbitDistance, planetAngle);
+                
+                // ✅ Zeichne Monde um diesen Planeten
+                if (planet.moons && planet.moons.length > 0) {
+                    const planetDistance = orbitDistance * canvasScale;
+                    const planetX = canvasOffsetX + Math.cos(planetAngle) * planetDistance;
+                    const planetY = canvasOffsetY + Math.sin(planetAngle) * planetDistance;
+                    
+                    let cumulativeMoonOrbit = 0;
+                    let sharedMoonGroup = [];
+                    
+                    planet.moons.forEach((moon, moonIndex) => {
+                        if (moon.orbitDistance > 0) {
+                            // Zeichne vorherige Mond-Gruppe
+                            if (sharedMoonGroup.length > 0) {
+                                drawMoonGroup(sharedMoonGroup, planetX, planetY, cumulativeMoonOrbit);
+                                sharedMoonGroup = [];
+                            }
+                            
+                            cumulativeMoonOrbit += moon.orbitDistance;
+                            drawMoonOrbit(orbitDistance, planetAngle, cumulativeMoonOrbit);
+                        }
+                        
+                        if (moonIndex === 0 && moon.orbitDistance === 0) {
+                            cumulativeMoonOrbit = 10;
+                            drawMoonOrbit(orbitDistance, planetAngle, cumulativeMoonOrbit);
+                        }
+                        
+                        sharedMoonGroup.push(moon);
+                    });
+                    
+                    // Zeichne letzte Mond-Gruppe
+                    if (sharedMoonGroup.length > 0) {
+                        drawMoonGroup(sharedMoonGroup, planetX, planetY, cumulativeMoonOrbit);
+                    }
+                }
+            });
+        }
+        
+        // ✅ NEW: Zeichne Mond-Gruppe um Planeten
+        function drawMoonGroup(moons, planetX, planetY, moonOrbitRadius) {
+            const angleStep = 360 / moons.length;
+            
+            moons.forEach((moon, index) => {
+                const moonAngle = (index * angleStep) * Math.PI / 180;
+                drawMoonAroundPlanet(moon, planetX, planetY, moonOrbitRadius, moonAngle);
+            });
+        }
+
+        // ✅ NEW: Zeichne Mond-Umlaufbahn um Planeten (nicht um Stern!)
+        function drawMoonOrbit(planetOrbit, planetAngle, moonOrbitRadius) {
+            // Calculate planet position
+            const planetDistance = planetOrbit * canvasScale;
+            const planetX = canvasOffsetX + Math.cos(planetAngle) * planetDistance;
+            const planetY = canvasOffsetY + Math.sin(planetAngle) * planetDistance;
+            
+            const moonOrbitSize = moonOrbitRadius * canvasScale;
+            
+            // Draw moon orbit around planet
+            ctx.strokeStyle = 'rgba(153, 102, 255, 0.3)';
+            ctx.lineWidth = 1;
+            ctx.setLineDash([5, 5]);
+            
+            ctx.beginPath();
+            ctx.arc(planetX, planetY, moonOrbitSize, 0, Math.PI * 2);
+            ctx.stroke();
+            
+            ctx.setLineDash([]);
+        }
+        
+        // ✅ NEW: Zeichne Mond relativ zum Planeten
+        function drawMoonAroundPlanet(moon, planetX, planetY, moonOrbitRadius, moonAngle) {
+            const moonDistance = moonOrbitRadius * canvasScale;
+            
+            // Moon position relative to planet
+            const x = planetX + Math.cos(moonAngle) * moonDistance;
+            const y = planetY + Math.sin(moonAngle) * moonDistance;
+            
+            const radius = Math.max(2, Math.log(moon.size + 1) * canvasScale);
+            
+            // Moon color
+            ctx.fillStyle = '#9ca3af';
+            ctx.beginPath();
+            ctx.arc(x, y, radius, 0, Math.PI * 2);
+            ctx.fill();
+            
+            // Draw starting planet indicator for moons
+            if (moon.isStartingPlanet) {
+                ctx.strokeStyle = '#48bb78';
+                ctx.lineWidth = 1.5;
+                ctx.beginPath();
+                ctx.arc(x, y, radius + 2, 0, Math.PI * 2);
+                ctx.stroke();
+            }
+            
+            // Draw moon label for larger zoom levels
+            if (canvasScale > 1.2) {
+                ctx.fillStyle = '#cbd5e0';
+                ctx.font = `${8 * canvasScale}px 'Exo 2', sans-serif`;
+                ctx.textAlign = 'center';
+                ctx.fillText(moon.displayName, x, y - radius - 6);
+            }
+        }
+        
+        function drawGrid() {
+            ctx.strokeStyle = 'rgba(0, 212, 255, 0.1)';
+            ctx.lineWidth = 1;
+            
+            const gridSize = 50 * canvasScale;
+            const startX = (canvasOffsetX % gridSize) - gridSize;
+            const startY = (canvasOffsetY % gridSize) - gridSize;
+            
+            // Vertical lines
+            for (let x = startX; x < canvas.width + gridSize; x += gridSize) {
+                ctx.beginPath();
+                ctx.moveTo(x, 0);
+                ctx.lineTo(x, canvas.height);
+                ctx.stroke();
+            }
+            
+            // Horizontal lines
+            for (let y = startY; y < canvas.height + gridSize; y += gridSize) {
+                ctx.beginPath();
+                ctx.moveTo(0, y);
+                ctx.lineTo(canvas.width, y);
+                ctx.stroke();
+            }
+        }
+        
+        function drawStar(starClass) {
+            const colors = {
+                'pc_g_star': '#FFD700',
+                'pc_k_star': '#FFA500',
+                'pc_m_star': '#FF4500',
+                'pc_f_star': '#F0E68C',
+                'pc_a_star': '#FFFFFF',
+                'pc_b_star': '#87CEEB',
+                'pc_black_hole': '#000000',
+                'pc_neutron_star': '#9370DB',
+                'pc_pulsar': '#FF1493'
+            };
+            
+            const color = colors[starClass] || '#FFD700';
+            const radius = 15 * canvasScale;
+            
+            // Draw glow
+            const gradient = ctx.createRadialGradient(
+                canvasOffsetX, canvasOffsetY, 0,
+                canvasOffsetX, canvasOffsetY, radius * 2
+            );
+            gradient.addColorStop(0, color + '80');
+            gradient.addColorStop(1, color + '00');
+            
+            ctx.fillStyle = gradient;
+            ctx.fillRect(
+                canvasOffsetX - radius * 2,
+                canvasOffsetY - radius * 2,
+                radius * 4,
+                radius * 4
+            );
+            
+            // Draw star
+            ctx.fillStyle = color;
+            ctx.beginPath();
+            ctx.arc(canvasOffsetX, canvasOffsetY, radius, 0, Math.PI * 2);
+            ctx.fill();
+            
+            // Black hole border
+            if (starClass === 'pc_black_hole') {
+                ctx.strokeStyle = '#9966ff';
+                ctx.lineWidth = 2;
+                ctx.stroke();
+            }
+        }
+        
+        function drawOrbit(distance, isMoon = false) {
+            const radius = distance * canvasScale;
+            
+            ctx.strokeStyle = isMoon ? 'rgba(153, 102, 255, 0.3)' : 'rgba(0, 212, 255, 0.3)';
+            ctx.lineWidth = isMoon ? 1 : 1.5;
+            ctx.setLineDash(isMoon ? [5, 5] : []);
+            
+            ctx.beginPath();
+            ctx.arc(canvasOffsetX, canvasOffsetY, radius, 0, Math.PI * 2);
+            ctx.stroke();
+            
+            ctx.setLineDash([]);
+        }
+        
+        function drawPlanet(planet, absoluteOrbit, forceAngle = null) {
+            const angle = forceAngle !== null 
+                ? forceAngle 
+                : (planet.orbitAngleType === 'fixed' ? planet.orbitAngle : 90) * Math.PI / 180;
+            const distance = absoluteOrbit * canvasScale;
+            
+            const x = canvasOffsetX + Math.cos(angle) * distance;
+            const y = canvasOffsetY + Math.sin(angle) * distance;
+            
+            // Calculate size (logarithmic scale for better visualization)
+            const baseSize = Math.max(3, Math.log(planet.size + 1) * 2) * canvasScale;
+            const radius = Math.max(3, baseSize);
+            
+            // Planet color based on class
+            const colors = {
+                'pc_continental': '#48bb78',
+                'pc_ocean': '#4299e1',
+                'pc_desert': '#ecc94b',
+                'pc_tropical': '#38b2ac',
+                'pc_arid': '#d69e2e',
+                'pc_tundra': '#90cdf4',
+                'pc_arctic': '#bee3f8',
+                'pc_alpine': '#e6fffa',
+                'pc_savannah': '#faf089',
+                'pc_gas_giant': '#ed8936',
+                'pc_molten': '#fc8181',
+                'pc_barren': '#a0aec0',
+                'pc_barren_cold': '#718096',
+                'pc_toxic': '#9ae6b4',
+                'pc_frozen': '#e2e8f0'
+            };
+            
+            const color = colors[planet.class] || '#cbd5e0';
+            
+            // Draw planet
+            ctx.fillStyle = color;
+            ctx.beginPath();
+            ctx.arc(x, y, radius, 0, Math.PI * 2);
+            ctx.fill();
+            
+            // Draw ring if has ring
+            if (planet.hasRing) {
+                ctx.strokeStyle = color + '80';
+                ctx.lineWidth = 2 * canvasScale;
+                ctx.beginPath();
+                ctx.ellipse(x, y, radius * 1.8, radius * 0.6, 0, 0, Math.PI * 2);
+                ctx.stroke();
+            }
+            
+            // Draw starting planet indicator
+            if (planet.isStartingPlanet) {
+                ctx.strokeStyle = '#48bb78';
+                ctx.lineWidth = 2;
+                ctx.beginPath();
+                ctx.arc(x, y, radius + 3, 0, Math.PI * 2);
+                ctx.stroke();
+            }
+            
+            // Draw label for larger zoom levels
+            if (canvasScale > 0.8) {
+                ctx.fillStyle = '#e2e8f0';
+                ctx.font = `${10 * canvasScale}px 'Exo 2', sans-serif`;
+                ctx.textAlign = 'center';
+                ctx.fillText(planet.displayName, x, y - radius - 8);
+            }
+        }
+        
+        function drawMoon(moon, parentPlanetAbsoluteOrbit, moonAbsoluteOrbit, forceAngle = null) {
+            const baseAngle = forceAngle !== null 
+                ? forceAngle 
+                : 90 * Math.PI / 180;
+            
+            const distance = moonAbsoluteOrbit * canvasScale;
+            
+            const x = canvasOffsetX + Math.cos(baseAngle) * distance;
+            const y = canvasOffsetY + Math.sin(baseAngle) * distance;
+            
+            const radius = Math.max(2, Math.log(moon.size + 1) * canvasScale);
+            
+            // Moon color (slightly darker than planets)
+            ctx.fillStyle = '#9ca3af';
+            ctx.beginPath();
+            ctx.arc(x, y, radius, 0, Math.PI * 2);
+            ctx.fill();
+            
+            // Draw starting planet indicator for moons
+            if (moon.isStartingPlanet) {
+                ctx.strokeStyle = '#48bb78';
+                ctx.lineWidth = 1.5;
+                ctx.beginPath();
+                ctx.arc(x, y, radius + 2, 0, Math.PI * 2);
+                ctx.stroke();
+            }
+            
+            // Draw moon label for larger zoom levels
+            if (canvasScale > 1.2) {
+                ctx.fillStyle = '#cbd5e0';
+                ctx.font = `${8 * canvasScale}px 'Exo 2', sans-serif`;
+                ctx.textAlign = 'center';
+                ctx.fillText(moon.displayName, x, y - radius - 6);
+            }
+        }
+        
+        function drawAsteroidBelt(radius) {
+            const distance = radius * canvasScale;
+            
+            // Draw dashed circle
+            ctx.strokeStyle = 'rgba(255, 215, 0, 0.4)';
+            ctx.lineWidth = 2;
+            ctx.setLineDash([10, 5]);
+            
+            ctx.beginPath();
+            ctx.arc(canvasOffsetX, canvasOffsetY, distance, 0, Math.PI * 2);
+            ctx.stroke();
+            
+            ctx.setLineDash([]);
+            
+            // Draw asteroid particles
+            const particleCount = Math.min(30, Math.floor(distance / 5));
+            for (let i = 0; i < particleCount; i++) {
+                const angle = (i / particleCount) * Math.PI * 2;
+                const variance = (Math.random() - 0.5) * 10 * canvasScale;
+                const x = canvasOffsetX + Math.cos(angle) * (distance + variance);
+                const y = canvasOffsetY + Math.sin(angle) * (distance + variance);
+                
+                ctx.fillStyle = 'rgba(255, 215, 0, 0.6)';
+                ctx.beginPath();
+                ctx.arc(x, y, 1.5 * canvasScale, 0, Math.PI * 2);
+                ctx.fill();
+            }
         }
     </script>
 </body>
