@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Stellaris Solar System Editor V25 - Full Editor</title>
+    <title>Stellaris Solar System Editor V26 - Full Editor</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;600;700;800;900&family=Exo+2:wght@300;400;500;600&display=swap');
@@ -395,7 +395,7 @@
 </head>
 <body>
     <div class="container mx-auto py-8 px-4">
-        <h1 class="stellaris-header">🌌 Stellaris Solar System Editor V25</h1>
+        <h1 class="stellaris-header">🌌 Stellaris Solar System Editor V26</h1>
         <div class="text-center mb-6">
             <span class="text-yellow-400 font-semibold">⭐ Full Editor - Edit systems, planets, and neighbors</span>
         </div>
@@ -1031,6 +1031,13 @@
             <div id="systemPropertiesModal" class="modal">
                 <div class="modal-content">
                     <h2 class="text-2xl font-bold mb-4 text-purple-300">⚙️ Edit System Properties</h2>
+
+                    <!-- ✅ NEW: System Identifier field -->
+                    <div class="form-group mb-4">
+                        <label class="label">System Identifier (Internal Name)</label>
+                        <input type="text" id="systemIdentifier" class="stellaris-input" placeholder="e.g. my_custom_system_initializer">
+                        <p class="text-xs text-gray-400 mt-1">💡 Must end with "_system_initializer" for proper export/import</p>
+                    </div>
                     
                     <div class="form-group mb-4">
                         <label class="label">System Display Name</label>
@@ -1211,7 +1218,8 @@
         let editingMoonPlanetIndex = null;
         let nextPlanetId = 1;
 
-        function createEmptySystem(name = 'custom_system') {
+        // ✅ FIX: Default name now ends with _system_initializer for proper import/export compatibility
+        function createEmptySystem(name = 'custom_system_initializer') {
             return {
                 name: name,
                 displayName: name.replace(/_/g, ' ').replace(/system initializer$/i, '').trim(),
@@ -1823,7 +1831,8 @@
         });
 
         document.getElementById('addNewSystemBtn').addEventListener('click', () => {
-            const newSystem = createEmptySystem('new_custom_system_' + (allSystems.length + 1));
+            // ✅ FIX: Add _system_initializer suffix for proper import/export compatibility
+            const newSystem = createEmptySystem('custom_system_' + (allSystems.length + 1) + '_system_initializer');
             if (allSystems.length === 0) {
                 newSystem.isMain = true;
             }
@@ -1997,7 +2006,10 @@
                 return;
             }
             const currentPlanet = getCurrentPlanet();
-            if (!currentPlanet) return;
+            if (!currentPlanet) {
+                alert('⚠️ Please select a planet first!\n\nYou need to select a planet from the "Celestial Bodies" list before adding modifiers.');
+                return;
+            }
             // Avoid duplicates
             if (!currentPlanet.modifiers.includes(modifierId)) {
                 currentPlanet.modifiers.push(modifierId);
@@ -2038,7 +2050,10 @@
             }
             
             const currentPlanet = getCurrentPlanet();
-            if (!currentPlanet) return;
+            if (!currentPlanet) {
+                alert('⚠️ Please select a planet first!\n\nYou need to select a planet from the "Celestial Bodies" list before adding modifiers.');
+                return;
+            }
             
             if (!currentPlanet.modifiers.includes(customModifier)) {
                 currentPlanet.modifiers.push(customModifier);
@@ -2077,7 +2092,10 @@
             }
             
             const currentPlanet = getCurrentPlanet();
-            if (!currentPlanet) return;
+            if (!currentPlanet) {
+                alert('⚠️ Please select a planet first!\n\nYou need to select a planet from the "Celestial Bodies" list before adding deposits.');
+                return;
+            }
             
             if (!currentPlanet.deposits) currentPlanet.deposits = [];
             
@@ -2100,7 +2118,10 @@
             }
             
             const currentPlanet = getCurrentPlanet();
-            if (!currentPlanet) return;
+            if (!currentPlanet) {
+                alert('⚠️ Please select a planet first!\n\nYou need to select a planet from the "Celestial Bodies" list before adding deposits.');
+                return;
+            }
             
             if (!currentPlanet.deposits) currentPlanet.deposits = [];
             
@@ -2176,7 +2197,10 @@
                 return;
             }
             const currentMoon = getCurrentMoon();
-            if (!currentMoon) return;
+            if (!currentMoon) {
+                alert('⚠️ Please select a moon first!\n\nYou need to select a moon from a planet before adding modifiers.');
+                return;
+            }
             // Avoid duplicates
             if (!currentMoon.modifiers.includes(modifierId)) {
                 currentMoon.modifiers.push(modifierId);
@@ -2212,7 +2236,10 @@
             }
             
             const currentMoon = getCurrentMoon();
-            if (!currentMoon) return;
+            if (!currentMoon) {
+                alert('⚠️ Please select a moon first!\n\nYou need to select a moon from a planet before adding modifiers.');
+                return;
+            }
             
             if (!currentMoon.modifiers.includes(customModifier)) {
                 currentMoon.modifiers.push(customModifier);
@@ -3318,6 +3345,9 @@
             
             const system = allSystems[currentSystemIndex];
             
+            // ✅ NEW: Populate system identifier field
+            document.getElementById('systemIdentifier').value = system.name || '';
+            
             // Populate modal with current system data
             document.getElementById('systemDisplayName').value = system.displayName || '';
             document.getElementById('systemUsage').value = system.usage || 'custom_empire';
@@ -3347,6 +3377,21 @@
             if (currentSystemIndex === null) return;
             
             const system = allSystems[currentSystemIndex];
+            
+            // ✅ NEW: Get and validate system identifier
+            let newIdentifier = document.getElementById('systemIdentifier').value.trim();
+            if (newIdentifier) {
+                // Sanitize: remove spaces, convert to lowercase, replace invalid chars
+                newIdentifier = newIdentifier.toLowerCase().replace(/\s+/g, '_').replace(/[^a-z0-9_]/g, '');
+                
+                // Auto-add _system_initializer suffix if missing
+                if (!newIdentifier.endsWith('_system_initializer')) {
+                    // Remove common endings that might be partial
+                    newIdentifier = newIdentifier.replace(/_system$/, '').replace(/_initializer$/, '').replace(/_init$/, '');
+                    newIdentifier = newIdentifier + '_system_initializer';
+                }
+                system.name = newIdentifier;
+            }
             
             // Get display name
             const newDisplayName = document.getElementById('systemDisplayName').value.trim();
