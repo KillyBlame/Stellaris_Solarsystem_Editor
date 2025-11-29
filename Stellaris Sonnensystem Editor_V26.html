@@ -1329,7 +1329,9 @@
 
             parseMultipleSystems(fileContent) {
                 const systems = [];
-                const systemRegex = /(\w+_system_initializer)\s*=\s*\{/g;
+                // ✅ FIX: Accept any top-level block that looks like a system initializer
+                // Must start at beginning of line (no indentation) to avoid matching nested blocks
+                const systemRegex = /^(\w+)\s*=\s*\{/gm;
                 const matches = [];
                 let match;
                 
