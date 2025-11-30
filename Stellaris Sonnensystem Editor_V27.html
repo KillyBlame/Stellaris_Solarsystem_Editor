@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Stellaris Solar System Editor V26 - Full Editor</title>
+    <title>Stellaris Solar System Editor V27 - Full Editor</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;600;700;800;900&family=Exo+2:wght@300;400;500;600&display=swap');
@@ -395,7 +395,7 @@
 </head>
 <body>
     <div class="container mx-auto py-8 px-4">
-        <h1 class="stellaris-header">🌌 Stellaris Solar System Editor V26</h1>
+        <h1 class="stellaris-header">🌌 Stellaris Solar System Editor V27</h1>
         <div class="text-center mb-6">
             <span class="text-yellow-400 font-semibold">⭐ Full Editor - Edit systems, planets, and neighbors</span>
         </div>
@@ -519,10 +519,28 @@
                                 <option value="pc_toxic">Toxic</option>
                                 <option value="pc_frozen">Frozen</option>
                             </optgroup>
+                            <optgroup label="Destroyed/Special Worlds">
+                                <option value="pc_nuked">Nuked (Tomb World)</option>
+                                <option value="pc_shattered">Shattered</option>
+                                <option value="pc_shattered_2">Shattered 2</option>
+                                <option value="pc_broken">Broken</option>
+                                <option value="pc_shrouded">Shrouded</option>
+                                <option value="pc_shielded">Shielded</option>
+                                <option value="pc_relic">Relic World</option>
+                                <option value="pc_city">Ecumenopolis</option>
+                                <option value="pc_habitat">Habitat</option>
+                            </optgroup>
+                            <optgroup label="Exotic">
+                                <option value="pc_volcanic">Volcanic</option>
+                                <option value="pc_gray_goo">Gray Goo</option>
+                                <option value="pc_ai">AI World</option>
+                                <option value="pc_cybrex">Cybrex World</option>
+                            </optgroup>
                             <optgroup label="Asteroiden">
                                 <option value="pc_asteroid">Asteroid</option>
                                 <option value="pc_ice_asteroid">Ice Asteroid</option>
                                 <option value="pc_rare_crystal_asteroid">Rare Crystal Asteroid</option>
+                                <option value="pc_crystal_asteroid">Crystal Asteroid</option>
                             </optgroup>
                             <optgroup label="Custome">
                                 <option value="CUSTOM">🔧 Custom Class...</option>
@@ -754,10 +772,20 @@
                                 <option value="pc_toxic">Toxic</option>
                                 <option value="pc_frozen">Frozen</option>
                             </optgroup>
+                            <optgroup label="Destroyed/Special Worlds">
+                                <option value="pc_nuked">Nuked (Tomb World)</option>
+                                <option value="pc_shattered">Shattered</option>
+                                <option value="pc_shattered_2">Shattered 2</option>
+                                <option value="pc_broken">Broken</option>
+                                <option value="pc_shrouded">Shrouded</option>
+                                <option value="pc_shielded">Shielded</option>
+                                <option value="pc_relic">Relic World</option>
+                            </optgroup>
                             <optgroup label="Asteroids">
                                 <option value="pc_asteroid">Asteroid</option>
                                 <option value="pc_ice_asteroid">Ice Asteroid</option>
                                 <option value="pc_rare_crystal_asteroid">Rare Crystal Asteroid</option>
+                                <option value="pc_crystal_asteroid">Crystal Asteroid</option>
                             </optgroup>
                             <optgroup label="Custome">
                                 <option value="CUSTOM">🔧 Custom Class...</option>
@@ -3957,7 +3985,12 @@
                 'pc_arctic': '🧊', 'pc_alpine': '🏔️', 'pc_savannah': '🌾',
                 'pc_gas_giant': '🪐', 'pc_molten': '🌋', 'pc_barren': '🪨',
                 'pc_barren_cold': '☄️', 'pc_toxic': '☢️', 'pc_frozen': '🧊',
-                'pc_asteroid': '☄️', 'pc_ice_asteroid': '❄️', 'pc_rare_crystal_asteroid': '💎'
+                'pc_asteroid': '☄️', 'pc_ice_asteroid': '❄️', 'pc_rare_crystal_asteroid': '💎',
+                'pc_crystal_asteroid': '💠',
+                'pc_nuked': '☢️', 'pc_shattered': '💥', 'pc_shattered_2': '💥',
+                'pc_broken': '🔥', 'pc_shrouded': '👁️', 'pc_shielded': '🛡️',
+                'pc_relic': '🏛️', 'pc_city': '🌃', 'pc_habitat': '🛸',
+                'pc_volcanic': '🌋', 'pc_gray_goo': '🦠', 'pc_ai': '🤖', 'pc_cybrex': '⚙️'
             };
             return icons[planetClass] || '🌑';
         }
@@ -3975,7 +4008,11 @@
                 'pc_gas_giant': 'Gas Giant', 'pc_molten': 'Molten', 'pc_barren': 'Barren',
                 'pc_barren_cold': 'Barren (Cold)', 'pc_toxic': 'Toxic', 'pc_frozen': 'Frozen',
                 'pc_asteroid': 'Asteroid', 'pc_ice_asteroid': 'Ice Asteroid', 
-                'pc_rare_crystal_asteroid': 'Rare Crystal Asteroid'
+                'pc_rare_crystal_asteroid': 'Rare Crystal Asteroid', 'pc_crystal_asteroid': 'Crystal Asteroid',
+                'pc_nuked': 'Nuked (Tomb)', 'pc_shattered': 'Shattered', 'pc_shattered_2': 'Shattered 2',
+                'pc_broken': 'Broken', 'pc_shrouded': 'Shrouded', 'pc_shielded': 'Shielded',
+                'pc_relic': 'Relic World', 'pc_city': 'Ecumenopolis', 'pc_habitat': 'Habitat',
+                'pc_volcanic': 'Volcanic', 'pc_gray_goo': 'Gray Goo', 'pc_ai': 'AI World', 'pc_cybrex': 'Cybrex'
             };
             return names[planetClass] || planetClass;
         }
@@ -4449,7 +4486,21 @@
                 'pc_barren': '#a0aec0',
                 'pc_barren_cold': '#718096',
                 'pc_toxic': '#9ae6b4',
-                'pc_frozen': '#e2e8f0'
+                'pc_frozen': '#e2e8f0',
+                'pc_nuked': '#6b7280',
+                'pc_shattered': '#4a5568',
+                'pc_shattered_2': '#4a5568',
+                'pc_broken': '#b45309',
+                'pc_shrouded': '#7c3aed',
+                'pc_shielded': '#3b82f6',
+                'pc_relic': '#f59e0b',
+                'pc_city': '#fbbf24',
+                'pc_habitat': '#8b5cf6',
+                'pc_volcanic': '#ef4444',
+                'pc_gray_goo': '#6ee7b7',
+                'pc_ai': '#60a5fa',
+                'pc_cybrex': '#a78bfa',
+                'pc_crystal_asteroid': '#c084fc'
             };
             
             const color = colors[planet.class] || '#cbd5e0';
