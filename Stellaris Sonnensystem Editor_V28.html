@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Stellaris Solar System Editor V27 - Full Editor</title>
+    <title>Stellaris Solar System Editor V28 - Full Editor</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;600;700;800;900&family=Exo+2:wght@300;400;500;600&display=swap');
@@ -395,7 +395,7 @@
 </head>
 <body>
     <div class="container mx-auto py-8 px-4">
-        <h1 class="stellaris-header">🌌 Stellaris Solar System Editor V27</h1>
+        <h1 class="stellaris-header">🌌 Stellaris Solar System Editor V28</h1>
         <div class="text-center mb-6">
             <span class="text-yellow-400 font-semibold">⭐ Full Editor - Edit systems, planets, and neighbors</span>
         </div>
@@ -1782,8 +1782,24 @@
                 systemMap.set(system.name, index);
             });
             
+            // ✅ FIX: Sammle alle Systeme, die als Nachbarn referenziert werden
+            const referencedAsNeighbor = new Set();
+            allSystems.forEach(system => {
+                system.neighborSystems.forEach(neighbor => {
+                    referencedAsNeighbor.add(neighbor.initializer);
+                });
+            });
+            
             // Durchlaufe alle Systeme und verknüpfe Nachbarn
             allSystems.forEach((system, systemIndex) => {
+                // ✅ FIX: Markiere System als Nachbarsystem wenn es referenziert wird
+                system.isNeighborSystem = referencedAsNeighbor.has(system.name);
+
+                // ✅ FIX: Nachbarsysteme haben keine usage (nur Hauptsystem hat custom_empire)
+                if (system.isNeighborSystem && !system.isMain) {
+                    system.usage = 'none';
+                }
+
                 system.neighborSystems.forEach(neighbor => {
                     // Prüfe ob das referenzierte System existiert
                     if (systemMap.has(neighbor.initializer)) {
@@ -3783,8 +3799,8 @@
                 });
             }
             
-            // ✅ NEW: Skip usage line if set to 'none'
-            if (system.usage !== 'none') {
+            // ✅ FIX: Only export usage for main system (neighbors don't have usage)
+            if (system.isMain && system.usage !== 'none') {
                 code += `\tusage = ${system.usage}\n`;
             }
             
@@ -3793,7 +3809,10 @@
                 code += `\tmandatory_neighbors = yes\n`;
             }
             
-            if (system.isMain) {
+            // ✅ FIX: Export init_effect for BOTH main system AND neighbor systems
+            // Main system: includes generate_home_system_resources
+            // Neighbor systems: only empire_cluster flags (no usage, no home resources)
+            if (system.isMain || system.isNeighborSystem) {
                 code += `\tinit_effect = {\n`;
                 code += `\t\tevery_neighbor_system = {\n`;
                 code += `\t\t\tset_star_flag = empire_cluster\n`;
@@ -3801,8 +3820,8 @@
                 code += `\t\t\t\tset_star_flag = empire_cluster\n`;
                 code += `\t\t\t}\n`;
                 code += `\t\t}\n`;
-                // ✅ FIX 9: Only export if checkbox is enabled
-                if (system.generateHomeResources !== false) {
+                // Only main system gets generate_home_system_resources
+                if (system.isMain && system.generateHomeResources !== false) {
                     code += `\t\tgenerate_home_system_resources = yes\n`;
                 }
                 code += `\t}\n`;
@@ -3822,7 +3841,8 @@
                     code += `\t\tdistance = ${neighbor.distance}\n`;
                 }
                 
-                if (neighbor.minOrientationAngle !== null && neighbor.maxOrientationAngle !== null) {
+                // ✅ FIX: Check for both null AND undefined to prevent exporting "undefined" as text
+                if (neighbor.minOrientationAngle != null && neighbor.maxOrientationAngle != null) {
                     code += `\t\tmin_orientation_angle = ${neighbor.minOrientationAngle}\n`;
                     code += `\t\tmax_orientation_angle = ${neighbor.maxOrientationAngle}\n`;
                 }
