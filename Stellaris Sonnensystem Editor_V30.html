@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Stellaris Solar System Editor V29 - Full Editor</title>
+    <title>Stellaris Solar System Editor V30 - Full Editor</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;600;700;800;900&family=Exo+2:wght@300;400;500;600&display=swap');
@@ -395,7 +395,7 @@
 </head>
 <body>
     <div class="container mx-auto py-8 px-4">
-        <h1 class="stellaris-header">🌌 Stellaris Solar System Editor V29</h1>
+        <h1 class="stellaris-header">🌌 Stellaris Solar System Editor V30</h1>
         <div class="text-center mb-6">
             <span class="text-yellow-400 font-semibold">⭐ Full Editor - Edit systems, planets, and neighbors</span>
         </div>
@@ -487,7 +487,9 @@
                         </label>
                     </div>
                     <div class="form-group">
-                        <label class="label">Planet class</label>
+                        <label class="label">Planet class 
+                            <span class="text-xs text-gray-400">(v4.3: ideal_planet_class → ideal_design_class)</span>
+                        </label>
                         <select id="planetClass" class="stellaris-input" onchange="window.toggleCustomPlanetClass()">
                             <optgroup label="⭐ Stars">
                                 <option value="pc_g_star">G-Star (Yellow)</option>
@@ -542,11 +544,20 @@
                                 <option value="pc_ai">AI World</option>
                                 <option value="pc_cybrex">Cybrex World</option>
                             </optgroup>
-                            <optgroup label="Asteroiden">
+<optgroup label="Asteroiden">
                                 <option value="pc_asteroid">Asteroid</option>
                                 <option value="pc_ice_asteroid">Ice Asteroid</option>
                                 <option value="pc_rare_crystal_asteroid">Rare Crystal Asteroid</option>
                                 <option value="pc_crystal_asteroid">Crystal Asteroid</option>
+                            </optgroup>
+                            <optgroup label="🎲 Dynamic Classes (4.3 Cetus)">
+                                <option value="ideal_planet_class">⭐ Ideal Planet Class (Homeworld)</option>
+                                <option value="ideal_design_class">🌍 Ideal Design Class (Colony)</option>
+                                <option value="random_non_ideal">🎲 Random Non-Ideal</option>
+                                <option value="random">🎲 Random (Distance-based)</option>
+                                <option value="random_colonizable">🌿 Random Colonizable</option>
+                                <option value="random_non_colonizable">🪨 Random Non-Colonizable</option>
+                                <option value="random_asteroid">☄️ Random Asteroid</option>
                             </optgroup>
                             <optgroup label="Custome">
                                 <option value="CUSTOM">🔧 Custom Class...</option>
@@ -1183,9 +1194,10 @@
                     <div class="form-group">
                         <label class="label">Belt Typ</label>
                         <select id="beltType" class="stellaris-input">
-                            <option value="rocky_asteroid_belt">Rocky Asteroid Belt</option>
-                            <option value="icy_asteroid_belt">Icy Asteroid Belt</option>
-                            <option value="crystal_asteroid_belt">Crystal Asteroid Belt</option>
+                            <option value="rocky_asteroid_belt">🪨 Rocky Asteroid Belt</option>
+                            <option value="icy_asteroid_belt">❄️ Icy Asteroid Belt</option>
+                            <option value="debris_asteroid_belt">💥 Debris Asteroid Belt (4.3)</option>
+                            <option value="crystal_asteroid_belt">💎 Crystal Asteroid Belt (Mod)</option>
                         </select>
                     </div>
                     <div class="form-group">
@@ -1281,21 +1293,27 @@
                 name: 'Ressourcen-Modifier',
                 modifiers: [
                     { id: 'pm_planet_strong_magnetic_field', name: 'Starkes Magnetfeld', desc: '+2 Physik' },
-                    { id: 'pm_natural_beauty', name: 'Natürliche Schönheit', desc: '+5% Annehmlichkeiten' },
+                    { id: 'natural_beauty', name: 'Natürliche Schönheit', desc: '+5% Annehmlichkeiten' },
                     { id: 'pm_atmospheric_hallucinogen', name: 'Atmosphärisches Halluzinogen', desc: '+10% Glück' },
                     { id: 'pm_titanic_life', name: 'Titanisches Leben', desc: '+4 Gesellschaft' },
                     { id: 'pm_asteroid_belt', name: 'Asteroidengürtel', desc: '+2 Mineralien' },
-                    { id: 'pm_extensive_moon_system', name: 'Ausgedehntes Mondsystem', desc: '+2 Physik' }
+                    { id: 'pm_extensive_moon_system', name: 'Ausgedehntes Mondsystem', desc: '+2 Physik' },
+                    { id: 'molten_mineral_rivers', name: 'Geschmolzene Mineralflüsse', desc: 'Mineralien-Bonus' },
+                    { id: 'living_sea', name: 'Lebendiges Meer', desc: 'Gesellschaft +4' }
                 ]
             },
             planetary: {
                 name: 'Planetare Features',
                 modifiers: [
                     { id: 'pm_dangerous_wildlife', name: 'Gefährliche Tierwelt', desc: 'Armeen -15%' },
-                    { id: 'pm_lush', name: 'Üppig', desc: '+25% Landwirtschaft' },
+                    { id: 'lush_planet', name: 'Üppiger Planet', desc: '+25% Landwirtschaft' },
                     { id: 'pm_bleak', name: 'Trist', desc: '-10% Annehmlichkeiten' },
                     { id: 'pm_unstable_tectonics', name: 'Instabile Tektonik', desc: 'Häuser -20%' },
-                    { id: 'pm_chthonian_planet', name: 'Chthonischer Planet', desc: 'Ehemaliger Gasriese' }
+                    { id: 'pm_chthonian_planet', name: 'Chthonischer Planet', desc: 'Ehemaliger Gasriese' },
+                    { id: 'hostile_planet', name: 'Feindlicher Planet', desc: 'Wohnraum -15%' },
+                    { id: 'death_world', name: 'Todeswelt', desc: 'Extreme Überlebensbedingungen' },
+                    { id: 'docile_fauna', name: 'Friedliche Fauna', desc: 'Keine gefährlichen Tiere' },
+                    { id: 'tidal_locked', name: 'Gezeitenverriegelt', desc: 'An Stern gebunden' }
                 ]
             },
             deposits: {
@@ -1322,9 +1340,33 @@
                 name: 'Spezielle Modifier',
                 modifiers: [
                     { id: 'pm_carbon_world', name: 'Kohlenstoffwelt', desc: 'Diamant-Planet' },
+                    { id: 'metal_planet', name: 'Metallplanet', desc: 'Reiche Metallerze' },
+                    { id: 'wooden_planet', name: 'Holzplanet', desc: 'Organische Strukturen' },
+                    { id: 'collided_planet', name: 'Kollisionsplanet', desc: 'Planetare Kollision' },
+                    { id: 'previously_terraformed_planet', name: 'Vorher Terraformiert', desc: 'Alte Terraforming-Spuren' },
                     { id: 'pm_class_star', name: 'Klasse-Stern', desc: 'Besondere Sternklasse' },
                     { id: 'pm_floating_landmass', name: 'Schwebende Landmasse', desc: 'Gravitationsanomalie' },
-                    { id: 'pm_irradiated', name: 'Verstrahlt', desc: 'Radioaktiv' }
+                    { id: 'pm_irradiated', name: 'Verstrahlt', desc: 'Radioaktiv' },
+                    { id: 'superflare_planet', name: 'Supereruptions-Planet', desc: 'Intensive Sonneneruptionen' },
+                    { id: 'pulsar_frying_pan', name: 'Pulsar-Bratpfanne', desc: 'Extreme Pulsar-Strahlung' }
+                ]
+            },
+            system_special: {
+                name: '🆕 System Features (4.3)',
+                modifiers: [
+                    { id: 'ship_junkyard', name: 'Schiffsfriedhof', desc: 'Verlassene Schiffswracks' },
+                    { id: 'unplugged_battlefield', name: 'Entfesseltes Schlachtfeld', desc: 'Kriegsruinen' },
+                    { id: 'sanctuary_power', name: 'Heiligtums-Macht', desc: 'Schützende Aura' },
+                    { id: 'ancient_warden_boost', name: 'Uralter Wächter', desc: 'Wächter-Bonus' },
+                    { id: 'voidworm_scaling', name: 'Leerentwurm-Skalierung', desc: 'Void-Effekt' },
+                    { id: 'armistice_power', name: 'Waffenstillstands-Macht', desc: 'Friedensbonus' }
+                ]
+            },
+            terraforming: {
+                name: '🆕 Terraforming Status',
+                modifiers: [
+                    { id: 'terraforming_candidate', name: 'Terraform-Kandidat', desc: 'Für Terraforming geeignet' },
+                    { id: 'toxic_terraforming_candidate', name: 'Toxischer Terraform-Kandidat', desc: 'Giftige Atmosphäre, schwierig' }
                 ]
             },
             pd_terraforming: {
