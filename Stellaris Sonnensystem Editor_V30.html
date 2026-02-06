@@ -417,12 +417,20 @@
                 </div>
             </div>
             
-            <div class="mt-4 p-3 bg-purple-900/20 rounded-lg border border-purple-500/30">
+            <div class="mt-4 p-3 bg-purple-900/20 rounded-lg border border-purple-500/30 space-y-3">
                 <label class="flex items-center gap-2 cursor-pointer">
                     <input type="checkbox" id="skipLocalizationCheckbox" class="w-4 h-4 rounded border-purple-500 bg-gray-700 text-purple-600 focus:ring-purple-500">
                     <span class="text-purple-300">
                         <span class="font-semibold">📝 Skip localization file</span> 
                         <span class="text-gray-400 text-sm">(Use if localization already exists in your mod)</span>
+                    </span>
+                </label>
+                
+                <label class="flex items-center gap-2 cursor-pointer">
+                    <input type="checkbox" id="legacyModifierFormatCheckbox" class="w-4 h-4 rounded border-purple-500 bg-gray-700 text-purple-600 focus:ring-purple-500">
+                    <span class="text-purple-300">
+                        <span class="font-semibold">⚙️ Use Legacy Modifier Format</span>
+                        <span class="text-gray-400 text-sm">(modifiers = { ... } instead of init_effect blocks - 4.3 Vanilla uses init_effect)</span>
                     </span>
                 </label>
             </div>
@@ -635,6 +643,12 @@
                         <label class="flex items-center cursor-pointer">
                             <input type="checkbox" id="planetIsGuaranteedHabitable" class="mr-2">
                             <span class="text-gray-300">🌿 Garantierter bewohnbarer Planet</span>
+                        </label>
+                    </div>
+                    <div class="form-group flex items-center">
+                        <label class="flex items-center cursor-pointer">
+                            <input type="checkbox" id="planetIsTerraformingCandidate" class="mr-2">
+                            <span class="text-gray-300">🪐 Terraforming Candidate</span>
                         </label>
                     </div>
                 </div>
@@ -2898,6 +2912,7 @@
             document.getElementById('planetChangeOrbit').value = '0';
             document.getElementById('planetHasRing').checked = false;
             document.getElementById('planetIsStarting').checked = false;
+            document.getElementById('planetIsTerraformingCandidate').checked = false;
             document.getElementById('planetUseAutoName').checked = false;
             togglePlanetNameField();
             
@@ -2989,6 +3004,7 @@
             document.getElementById('planetHasRing').checked = planet.hasRing;
             document.getElementById('planetIsStarting').checked = planet.isStartingPlanet;
             document.getElementById('planetIsGuaranteedHabitable').checked = planet.isGuaranteedHabitable || false;
+            document.getElementById('planetIsTerraformingCandidate').checked = planet.isTerraformingCandidate || false;
             document.getElementById('planetUseAutoName').checked = planet.useAutoName || false;
             togglePlanetNameField();
             
@@ -3029,6 +3045,7 @@
             const isStarting = document.getElementById('planetIsStarting').checked;
             const isHomePlanet = document.getElementById('planetIsHomePlanet').checked;
             const isGuaranteedHabitable = document.getElementById('planetIsGuaranteedHabitable').checked;
+            const isTerraformingCandidate = document.getElementById('planetIsTerraformingCandidate').checked;
             
             // NEU: Orbit Angle basierend auf Modus
             const angleMode = document.getElementById('orbitAngleMode').value;
@@ -3065,6 +3082,7 @@
                 isStartingPlanet: isStarting,
                 isHomePlanet: isHomePlanet,
                 isGuaranteedHabitable: isGuaranteedHabitable,
+                isTerraformingCandidate: isTerraformingCandidate,
                 modifiers: editingPlanetIndex !== null ? allSystems[currentSystemIndex].planets[editingPlanetIndex].modifiers || [] : [],
                 deposits: editingPlanetIndex !== null ? (allSystems[currentSystemIndex].planets[editingPlanetIndex].deposits || []) : [], // ✅ NEW
                 moons: [],
@@ -3964,6 +3982,9 @@
             const tab = '\t'.repeat(indentLevel);
             let code = `\n${tab}planet = {\n`;
             
+            // ✅ Check modifier format preference
+            const useLegacyModifiers = document.getElementById('legacyModifierFormatCheckbox')?.checked || false;
+            
             // Nur Name exportieren wenn nicht automatisch von Stellaris gesetzt werden soll
             if (!planet.useAutoName && planet.name) {
                 code += `${tab}\tname = "${planet.name}"\n`;
@@ -3991,8 +4012,8 @@
             
             code += `${tab}\thas_ring = ${planet.hasRing ? 'yes' : 'no'}\n`;
             
-            // Export modifiers for ALL planets
-            if (planet.modifiers && planet.modifiers.length > 0) {
+            // ✅ LEGACY FORMAT: Export modifiers as inline list
+            if (useLegacyModifiers && planet.modifiers && planet.modifiers.length > 0) {
                 code += `${tab}\tmodifiers = { ${planet.modifiers.join(' ')} }\n`;
             }
             
@@ -4011,11 +4032,29 @@
                 code += `${tab}\tinit_effect = {\n`;
                 code += `${tab}\t\tprevent_anomaly = yes\n`;
                 
-                // ✅ NEW: Export deposits in init_effect
+                // ✅ Export deposits in init_effect
                 if (planet.deposits && planet.deposits.length > 0) {
                     planet.deposits.forEach(deposit => {
                         code += `${tab}\t\tadd_deposit = ${deposit}\n`;
                     });
+                }
+                
+                // ✅ VANILLA FORMAT: Export modifiers in init_effect
+                if (!useLegacyModifiers && planet.modifiers && planet.modifiers.length > 0) {
+                    planet.modifiers.forEach(modifier => {
+                        code += `${tab}\t\tadd_modifier = {\n`;
+                        code += `${tab}\t\t\tmodifier = "${modifier}"\n`;
+                        code += `${tab}\t\t\tdays = -1\n`;
+                        code += `${tab}\t\t}\n`;
+                    });
+                }
+                
+                // ✅ Add terraforming_candidate if checked
+                if (planet.isTerraformingCandidate) {
+                    code += `${tab}\t\tadd_modifier = {\n`;
+                    code += `${tab}\t\t\tmodifier = "terraforming_candidate"\n`;
+                    code += `${tab}\t\t\tdays = -1\n`;
+                    code += `${tab}\t\t}\n`;
                 }
                 
                 code += `${tab}\t}\n`;
@@ -4023,12 +4062,39 @@
                 code += `${tab}\t\tgenerate_empire_home_planet = yes\n`;
                 code += `${tab}\t}\n`;
             } else {
-                // ✅ NEW: For non-starting planets, deposits go in separate init_effect
-                if (planet.deposits && planet.deposits.length > 0) {
+                // ✅ For non-starting planets: deposits, modifiers, and terraforming candidate in init_effect
+                const hasDeposits = planet.deposits && planet.deposits.length > 0;
+                const hasModifiers = !useLegacyModifiers && planet.modifiers && planet.modifiers.length > 0;
+                const hasTerraformingCandidate = planet.isTerraformingCandidate === true;
+                
+                if (hasDeposits || hasModifiers || hasTerraformingCandidate) {
                     code += `${tab}\tinit_effect = {\n`;
-                    planet.deposits.forEach(deposit => {
-                        code += `${tab}\t\tadd_deposit = ${deposit}\n`;
-                    });
+                    
+                    // Add deposits
+                    if (hasDeposits) {
+                        planet.deposits.forEach(deposit => {
+                            code += `${tab}\t\tadd_deposit = ${deposit}\n`;
+                        });
+                    }
+                    
+                    // ✅ VANILLA FORMAT: Add modifiers
+                    if (hasModifiers) {
+                        planet.modifiers.forEach(modifier => {
+                            code += `${tab}\t\tadd_modifier = {\n`;
+                            code += `${tab}\t\t\tmodifier = "${modifier}"\n`;
+                            code += `${tab}\t\t\tdays = -1\n`;
+                            code += `${tab}\t\t}\n`;
+                        });
+                    }
+                    
+                    // ✅ Add terraforming_candidate if checked
+                    if (hasTerraformingCandidate) {
+                        code += `${tab}\t\tadd_modifier = {\n`;
+                        code += `${tab}\t\t\tmodifier = "terraforming_candidate"\n`;
+                        code += `${tab}\t\t\tdays = -1\n`;
+                        code += `${tab}\t\t}\n`;
+                    }
+                    
                     code += `${tab}\t}\n`;
                 }
             }
@@ -4041,26 +4107,6 @@
                 code += `${tab}\t\tset_planet_flag = prescripted_ideal\n`;
                 code += `${tab}\t}\n`;
             }
-    //
-    //
-    // This change does the following:
-
-    // 1. ✅ **For normal planets with modifiers**: Exports `modifiers = { pm_xyz pm_abc }`
-    // 2. ✅ **For normal planets without modifiers**: No modifier line (as is usual in Stellaris)
-    // 3. ✅ **For starting planets with modifiers**: Exports the modifiers and NOT `modifiers = none`
-    // 4. ✅ **For starting planets without modifiers**: Exports `modifiers = none` (as expected by Stellaris)
-
-    // Now the export should work correctly! Please test it again and check the export preview. The modifiers should now appear as:
-    
-    //  planet = {
-    //      name = "Balder"
-    //      class = "pc_molten"
-    //      orbit_distance = 25
-    //      orbit_angle = { min = 90 max = 270 }
-    //      size = 20
-    //      has_ring = no
-    //      modifiers = { pm_carbon_world }
-    //  }
             
             planet.moons.forEach(moon => {
                 const moonCode = generatePlanetCode(moon, indentLevel + 1);
