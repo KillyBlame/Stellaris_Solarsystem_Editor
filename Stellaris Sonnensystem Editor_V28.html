@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Stellaris Solar System Editor V28 - Full Editor</title>
+    <title>Stellaris Solar System Editor V29 - Full Editor</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;600;700;800;900&family=Exo+2:wght@300;400;500;600&display=swap');
@@ -395,7 +395,7 @@
 </head>
 <body>
     <div class="container mx-auto py-8 px-4">
-        <h1 class="stellaris-header">🌌 Stellaris Solar System Editor V28</h1>
+        <h1 class="stellaris-header">🌌 Stellaris Solar System Editor V29</h1>
         <div class="text-center mb-6">
             <span class="text-yellow-400 font-semibold">⭐ Full Editor - Edit systems, planets, and neighbors</span>
         </div>
@@ -479,6 +479,12 @@
                     <div class="form-group">
                         <label class="label">Planet-Name</label>
                         <input type="text" id="planetName" class="stellaris-input" placeholder="z.B. Earth">
+                    </div>
+                    <div class="form-group flex items-center">
+                        <label class="flex items-center cursor-pointer">
+                            <input type="checkbox" id="planetUseAutoName" class="mr-2" onchange="togglePlanetNameField()">
+                            <span class="text-gray-300">🤖 Automatische Benennung durch Stellaris</span>
+                        </label>
                     </div>
                     <div class="form-group">
                         <label class="label">Planet class</label>
@@ -744,6 +750,12 @@
                     <div class="form-group">
                         <label class="label">Moon-Name</label>
                         <input type="text" id="moonName" class="stellaris-input" placeholder="z.B. Luna">
+                    </div>
+                    <div class="form-group flex items-center">
+                        <label class="flex items-center cursor-pointer">
+                            <input type="checkbox" id="moonUseAutoName" class="mr-2" onchange="toggleMoonNameField()">
+                            <span class="text-gray-300">🤖 Automatische Benennung durch Stellaris</span>
+                        </label>
                     </div>
                     <div class="form-group">
                         <label class="label">Moon Class</label>
@@ -2801,6 +2813,20 @@
         // PLANET MANAGEMENT
         // =====================================================
         
+        function togglePlanetNameField() {
+            const useAutoName = document.getElementById('planetUseAutoName').checked;
+            const nameField = document.getElementById('planetName');
+            
+            if (useAutoName) {
+                nameField.disabled = true;
+                nameField.value = '';
+                nameField.placeholder = 'Wird automatisch von Stellaris gesetzt';
+            } else {
+                nameField.disabled = false;
+                nameField.placeholder = 'z.B. Earth';
+            }
+        }
+        
         function openAddPlanetModal() {
             editingPlanetId = null;
             editingPlanetIndex = null;
@@ -2830,6 +2856,8 @@
             document.getElementById('planetChangeOrbit').value = '0';
             document.getElementById('planetHasRing').checked = false;
             document.getElementById('planetIsStarting').checked = false;
+            document.getElementById('planetUseAutoName').checked = false;
+            togglePlanetNameField();
             
             document.getElementById('planetModal').classList.add('active');
         }
@@ -2857,6 +2885,8 @@
             document.getElementById('planetHasRing').checked = false;
             document.getElementById('planetIsStarting').checked = false;
             document.getElementById('planetIsGuaranteedHabitable').checked = false;
+            document.getElementById('planetUseAutoName').checked = false;
+            togglePlanetNameField();
             
             // Show info banner
             showStarInfoBanner();
@@ -2897,7 +2927,7 @@
             editingPlanetIndex = planetIndex;
             document.getElementById('planetModalTitle').textContent = '✏️ Edit Planet';
             
-            document.getElementById('planetName').value = planet.name;
+            document.getElementById('planetName').value = planet.name || '';
             document.getElementById('planetClass').value = planet.class;
             document.getElementById('planetSize').value = planet.size;
             document.getElementById('planetOrbit').value = planet.orbitDistance;
@@ -2917,6 +2947,8 @@
             document.getElementById('planetHasRing').checked = planet.hasRing;
             document.getElementById('planetIsStarting').checked = planet.isStartingPlanet;
             document.getElementById('planetIsGuaranteedHabitable').checked = planet.isGuaranteedHabitable || false;
+            document.getElementById('planetUseAutoName').checked = planet.useAutoName || false;
+            togglePlanetNameField();
             
             // Load modifiers
             if (!planet.modifiers) {
@@ -2934,7 +2966,8 @@
         }
 
         function savePlanet() {
-            const name = document.getElementById('planetName').value.trim() || `planet_${nextPlanetId}`;
+            const useAutoName = document.getElementById('planetUseAutoName').checked;
+            const name = useAutoName ? '' : document.getElementById('planetName').value.trim();
             let planetClass = document.getElementById('planetClass').value;
             
             // ✅ NEW: Handle custom planet class
@@ -2976,7 +3009,8 @@
                 id: editingPlanetId || nextPlanetId++,
                 type: 'planet',
                 name: name,
-                displayName: name,
+                displayName: name || `🪐 Unbenannt (Orbit ${orbit})`,
+                useAutoName: useAutoName,
                 class: planetClass,
                 size: size,
                 orbitDistance: orbit,
@@ -3039,6 +3073,20 @@
         // MOON MANAGEMENT
         // =====================================================
         
+        function toggleMoonNameField() {
+            const useAutoName = document.getElementById('moonUseAutoName').checked;
+            const nameField = document.getElementById('moonName');
+            
+            if (useAutoName) {
+                nameField.disabled = true;
+                nameField.value = '';
+                nameField.placeholder = 'Wird automatisch von Stellaris gesetzt';
+            } else {
+                nameField.disabled = false;
+                nameField.placeholder = 'z.B. Luna';
+            }
+        }
+        
         function openAddMoonModal(parentPlanetId) {
             editingMoonParentId = parentPlanetId;
             editingMoonIndex = null;
@@ -3050,6 +3098,8 @@
             document.getElementById('moonOrbit').value = '10';
             document.getElementById('moonIsStarting').checked = false;
             document.getElementById('moonIsGuaranteedHabitable').checked = false;
+            document.getElementById('moonUseAutoName').checked = false;
+            toggleMoonNameField();
             
             // NEU: Orbit Angle Standardwerte
             document.getElementById('moonOrbitAngleMode').value = 'range';
@@ -3078,12 +3128,14 @@
             editingMoonIndex = moonIndex;
             document.getElementById('moonModalTitle').textContent = '✏️ Edit Moon';
             
-            document.getElementById('moonName').value = moon.name;
+            document.getElementById('moonName').value = moon.name || '';
             document.getElementById('moonClass').value = moon.class;
             document.getElementById('moonSize').value = moon.size;
             document.getElementById('moonOrbit').value = moon.orbitDistance;
             document.getElementById('moonIsStarting').checked = moon.isStartingPlanet || false;
             document.getElementById('moonIsGuaranteedHabitable').checked = false;
+            document.getElementById('moonUseAutoName').checked = moon.useAutoName || false;
+            toggleMoonNameField();
             
             // NEU: Orbit Angle Setup für Monde
             if (moon.orbitAngleType === 'fixed') {
@@ -3108,7 +3160,8 @@
         }
 
         function saveMoon() {
-            const name = document.getElementById('moonName').value.trim() || 'moon';
+            const useAutoName = document.getElementById('moonUseAutoName').checked;
+            const name = useAutoName ? '' : document.getElementById('moonName').value.trim();
             let moonClass = document.getElementById('moonClass').value;
             
             // ✅ NEW: Handle custom moon class
@@ -3149,7 +3202,8 @@
                 id: editingMoonParentId * 1000 + (planet.moons.length + 1),
                 type: 'moon',
                 name: name,
-                displayName: name,
+                displayName: name || `🌙 Unbenannt (Orbit ${orbit})`,
+                useAutoName: useAutoName,
                 class: moonClass,
                 size: size,
                 orbitDistance: orbit,
@@ -3868,7 +3922,10 @@
             const tab = '\t'.repeat(indentLevel);
             let code = `\n${tab}planet = {\n`;
             
-            code += `${tab}\tname = "${planet.name}"\n`;
+            // Nur Name exportieren wenn nicht automatisch von Stellaris gesetzt werden soll
+            if (!planet.useAutoName && planet.name) {
+                code += `${tab}\tname = "${planet.name}"\n`;
+            }
             // Verwende ideal_design_class für garantierte bewohnbare Planeten
             if (planet.isGuaranteedHabitable) {
                 code += `${tab}\tclass = ideal_design_class\n`;
