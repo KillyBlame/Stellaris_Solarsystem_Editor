@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Stellaris Solar System Editor V30 - Full Editor</title>
+    <title>Stellaris Solar System Editor V36 - Full Editor</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;600;700;800;900&family=Exo+2:wght@300;400;500;600&display=swap');
@@ -131,16 +131,6 @@
             z-index: 100;
         }
 
-        .modal-content {
-            position: relative;
-            z-index: 2001;
-        }
-
-        .modal-content select {
-            position: relative;
-            z-index: 2002;
-        }
-
         /* Dropdown-Optionen verbessern */
         .stellaris-input option,
         .stellaris-input optgroup {
@@ -152,11 +142,6 @@
         .stellaris-input optgroup {
             font-weight: bold;
             background-color: #1e2936 !important;
-        }
-
-        /* Modal über allem */
-        .modal {
-            z-index: 2000;
         }
 
         .stellaris-btn {
@@ -395,7 +380,7 @@
 </head>
 <body>
     <div class="container mx-auto py-8 px-4">
-        <h1 class="stellaris-header">🌌 Stellaris Solar System Editor V30</h1>
+        <h1 class="stellaris-header">🌌 Stellaris Solar System Editor V36</h1>
         <div class="text-center mb-6">
             <span class="text-yellow-400 font-semibold">⭐ Full Editor - Edit systems, planets, and neighbors</span>
         </div>
@@ -467,11 +452,13 @@
 
         <!-- Export Preview Modal -->
         <div id="exportPreview" class="modal">
+            <p id="modPathHint" class="text-xs text-gray-400 mt-2"></p>
             <div class="modal-content">
                 <h2 class="text-2xl font-bold mb-4 text-green-300">📋 Export Preview</h2>
                 <textarea id="exportTextarea" class="stellaris-input font-mono text-sm" rows="20" readonly></textarea>
                 <div class="mt-4 flex gap-2">
                     <button id="downloadExportBtn" class="stellaris-btn">💾 Download Files</button>
+                    <button id="generateModBtn" class="stellaris-btn stellaris-btn-success">📦 Generate Mod</button>
                     <button id="copyExportBtn" class="stellaris-btn stellaris-btn-secondary">📋 Copy to Clipboard</button>
                     <button id="closePreviewBtn" class="stellaris-btn stellaris-btn-secondary">✕ Close</button>
                 </div>
@@ -500,16 +487,20 @@
                         </label>
                         <select id="planetClass" class="stellaris-input" onchange="window.toggleCustomPlanetClass()">
                             <optgroup label="⭐ Stars">
+                                <option value="pc_b_star">B-Star (Blue)</option>
+                                <option value="pc_a_star">A-Star (White)</option>
+                                <option value="pc_f_star">F-Star (Yellowish-White)</option>
                                 <option value="pc_g_star">G-Star (Yellow)</option>
                                 <option value="pc_k_star">K-Star (Orange)</option>
                                 <option value="pc_m_star">M-Star (Red)</option>
-                                <option value="pc_f_star">F-Star (Yellowish-White)</option>
-                                <option value="pc_a_star">A-Star (White)</option>
-                                <option value="pc_b_star">B-Star (Blue)</option>
-                                <option value="pc_o_star">O-Star (Blue)</option>
+                                <option value="pc_m_giant_star">M-Giant-Star (Red Giant)</option>
+                                <option value="pc_t_star">T-Star (Brown Dwarf)</option>
                                 <option value="pc_black_hole">Black Hole</option>
                                 <option value="pc_neutron_star">Neutron Star</option>
                                 <option value="pc_pulsar">Pulsar</option>
+                                <option value="pc_toxoid_star">Toxoid Star</option>
+                                <option value="pc_rift_star">Rift Star (Astral Planes DLC)</option>
+                                <option value="pc_protostar">Protostar (Nomads)</option>
                             </optgroup>
                             <optgroup label="Habitable Planets">
                                 <option value="pc_continental">Continental</option>
@@ -535,6 +526,20 @@
                                 <option value="pc_toxic">Toxic</option>
                                 <option value="pc_frozen">Frozen</option>
                             </optgroup>
+                            <optgroup label="💍 Ringworld Segments (Advanced)">
+                                <option value="pc_ringworld_habitable">Ringworld – Habitable</option>
+                                <option value="pc_ringworld_habitable_damaged">Ringworld – Habitable (Damaged)</option>
+                                <option value="pc_ringworld_tech">Ringworld – Tech Section</option>
+                                <option value="pc_ringworld_tech_damaged">Ringworld – Tech Section (Damaged)</option>
+                                <option value="pc_ringworld_seam">Ringworld – Seam</option>
+                                <option value="pc_ringworld_seam_damaged">Ringworld – Seam (Damaged)</option>
+                                <option value="pc_ringworld_shielded">Ringworld – Shielded (Apocalypse)</option>
+                                <option value="pc_shattered_ring_habitable">Shattered Ring – Habitable</option>
+                            </optgroup>
+                            <optgroup label="🌌 DLC Special Worlds">
+                                <option value="pc_astral_scar">Astral Scar (Astral Planes)</option>
+                                <option value="pc_infested">Infested World</option>
+                            </optgroup>
                             <optgroup label="Destroyed/Special Worlds">
                                 <option value="pc_nuked">Nuked (Tomb World)</option>
                                 <option value="pc_shattered">Shattered</option>
@@ -552,7 +557,7 @@
                                 <option value="pc_ai">AI World</option>
                                 <option value="pc_cybrex">Cybrex World</option>
                             </optgroup>
-<optgroup label="Asteroiden">
+                            <optgroup label="Asteroiden">
                                 <option value="pc_asteroid">Asteroid</option>
                                 <option value="pc_ice_asteroid">Ice Asteroid</option>
                                 <option value="pc_rare_crystal_asteroid">Rare Crystal Asteroid</option>
@@ -678,14 +683,16 @@
                                 <label class="label text-xs">MODIFIER CATEGORY</label>
                                 <select id="modifierCategory" class="stellaris-input text-sm" onchange="window.updateModifierOptions()">
                                     <option value="">-- Select Category --</option>
-                                    <option value="resources">Resource Modifiers</option>
-                                    <option value="planetary">Planetary Features</option>
-                                    <option value="deposits">Deposits</option>
-                                    <option value="anomalies">Anomalies</option>
-                                    <option value="special">Special Modifiers</option>
-                                    <option value="pd_terraforming">PD: Terraforming</option>
-                                    <option value="pd_climate">PD: Climate</option>
-                                    <option value="pd_unique">PD: Unique</option>
+                                    <option value="v_res">💰 Vanilla: Ressourcen & Ertrag</option>
+                                    <option value="v_grav">🌀 Vanilla: Schwerkraft & Bahn</option>
+                                    <option value="v_geo">🪨 Vanilla: Geologie & Wetter</option>
+                                    <option value="v_volcanic">🌋 Vanilla: Vulkanwelten</option>
+                                    <option value="v_bio">🌿 Vanilla: Flora & Fauna</option>
+                                    <option value="v_art">🏭 Vanilla: Künstlich & Megastruktur</option>
+                                    <option value="v_special">🌌 Vanilla: Spezial & Shroud</option>
+                                    <option value="terraforming">🌱 Terraforming-Kandidat</option>
+                                    <option value="event_special">⭐ Spezial & Event (verifiziert)</option>
+                                    <option value="pd">🧩 Planetary Diversity (Mod)</option>
                                 </select>
                             </div>
                             <div>
@@ -724,24 +731,495 @@
                             <label class="label text-xs">SELECT DEPOSIT</label>
                             <select id="depositSelection" class="stellaris-input text-sm">
                                 <option value="">-- Select Deposit --</option>
-                                <optgroup label="Resources">
-                                    <option value="d_minerals_1">Minerals +1</option>
-                                    <option value="d_minerals_2">Minerals +2</option>
-                                    <option value="d_minerals_3">Minerals +3</option>
-                                    <option value="d_minerals_4">Minerals +4</option>
-                                    <option value="d_energy_1">Energy +1</option>
-                                    <option value="d_energy_2">Energy +2</option>
-                                    <option value="d_energy_3">Energy +3</option>
-                                    <option value="d_alloys_1">Alloys +1</option>
-                                    <option value="d_alloys_2">Alloys +2</option>
-                                </optgroup>
-                                <optgroup label="Strategic">
-                                    <option value="d_exotic_gases_1">Exotic Gases +1</option>
-                                    <option value="d_rare_crystals_1">Rare Crystals +1</option>
-                                    <option value="d_volatile_motes_1">Volatile Motes +1</option>
-                                    <option value="d_zro_deposit_1">Zro +1</option>
-                                    <option value="d_dark_matter_deposit_1">Dark Matter +1</option>
-                                </optgroup>
+                                    <optgroup label="⛏️ Mineralien (Mining)">
+                                        <option value="d_minerals_1">Minerals 1 (d_minerals_1)</option>
+                                        <option value="d_minerals_2">Minerals 2 (d_minerals_2)</option>
+                                        <option value="d_minerals_3">Minerals 3 (d_minerals_3)</option>
+                                        <option value="d_minerals_4">Minerals 4 (d_minerals_4)</option>
+                                        <option value="d_minerals_5">Minerals 5 (d_minerals_5)</option>
+                                        <option value="d_minerals_6">Minerals 6 (d_minerals_6)</option>
+                                        <option value="d_minerals_7">Minerals 7 (d_minerals_7)</option>
+                                        <option value="d_minerals_8">Minerals 8 (d_minerals_8)</option>
+                                        <option value="d_minerals_9">Minerals 9 (d_minerals_9)</option>
+                                        <option value="d_minerals_10">Minerals 10 (d_minerals_10)</option>
+                                    </optgroup>
+                                    <optgroup label="⚡ Energie (Mining)">
+                                        <option value="d_energy_1">Energy 1 (d_energy_1)</option>
+                                        <option value="d_energy_2">Energy 2 (d_energy_2)</option>
+                                        <option value="d_energy_3">Energy 3 (d_energy_3)</option>
+                                        <option value="d_energy_4">Energy 4 (d_energy_4)</option>
+                                        <option value="d_energy_5">Energy 5 (d_energy_5)</option>
+                                        <option value="d_energy_6">Energy 6 (d_energy_6)</option>
+                                        <option value="d_energy_7">Energy 7 (d_energy_7)</option>
+                                        <option value="d_energy_8">Energy 8 (d_energy_8)</option>
+                                        <option value="d_energy_9">Energy 9 (d_energy_9)</option>
+                                        <option value="d_energy_10">Energy 10 (d_energy_10)</option>
+                                    </optgroup>
+                                    <optgroup label="🌾 Nahrung (Mining)">
+                                        <option value="d_food_3">Food 3 (d_food_3)</option>
+                                        <option value="d_food_4">Food 4 (d_food_4)</option>
+                                        <option value="d_food_5">Food 5 (d_food_5)</option>
+                                        <option value="d_food_6">Food 6 (d_food_6)</option>
+                                        <option value="d_food_7">Food 7 (d_food_7)</option>
+                                        <option value="d_food_10">Food 10 (d_food_10)</option>
+                                    </optgroup>
+                                    <optgroup label="🔩 Legierungen (Mining)">
+                                        <option value="d_alloys_1">Alloys 1 (d_alloys_1)</option>
+                                        <option value="d_alloys_2">Alloys 2 (d_alloys_2)</option>
+                                        <option value="d_alloys_3">Alloys 3 (d_alloys_3)</option>
+                                        <option value="d_alloys_4">Alloys 4 (d_alloys_4)</option>
+                                        <option value="d_alloys_5">Alloys 5 (d_alloys_5)</option>
+                                        <option value="d_alloys_10">Alloys 10 (d_alloys_10)</option>
+                                        <option value="d_alloys_25">Alloys 25 (d_alloys_25)</option>
+                                    </optgroup>
+                                    <optgroup label="💰 Handelswert (Mining)">
+                                        <option value="d_trade_value_1">Trade Value 1 (d_trade_value_1)</option>
+                                        <option value="d_trade_value_2">Trade Value 2 (d_trade_value_2)</option>
+                                        <option value="d_trade_value_3">Trade Value 3 (d_trade_value_3)</option>
+                                        <option value="d_trade_value_4">Trade Value 4 (d_trade_value_4)</option>
+                                        <option value="d_trade_value_5">Trade Value 5 (d_trade_value_5)</option>
+                                        <option value="d_trade_value_6">Trade Value 6 (d_trade_value_6)</option>
+                                        <option value="d_trade_value_7">Trade Value 7 (d_trade_value_7)</option>
+                                        <option value="d_trade_value_8">Trade Value 8 (d_trade_value_8)</option>
+                                        <option value="d_trade_value_9">Trade Value 9 (d_trade_value_9)</option>
+                                        <option value="d_trade_value_10">Trade Value 10 (d_trade_value_10)</option>
+                                    </optgroup>
+                                    <optgroup label="🔬 Physik-Forschung">
+                                        <option value="d_physics_1">Physics 1 (d_physics_1)</option>
+                                        <option value="d_physics_2">Physics 2 (d_physics_2)</option>
+                                        <option value="d_physics_3">Physics 3 (d_physics_3)</option>
+                                        <option value="d_physics_4">Physics 4 (d_physics_4)</option>
+                                        <option value="d_physics_5">Physics 5 (d_physics_5)</option>
+                                        <option value="d_physics_6">Physics 6 (d_physics_6)</option>
+                                        <option value="d_physics_7">Physics 7 (d_physics_7)</option>
+                                        <option value="d_physics_8">Physics 8 (d_physics_8)</option>
+                                        <option value="d_physics_9">Physics 9 (d_physics_9)</option>
+                                        <option value="d_physics_10">Physics 10 (d_physics_10)</option>
+                                        <option value="d_physics_25">Physics 25 (d_physics_25)</option>
+                                    </optgroup>
+                                    <optgroup label="🧬 Gesellschafts-Forschung">
+                                        <option value="d_society_1">Society 1 (d_society_1)</option>
+                                        <option value="d_society_2">Society 2 (d_society_2)</option>
+                                        <option value="d_society_3">Society 3 (d_society_3)</option>
+                                        <option value="d_society_4">Society 4 (d_society_4)</option>
+                                        <option value="d_society_5">Society 5 (d_society_5)</option>
+                                        <option value="d_society_6">Society 6 (d_society_6)</option>
+                                        <option value="d_society_7">Society 7 (d_society_7)</option>
+                                        <option value="d_society_8">Society 8 (d_society_8)</option>
+                                        <option value="d_society_9">Society 9 (d_society_9)</option>
+                                        <option value="d_society_10">Society 10 (d_society_10)</option>
+                                        <option value="d_society_15">Society 15 (d_society_15)</option>
+                                        <option value="d_society_25">Society 25 (d_society_25)</option>
+                                    </optgroup>
+                                    <optgroup label="⚙️ Ingenieurs-Forschung">
+                                        <option value="d_engineering_1">Engineering 1 (d_engineering_1)</option>
+                                        <option value="d_engineering_2">Engineering 2 (d_engineering_2)</option>
+                                        <option value="d_engineering_3">Engineering 3 (d_engineering_3)</option>
+                                        <option value="d_engineering_4">Engineering 4 (d_engineering_4)</option>
+                                        <option value="d_engineering_5">Engineering 5 (d_engineering_5)</option>
+                                        <option value="d_engineering_6">Engineering 6 (d_engineering_6)</option>
+                                        <option value="d_engineering_7">Engineering 7 (d_engineering_7)</option>
+                                        <option value="d_engineering_8">Engineering 8 (d_engineering_8)</option>
+                                        <option value="d_engineering_9">Engineering 9 (d_engineering_9)</option>
+                                        <option value="d_engineering_10">Engineering 10 (d_engineering_10)</option>
+                                        <option value="d_engineering_25">Engineering 25 (d_engineering_25)</option>
+                                    </optgroup>
+                                    <optgroup label="💎 Strategische Ressourcen">
+                                        <option value="d_exotic_gases_1">Exotic Gases 1 (d_exotic_gases_1)</option>
+                                        <option value="d_exotic_gases_2">Exotic Gases 2 (d_exotic_gases_2)</option>
+                                        <option value="d_exotic_gases_3">Exotic Gases 3 (d_exotic_gases_3)</option>
+                                        <option value="d_exotic_gases_4">Exotic Gases 4 (d_exotic_gases_4)</option>
+                                        <option value="d_exotic_gases_5">Exotic Gases 5 (d_exotic_gases_5)</option>
+                                        <option value="d_volatile_motes_1">Volatile Motes 1 (d_volatile_motes_1)</option>
+                                        <option value="d_volatile_motes_2">Volatile Motes 2 (d_volatile_motes_2)</option>
+                                        <option value="d_volatile_motes_3">Volatile Motes 3 (d_volatile_motes_3)</option>
+                                        <option value="d_volatile_motes_4">Volatile Motes 4 (d_volatile_motes_4)</option>
+                                        <option value="d_volatile_motes_5">Volatile Motes 5 (d_volatile_motes_5)</option>
+                                        <option value="d_rare_crystals_1">Rare Crystals 1 (d_rare_crystals_1)</option>
+                                        <option value="d_rare_crystals_2">Rare Crystals 2 (d_rare_crystals_2)</option>
+                                        <option value="d_rare_crystals_3">Rare Crystals 3 (d_rare_crystals_3)</option>
+                                        <option value="d_rare_crystals_4">Rare Crystals 4 (d_rare_crystals_4)</option>
+                                        <option value="d_rare_crystals_5">Rare Crystals 5 (d_rare_crystals_5)</option>
+                                        <option value="d_zro_deposit_1">Zro Deposit 1 (d_zro_deposit_1)</option>
+                                        <option value="d_zro_deposit_2">Zro Deposit 2 (d_zro_deposit_2)</option>
+                                        <option value="d_zro_deposit_3">Zro Deposit 3 (d_zro_deposit_3)</option>
+                                        <option value="d_zro_deposit_4">Zro Deposit 4 (d_zro_deposit_4)</option>
+                                        <option value="d_zro_deposit_5">Zro Deposit 5 (d_zro_deposit_5)</option>
+                                        <option value="d_dark_matter_deposit_1">Dark Matter Deposit 1 (d_dark_matter_deposit_1)</option>
+                                        <option value="d_dark_matter_deposit_2">Dark Matter Deposit 2 (d_dark_matter_deposit_2)</option>
+                                        <option value="d_dark_matter_deposit_3">Dark Matter Deposit 3 (d_dark_matter_deposit_3)</option>
+                                        <option value="d_dark_matter_deposit_10">Dark Matter Deposit 10 (d_dark_matter_deposit_10)</option>
+                                        <option value="d_astral_threads_deposit_1">Astral Threads Deposit 1 (d_astral_threads_deposit_1)</option>
+                                        <option value="d_astral_threads_deposit_2">Astral Threads Deposit 2 (d_astral_threads_deposit_2)</option>
+                                        <option value="d_astral_threads_deposit_3">Astral Threads Deposit 3 (d_astral_threads_deposit_3)</option>
+                                        <option value="d_living_metal_deposit">Living Metal Deposit (d_living_metal_deposit)</option>
+                                        <option value="d_nanites_deposit">Nanites Deposit (d_nanites_deposit)</option>
+                                    </optgroup>
+                                    <optgroup label="🌟 Planetar: Spezial/Event (benannt)">
+                                        <option value="d_abandoned_black_needle_base">Abandoned Black Needle Base (d_abandoned_black_needle_base)</option>
+                                        <option value="d_abandoned_primitive_homesteads">Abandoned Primitive Homesteads (d_abandoned_primitive_homesteads)</option>
+                                        <option value="d_admirals_bickering_crashed_cargo_ship">Admirals Bickering Crashed Cargo Ship (d_admirals_bickering_crashed_cargo_ship)</option>
+                                        <option value="d_alien_pets_deposit">Alien Pets Deposit (d_alien_pets_deposit)</option>
+                                        <option value="d_alien_sanctuary">Alien Sanctuary (d_alien_sanctuary)</option>
+                                        <option value="d_ancient_battlefield">Ancient Battlefield (d_ancient_battlefield)</option>
+                                        <option value="d_ancient_bombardment_craters">Ancient Bombardment Craters (d_ancient_bombardment_craters)</option>
+                                        <option value="d_ancient_cloaking_array">Ancient Cloaking Array (d_ancient_cloaking_array)</option>
+                                        <option value="d_ancient_facilities">Ancient Facilities (d_ancient_facilities)</option>
+                                        <option value="d_ancient_manufactorium_crater">Ancient Manufactorium Crater (d_ancient_manufactorium_crater)</option>
+                                        <option value="d_ancient_manufactorium_scrapyard">Ancient Manufactorium Scrapyard (d_ancient_manufactorium_scrapyard)</option>
+                                        <option value="d_ancient_manufactorium_vaultexploration">Ancient Manufactorium Vaultexploration (d_ancient_manufactorium_vaultexploration)</option>
+                                        <option value="d_ancient_manufactorium_working">Ancient Manufactorium Working (d_ancient_manufactorium_working)</option>
+                                        <option value="d_ancient_mining_site">Ancient Mining Site (d_ancient_mining_site)</option>
+                                        <option value="d_ancient_one">Ancient One (d_ancient_one)</option>
+                                        <option value="d_ancient_particle_accelerator">Ancient Particle Accelerator (d_ancient_particle_accelerator)</option>
+                                        <option value="d_arcane_device">Arcane Device (d_arcane_device)</option>
+                                        <option value="d_arcane_generator">Arcane Generator (d_arcane_generator)</option>
+                                        <option value="d_arcane_replicator">Arcane Replicator (d_arcane_replicator)</option>
+                                        <option value="d_artifacts_planet_1">Artifacts Planet 1 (d_artifacts_planet_1)</option>
+                                        <option value="d_artifacts_planet_2">Artifacts Planet 2 (d_artifacts_planet_2)</option>
+                                        <option value="d_artifacts_planet_3">Artifacts Planet 3 (d_artifacts_planet_3)</option>
+                                        <option value="d_astrogarbage_collector">Astrogarbage Collector (d_astrogarbage_collector)</option>
+                                        <option value="d_avian_reserve">Avian Reserve (d_avian_reserve)</option>
+                                        <option value="d_betharian_deposit">Betharian Deposit (d_betharian_deposit)</option>
+                                        <option value="d_black_needle_base">Black Needle Base (d_black_needle_base)</option>
+                                        <option value="d_blue_lava">Blue Lava (d_blue_lava)</option>
+                                        <option value="d_bluelotus">Bluelotus (d_bluelotus)</option>
+                                        <option value="d_bluelotus2">Bluelotus2 (d_bluelotus2)</option>
+                                        <option value="d_bogplants">Bogplants (d_bogplants)</option>
+                                        <option value="d_cave_shroom_veins">Cave Shroom Veins (d_cave_shroom_veins)</option>
+                                        <option value="d_cd_ancient_tunnels">Cd Ancient Tunnels (d_cd_ancient_tunnels)</option>
+                                        <option value="d_celestial_storm_1_mines">Celestial Storm 1 Mines (d_celestial_storm_1_mines)</option>
+                                        <option value="d_celestial_storm_2_society">Celestial Storm 2 Society (d_celestial_storm_2_society)</option>
+                                        <option value="d_celestial_storm_3_crystal">Celestial Storm 3 Crystal (d_celestial_storm_3_crystal)</option>
+                                        <option value="d_central_spire">Central Spire (d_central_spire)</option>
+                                        <option value="d_compact_modules">Compact Modules (d_compact_modules)</option>
+                                        <option value="d_crashed_slaver_ship">Crashed Slaver Ship (d_crashed_slaver_ship)</option>
+                                        <option value="d_crashed_slaver_ship_memorial">Crashed Slaver Ship Memorial (d_crashed_slaver_ship_memorial)</option>
+                                        <option value="d_crater_bluelotus">Crater Bluelotus (d_crater_bluelotus)</option>
+                                        <option value="d_cryonic_clones">Cryonic Clones (d_cryonic_clones)</option>
+                                        <option value="d_crystal_kraken_body">Crystal Kraken Body (d_crystal_kraken_body)</option>
+                                        <option value="d_crystal_kraken_body_bombed">Crystal Kraken Body Bombed (d_crystal_kraken_body_bombed)</option>
+                                        <option value="d_crystaline_growths">Crystaline Growths (d_crystaline_growths)</option>
+                                        <option value="d_crystalline_glacier">Crystalline Glacier (d_crystalline_glacier)</option>
+                                        <option value="d_dark_matter_monolith">Dark Matter Monolith (d_dark_matter_monolith)</option>
+                                        <option value="d_dayside_farm">Dayside Farm (d_dayside_farm)</option>
+                                        <option value="d_deep_sleep_cryo_pods_renewed">Deep Sleep Cryo Pods Renewed (d_deep_sleep_cryo_pods_renewed)</option>
+                                        <option value="d_dimensional_manipulation_device">Dimensional Manipulation Device (d_dimensional_manipulation_device)</option>
+                                        <option value="d_disco_planet">Disco Planet (d_disco_planet)</option>
+                                        <option value="d_disco_planet2">Disco Planet2 (d_disco_planet2)</option>
+                                        <option value="d_dragon_monument">Dragon Monument (d_dragon_monument)</option>
+                                        <option value="d_eater_deposit">Eater Deposit (d_eater_deposit)</option>
+                                        <option value="d_electric_storm_1_engineering">Electric Storm 1 Engineering (d_electric_storm_1_engineering)</option>
+                                        <option value="d_electric_storm_2_unity">Electric Storm 2 Unity (d_electric_storm_2_unity)</option>
+                                        <option value="d_electric_storm_3_physics">Electric Storm 3 Physics (d_electric_storm_3_physics)</option>
+                                        <option value="d_electrified_oceans">Electrified Oceans (d_electrified_oceans)</option>
+                                        <option value="d_explosive_atmosphere">Explosive Atmosphere (d_explosive_atmosphere)</option>
+                                        <option value="d_fallen_orbital_shipyard">Fallen Orbital Shipyard (d_fallen_orbital_shipyard)</option>
+                                        <option value="d_federation_hegemony_monument_1">Federation Hegemony Monument 1 (d_federation_hegemony_monument_1)</option>
+                                        <option value="d_federation_hegemony_monument_2">Federation Hegemony Monument 2 (d_federation_hegemony_monument_2)</option>
+                                        <option value="d_flooded_mounds">Flooded Mounds (d_flooded_mounds)</option>
+                                        <option value="d_forceful_winds">Forceful Winds (d_forceful_winds)</option>
+                                        <option value="d_forgotten_level">Forgotten Level (d_forgotten_level)</option>
+                                        <option value="d_former_relic_world">Former Relic World (d_former_relic_world)</option>
+                                        <option value="d_fractal_seed">Fractal Seed (d_fractal_seed)</option>
+                                        <option value="d_freeports">Freeports (d_freeports)</option>
+                                        <option value="d_fungal_study_zone">Fungal Study Zone (d_fungal_study_zone)</option>
+                                        <option value="d_galvanic_living_metal">Galvanic Living Metal (d_galvanic_living_metal)</option>
+                                        <option value="d_genesis_monument">Genesis Monument (d_genesis_monument)</option>
+                                        <option value="d_genesis_preserve">Genesis Preserve (d_genesis_preserve)</option>
+                                        <option value="d_geocentric_experiment">Geocentric Experiment (d_geocentric_experiment)</option>
+                                        <option value="d_ghostly_canyon">Ghostly Canyon (d_ghostly_canyon)</option>
+                                        <option value="d_gravity_storm_1_districts">Gravity Storm 1 Districts (d_gravity_storm_1_districts)</option>
+                                        <option value="d_gravity_storm_2_unity">Gravity Storm 2 Unity (d_gravity_storm_2_unity)</option>
+                                        <option value="d_gravity_storm_3_engineering">Gravity Storm 3 Engineering (d_gravity_storm_3_engineering)</option>
+                                        <option value="d_hab_alloy_1">Hab Alloy 1 (d_hab_alloy_1)</option>
+                                        <option value="d_hab_alloy_10">Hab Alloy 10 (d_hab_alloy_10)</option>
+                                        <option value="d_hab_alloy_2">Hab Alloy 2 (d_hab_alloy_2)</option>
+                                        <option value="d_hab_alloy_25">Hab Alloy 25 (d_hab_alloy_25)</option>
+                                        <option value="d_hab_alloy_3">Hab Alloy 3 (d_hab_alloy_3)</option>
+                                        <option value="d_hab_alloy_4">Hab Alloy 4 (d_hab_alloy_4)</option>
+                                        <option value="d_hab_alloy_5">Hab Alloy 5 (d_hab_alloy_5)</option>
+                                        <option value="d_hab_astral_threads_1">Hab Astral Threads 1 (d_hab_astral_threads_1)</option>
+                                        <option value="d_hab_astral_threads_2">Hab Astral Threads 2 (d_hab_astral_threads_2)</option>
+                                        <option value="d_hab_astral_threads_3">Hab Astral Threads 3 (d_hab_astral_threads_3)</option>
+                                        <option value="d_hab_consumer_goods_2">Hab Consumer Goods 2 (d_hab_consumer_goods_2)</option>
+                                        <option value="d_hab_crystal_1">Hab Crystal 1 (d_hab_crystal_1)</option>
+                                        <option value="d_hab_crystal_2">Hab Crystal 2 (d_hab_crystal_2)</option>
+                                        <option value="d_hab_crystal_3">Hab Crystal 3 (d_hab_crystal_3)</option>
+                                        <option value="d_hab_crystal_4">Hab Crystal 4 (d_hab_crystal_4)</option>
+                                        <option value="d_hab_crystal_5">Hab Crystal 5 (d_hab_crystal_5)</option>
+                                        <option value="d_hab_dark_matter_1">Hab Dark Matter 1 (d_hab_dark_matter_1)</option>
+                                        <option value="d_hab_dark_matter_10">Hab Dark Matter 10 (d_hab_dark_matter_10)</option>
+                                        <option value="d_hab_dark_matter_2">Hab Dark Matter 2 (d_hab_dark_matter_2)</option>
+                                        <option value="d_hab_dark_matter_3">Hab Dark Matter 3 (d_hab_dark_matter_3)</option>
+                                        <option value="d_hab_gas_1">Hab Gas 1 (d_hab_gas_1)</option>
+                                        <option value="d_hab_gas_2">Hab Gas 2 (d_hab_gas_2)</option>
+                                        <option value="d_hab_gas_3">Hab Gas 3 (d_hab_gas_3)</option>
+                                        <option value="d_hab_gas_4">Hab Gas 4 (d_hab_gas_4)</option>
+                                        <option value="d_hab_gas_5">Hab Gas 5 (d_hab_gas_5)</option>
+                                        <option value="d_hab_harvester_nanites_1">Hab Harvester Nanites 1 (d_hab_harvester_nanites_1)</option>
+                                        <option value="d_hab_harvester_nanites_2">Hab Harvester Nanites 2 (d_hab_harvester_nanites_2)</option>
+                                        <option value="d_hab_harvester_nanites_3">Hab Harvester Nanites 3 (d_hab_harvester_nanites_3)</option>
+                                        <option value="d_hab_living_metal_1">Hab Living Metal 1 (d_hab_living_metal_1)</option>
+                                        <option value="d_hab_lonely_bot_deposit">Hab Lonely Bot Deposit (d_hab_lonely_bot_deposit)</option>
+                                        <option value="d_hab_lonely_bot_deposit_2">Hab Lonely Bot Deposit 2 (d_hab_lonely_bot_deposit_2)</option>
+                                        <option value="d_hab_lonely_bot_deposit_3">Hab Lonely Bot Deposit 3 (d_hab_lonely_bot_deposit_3)</option>
+                                        <option value="d_hab_mote_1">Hab Mote 1 (d_hab_mote_1)</option>
+                                        <option value="d_hab_mote_2">Hab Mote 2 (d_hab_mote_2)</option>
+                                        <option value="d_hab_mote_3">Hab Mote 3 (d_hab_mote_3)</option>
+                                        <option value="d_hab_mote_4">Hab Mote 4 (d_hab_mote_4)</option>
+                                        <option value="d_hab_mote_5">Hab Mote 5 (d_hab_mote_5)</option>
+                                        <option value="d_hab_nanites_3">Hab Nanites 3 (d_hab_nanites_3)</option>
+                                        <option value="d_hab_zro_1">Hab Zro 1 (d_hab_zro_1)</option>
+                                        <option value="d_hab_zro_2">Hab Zro 2 (d_hab_zro_2)</option>
+                                        <option value="d_hab_zro_3">Hab Zro 3 (d_hab_zro_3)</option>
+                                        <option value="d_hab_zro_4">Hab Zro 4 (d_hab_zro_4)</option>
+                                        <option value="d_hab_zro_5">Hab Zro 5 (d_hab_zro_5)</option>
+                                        <option value="d_harvester_fields">Harvester Fields (d_harvester_fields)</option>
+                                        <option value="d_hive_dwelling">Hive Dwelling (d_hive_dwelling)</option>
+                                        <option value="d_hostile_fauna">Hostile Fauna (d_hostile_fauna)</option>
+                                        <option value="d_hostile_flora">Hostile Flora (d_hostile_flora)</option>
+                                        <option value="d_house_turtle">House Turtle (d_house_turtle)</option>
+                                        <option value="d_hydroactive_eggs">Hydroactive Eggs (d_hydroactive_eggs)</option>
+                                        <option value="d_hyperfertile_valley">Hyperfertile Valley (d_hyperfertile_valley)</option>
+                                        <option value="d_impact_crater">Impact Crater (d_impact_crater)</option>
+                                        <option value="d_impossiblecorrie">Impossiblecorrie (d_impossiblecorrie)</option>
+                                        <option value="d_industrial_sector">Industrial Sector (d_industrial_sector)</option>
+                                        <option value="d_irradiated_ruins">Irradiated Ruins (d_irradiated_ruins)</option>
+                                        <option value="d_irradiated_valley">Irradiated Valley (d_irradiated_valley)</option>
+                                        <option value="d_junk_canals">Junk Canals (d_junk_canals)</option>
+                                        <option value="d_junk_hollows">Junk Hollows (d_junk_hollows)</option>
+                                        <option value="d_junk_wastes">Junk Wastes (d_junk_wastes)</option>
+                                        <option value="d_knights_calibrator">Knights Calibrator (d_knights_calibrator)</option>
+                                        <option value="d_landed_dragon">Landed Dragon (d_landed_dragon)</option>
+                                        <option value="d_landgrab_blocker">Landgrab Blocker (d_landgrab_blocker)</option>
+                                        <option value="d_landgrab_foreign_holdings">Landgrab Foreign Holdings (d_landgrab_foreign_holdings)</option>
+                                        <option value="d_lava_tubes">Lava Tubes (d_lava_tubes)</option>
+                                        <option value="d_liquid_dark_matter">Liquid Dark Matter (d_liquid_dark_matter)</option>
+                                        <option value="d_lithoid_crater">Lithoid Crater (d_lithoid_crater)</option>
+                                        <option value="d_living_metal_medium">Living Metal Medium (d_living_metal_medium)</option>
+                                        <option value="d_living_metal_small">Living Metal Small (d_living_metal_small)</option>
+                                        <option value="d_living_metal_tiny">Living Metal Tiny (d_living_metal_tiny)</option>
+                                        <option value="d_living_snow_reserve">Living Snow Reserve (d_living_snow_reserve)</option>
+                                        <option value="d_machine_care_home">Machine Care Home (d_machine_care_home)</option>
+                                        <option value="d_machine_minerals">Machine Minerals (d_machine_minerals)</option>
+                                        <option value="d_magnetic_storm_1_minerals">Magnetic Storm 1 Minerals (d_magnetic_storm_1_minerals)</option>
+                                        <option value="d_magnetic_storm_2_alloys">Magnetic Storm 2 Alloys (d_magnetic_storm_2_alloys)</option>
+                                        <option value="d_magnetic_storm_3_mix">Magnetic Storm 3 Mix (d_magnetic_storm_3_mix)</option>
+                                        <option value="d_meals_in_pods">Meals In Pods (d_meals_in_pods)</option>
+                                        <option value="d_mechsiah_mainframe">Mechsiah Mainframe (d_mechsiah_mainframe)</option>
+                                        <option value="d_metal_boneyard">Metal Boneyard (d_metal_boneyard)</option>
+                                        <option value="d_metallic_puddles">Metallic Puddles (d_metallic_puddles)</option>
+                                        <option value="d_microplanet_memorial">Microplanet Memorial (d_microplanet_memorial)</option>
+                                        <option value="d_migrating_forest_reserve">Migrating Forest Reserve (d_migrating_forest_reserve)</option>
+                                        <option value="d_migrating_forests">Migrating Forests (d_migrating_forests)</option>
+                                        <option value="d_mineral_seabed">Mineral Seabed (d_mineral_seabed)</option>
+                                        <option value="d_mountains_of_steel">Mountains Of Steel (d_mountains_of_steel)</option>
+                                        <option value="d_msi_air_freshener">Msi Air Freshener (d_msi_air_freshener)</option>
+                                        <option value="d_mutant_landfill">Mutant Landfill (d_mutant_landfill)</option>
+                                        <option value="d_mutation_vats">Mutation Vats (d_mutation_vats)</option>
+                                        <option value="d_myrmeku_power_farms">Myrmeku Power Farms (d_myrmeku_power_farms)</option>
+                                        <option value="d_nanites_medium">Nanites Medium (d_nanites_medium)</option>
+                                        <option value="d_nanites_small">Nanites Small (d_nanites_small)</option>
+                                        <option value="d_nanites_tiny">Nanites Tiny (d_nanites_tiny)</option>
+                                        <option value="d_nano_corpses">Nano Corpses (d_nano_corpses)</option>
+                                        <option value="d_nanosands">Nanosands (d_nanosands)</option>
+                                        <option value="d_numas_breath">Numas Breath (d_numas_breath)</option>
+                                        <option value="d_odd_factory">Odd Factory (d_odd_factory)</option>
+                                        <option value="d_organic_landfill">Organic Landfill (d_organic_landfill)</option>
+                                        <option value="d_organic_slurry">Organic Slurry (d_organic_slurry)</option>
+                                        <option value="d_particle_storm_1_society">Particle Storm 1 Society (d_particle_storm_1_society)</option>
+                                        <option value="d_particle_storm_2_unity">Particle Storm 2 Unity (d_particle_storm_2_unity)</option>
+                                        <option value="d_particle_storm_3_motes">Particle Storm 3 Motes (d_particle_storm_3_motes)</option>
+                                        <option value="d_payback_habitat_research">Payback Habitat Research (d_payback_habitat_research)</option>
+                                        <option value="d_polaris_city">Polaris City (d_polaris_city)</option>
+                                        <option value="d_portal_research_zone">Portal Research Zone (d_portal_research_zone)</option>
+                                        <option value="d_prisoner_intergration">Prisoner Intergration (d_prisoner_intergration)</option>
+                                        <option value="d_processing_pens">Processing Pens (d_processing_pens)</option>
+                                        <option value="d_progenitor">Progenitor (d_progenitor)</option>
+                                        <option value="d_progenitor_empty">Progenitor Empty (d_progenitor_empty)</option>
+                                        <option value="d_project_cornucopia">Project Cornucopia (d_project_cornucopia)</option>
+                                        <option value="d_psionic_sands">Psionic Sands (d_psionic_sands)</option>
+                                        <option value="d_pulsar_scarred">Pulsar Scarred (d_pulsar_scarred)</option>
+                                        <option value="d_radiotrophic_preserve">Radiotrophic Preserve (d_radiotrophic_preserve)</option>
+                                        <option value="d_red_desert">Red Desert (d_red_desert)</option>
+                                        <option value="d_relic_dense_ruins">Relic Dense Ruins (d_relic_dense_ruins)</option>
+                                        <option value="d_rockworm_hive">Rockworm Hive (d_rockworm_hive)</option>
+                                        <option value="d_rockworm_hive_volcanic">Rockworm Hive Volcanic (d_rockworm_hive_volcanic)</option>
+                                        <option value="d_ruin_bluelotus">Ruin Bluelotus (d_ruin_bluelotus)</option>
+                                        <option value="d_ruined_hive_dwelling">Ruined Hive Dwelling (d_ruined_hive_dwelling)</option>
+                                        <option value="d_savage_wildlands">Savage Wildlands (d_savage_wildlands)</option>
+                                        <option value="d_sentinels">Sentinels (d_sentinels)</option>
+                                        <option value="d_sentinels_metal">Sentinels Metal (d_sentinels_metal)</option>
+                                        <option value="d_sentinels_monument">Sentinels Monument (d_sentinels_monument)</option>
+                                        <option value="d_shroud_flora_deposit">Shroud Flora Deposit (d_shroud_flora_deposit)</option>
+                                        <option value="d_shroud_rift_deposit">Shroud Rift Deposit (d_shroud_rift_deposit)</option>
+                                        <option value="d_shroud_storm_1_society">Shroud Storm 1 Society (d_shroud_storm_1_society)</option>
+                                        <option value="d_shroud_storm_2_zro">Shroud Storm 2 Zro (d_shroud_storm_2_zro)</option>
+                                        <option value="d_shroud_storm_3_happy">Shroud Storm 3 Happy (d_shroud_storm_3_happy)</option>
+                                        <option value="d_sky_mountain">Sky Mountain (d_sky_mountain)</option>
+                                        <option value="d_solar_storm_1_energy">Solar Storm 1 Energy (d_solar_storm_1_energy)</option>
+                                        <option value="d_solar_storm_2_districts">Solar Storm 2 Districts (d_solar_storm_2_districts)</option>
+                                        <option value="d_solar_storm_3_output">Solar Storm 3 Output (d_solar_storm_3_output)</option>
+                                        <option value="d_space_ship_graveyard">Space Ship Graveyard (d_space_ship_graveyard)</option>
+                                        <option value="d_space_time_anomaly">Space Time Anomaly (d_space_time_anomaly)</option>
+                                        <option value="d_spore_vents">Spore Vents (d_spore_vents)</option>
+                                        <option value="d_star_mall_promenade">Star Mall Promenade (d_star_mall_promenade)</option>
+                                        <option value="d_stasis_prison">Stasis Prison (d_stasis_prison)</option>
+                                        <option value="d_stellarite_trophy">Stellarite Trophy (d_stellarite_trophy)</option>
+                                        <option value="d_the_zone">The Zone (d_the_zone)</option>
+                                        <option value="d_titanic_life_blocker">Titanic Life Blocker (d_titanic_life_blocker)</option>
+                                        <option value="d_toxic_god_blight_upon_the_land">Toxic God Blight Upon The Land (d_toxic_god_blight_upon_the_land)</option>
+                                        <option value="d_toxic_god_blight_upon_the_land_upgraded">Toxic God Blight Upon The Land Upgraded (d_toxic_god_blight_upon_the_land_upgraded)</option>
+                                        <option value="d_toxic_god_deitys_swarms">Toxic God Deitys Swarms (d_toxic_god_deitys_swarms)</option>
+                                        <option value="d_toxic_god_deitys_swarms_upgraded">Toxic God Deitys Swarms Upgraded (d_toxic_god_deitys_swarms_upgraded)</option>
+                                        <option value="d_toxic_god_envenomed_seas">Toxic God Envenomed Seas (d_toxic_god_envenomed_seas)</option>
+                                        <option value="d_toxic_god_envenomed_seas_upgraded">Toxic God Envenomed Seas Upgraded (d_toxic_god_envenomed_seas_upgraded)</option>
+                                        <option value="d_toxic_god_pestilential_wasteland">Toxic God Pestilential Wasteland (d_toxic_god_pestilential_wasteland)</option>
+                                        <option value="d_toxic_god_pestilential_wasteland_upgraded">Toxic God Pestilential Wasteland Upgraded (d_toxic_god_pestilential_wasteland_upgraded)</option>
+                                        <option value="d_toxic_god_pools_most_venemous">Toxic God Pools Most Venemous (d_toxic_god_pools_most_venemous)</option>
+                                        <option value="d_toxic_god_pools_most_venemous_upgraded">Toxic God Pools Most Venemous Upgraded (d_toxic_god_pools_most_venemous_upgraded)</option>
+                                        <option value="d_toy_factory_complex">Toy Factory Complex (d_toy_factory_complex)</option>
+                                        <option value="d_treasure_planet">Treasure Planet (d_treasure_planet)</option>
+                                        <option value="d_tree_of_life_colony">Tree Of Life Colony (d_tree_of_life_colony)</option>
+                                        <option value="d_tree_of_life_home">Tree Of Life Home (d_tree_of_life_home)</option>
+                                        <option value="d_trophy_hall">Trophy Hall (d_trophy_hall)</option>
+                                        <option value="d_turtle_corpse">Turtle Corpse (d_turtle_corpse)</option>
+                                        <option value="d_turtle_miner">Turtle Miner (d_turtle_miner)</option>
+                                        <option value="d_underground_contact_zone">Underground Contact Zone (d_underground_contact_zone)</option>
+                                        <option value="d_underground_farm">Underground Farm (d_underground_farm)</option>
+                                        <option value="d_underground_farm_blocked">Underground Farm Blocked (d_underground_farm_blocked)</option>
+                                        <option value="d_underground_generator">Underground Generator (d_underground_generator)</option>
+                                        <option value="d_underground_generator_blocked">Underground Generator Blocked (d_underground_generator_blocked)</option>
+                                        <option value="d_underground_mine">Underground Mine (d_underground_mine)</option>
+                                        <option value="d_underground_mine_blocked">Underground Mine Blocked (d_underground_mine_blocked)</option>
+                                        <option value="d_underground_vault">Underground Vault (d_underground_vault)</option>
+                                        <option value="d_underground_vault_2">Underground Vault 2 (d_underground_vault_2)</option>
+                                        <option value="d_valley_of_zanaam">Valley Of Zanaam (d_valley_of_zanaam)</option>
+                                        <option value="d_virtual_power_medium">Virtual Power Medium (d_virtual_power_medium)</option>
+                                        <option value="d_virtual_power_small">Virtual Power Small (d_virtual_power_small)</option>
+                                        <option value="d_virtual_power_tiny">Virtual Power Tiny (d_virtual_power_tiny)</option>
+                                        <option value="d_volcanic_active_planet">Volcanic Active Planet (d_volcanic_active_planet)</option>
+                                        <option value="d_volcanic_fumarole">Volcanic Fumarole (d_volcanic_fumarole)</option>
+                                        <option value="d_volcanic_sulfur_lava">Volcanic Sulfur Lava (d_volcanic_sulfur_lava)</option>
+                                        <option value="d_volcanic_tunnels">Volcanic Tunnels (d_volcanic_tunnels)</option>
+                                        <option value="d_weapon_extraction_facility">Weapon Extraction Facility (d_weapon_extraction_facility)</option>
+                                        <option value="d_wetware_computer">Wetware Computer (d_wetware_computer)</option>
+                                        <option value="d_worm_farm">Worm Farm (d_worm_farm)</option>
+                                        <option value="d_worm_mine">Worm Mine (d_worm_mine)</option>
+                                    </optgroup>
+                                    <optgroup label="🍃 Planetar: Nahrungs-Spezial">
+                                        <option value="d_andisol_soil">Andisol Soil (d_andisol_soil)</option>
+                                        <option value="d_black_soil">Black Soil (d_black_soil)</option>
+                                        <option value="d_boggy_fens">Boggy Fens (d_boggy_fens)</option>
+                                        <option value="d_bountiful_plains">Bountiful Plains (d_bountiful_plains)</option>
+                                        <option value="d_desertling_infestation">Desertling Infestation (d_desertling_infestation)</option>
+                                        <option value="d_fertile_lands">Fertile Lands (d_fertile_lands)</option>
+                                        <option value="d_forgiving_tundra">Forgiving Tundra (d_forgiving_tundra)</option>
+                                        <option value="d_fungal_caves">Fungal Caves (d_fungal_caves)</option>
+                                        <option value="d_fungal_forest">Fungal Forest (d_fungal_forest)</option>
+                                        <option value="d_great_river">Great River (d_great_river)</option>
+                                        <option value="d_green_hills">Green Hills (d_green_hills)</option>
+                                        <option value="d_lichen_fields">Lichen Fields (d_lichen_fields)</option>
+                                        <option value="d_lush_jungle">Lush Jungle (d_lush_jungle)</option>
+                                        <option value="d_marvelous_oasis">Marvelous Oasis (d_marvelous_oasis)</option>
+                                        <option value="d_natural_farmland">Natural Farmland (d_natural_farmland)</option>
+                                        <option value="d_nutritious_mudland">Nutritious Mudland (d_nutritious_mudland)</option>
+                                        <option value="d_rugged_woods">Rugged Woods (d_rugged_woods)</option>
+                                        <option value="d_teeming_reef">Teeming Reef (d_teeming_reef)</option>
+                                        <option value="d_tropical_island">Tropical Island (d_tropical_island)</option>
+                                    </optgroup>
+                                    <optgroup label="🪨 Planetar: Mineralien-Spezial">
+                                        <option value="d_mineral_fields">Mineral Fields (d_mineral_fields)</option>
+                                        <option value="d_mineral_striations">Mineral Striations (d_mineral_striations)</option>
+                                        <option value="d_ore_rich_caverns">Ore Rich Caverns (d_ore_rich_caverns)</option>
+                                        <option value="d_planet_stripmine">Planet Stripmine (d_planet_stripmine)</option>
+                                        <option value="d_prospectorium_strip_mine">Prospectorium Strip Mine (d_prospectorium_strip_mine)</option>
+                                        <option value="d_prosperous_mesa">Prosperous Mesa (d_prosperous_mesa)</option>
+                                        <option value="d_rich_mountain">Rich Mountain (d_rich_mountain)</option>
+                                        <option value="d_submerged_ore_veins">Submerged Ore Veins (d_submerged_ore_veins)</option>
+                                        <option value="d_veiny_cliffs">Veiny Cliffs (d_veiny_cliffs)</option>
+                                        <option value="d_volcanic_lava_river">Volcanic Lava River (d_volcanic_lava_river)</option>
+                                        <option value="d_volcanic_mineral_fields">Volcanic Mineral Fields (d_volcanic_mineral_fields)</option>
+                                        <option value="d_volcanic_mineral_hills">Volcanic Mineral Hills (d_volcanic_mineral_hills)</option>
+                                        <option value="d_volcanic_mineral_layers">Volcanic Mineral Layers (d_volcanic_mineral_layers)</option>
+                                        <option value="d_volcanic_ore_caverns">Volcanic Ore Caverns (d_volcanic_ore_caverns)</option>
+                                        <option value="d_volcanic_ore_veins">Volcanic Ore Veins (d_volcanic_ore_veins)</option>
+                                        <option value="d_volcanic_rich_mountain">Volcanic Rich Mountain (d_volcanic_rich_mountain)</option>
+                                        <option value="d_volcanic_weak_crust">Volcanic Weak Crust (d_volcanic_weak_crust)</option>
+                                    </optgroup>
+                                    <optgroup label="❔ Ohne Kategorie">
+                                        <option value="d_abandoned_mining_tunnels">Abandoned Mining Tunnels (d_abandoned_mining_tunnels)</option>
+                                        <option value="d_ancient_reactor_pits">Ancient Reactor Pits (d_ancient_reactor_pits)</option>
+                                        <option value="d_boswash_metropolitan_axis">Boswash Metropolitan Axis (d_boswash_metropolitan_axis)</option>
+                                        <option value="d_delhi_sprawl">Delhi Sprawl (d_delhi_sprawl)</option>
+                                        <option value="d_great_albertan_crater">Great Albertan Crater (d_great_albertan_crater)</option>
+                                        <option value="d_immense_solar_array">Immense Solar Array (d_immense_solar_array)</option>
+                                        <option value="d_mauritanian_security_zone">Mauritanian Security Zone (d_mauritanian_security_zone)</option>
+                                        <option value="d_mesopotamian_urban_corridor">Mesopotamian Urban Corridor (d_mesopotamian_urban_corridor)</option>
+                                        <option value="d_pacific_algae_tracts">Pacific Algae Tracts (d_pacific_algae_tracts)</option>
+                                        <option value="d_pearl_river_agglomerate">Pearl River Agglomerate (d_pearl_river_agglomerate)</option>
+                                        <option value="d_relic_metal_boneyard">Relic Metal Boneyard (d_relic_metal_boneyard)</option>
+                                        <option value="d_saharan_irrigation_project">Saharan Irrigation Project (d_saharan_irrigation_project)</option>
+                                        <option value="d_scandinavian_reclamation_sector">Scandinavian Reclamation Sector (d_scandinavian_reclamation_sector)</option>
+                                        <option value="d_space_junk_hazards">Space Junk Hazards (d_space_junk_hazards)</option>
+                                    </optgroup>
+                                    <optgroup label="⛏️ Orbital: Mining (benannt)">
+                                        <option value="d_arc_furnace_1">Arc Furnace 1 (d_arc_furnace_1)</option>
+                                        <option value="d_arc_furnace_2">Arc Furnace 2 (d_arc_furnace_2)</option>
+                                        <option value="d_arc_furnace_3">Arc Furnace 3 (d_arc_furnace_3)</option>
+                                        <option value="d_arc_furnace_4">Arc Furnace 4 (d_arc_furnace_4)</option>
+                                        <option value="d_artifacts_mining_1">Artifacts Mining 1 (d_artifacts_mining_1)</option>
+                                        <option value="d_artifacts_mining_2">Artifacts Mining 2 (d_artifacts_mining_2)</option>
+                                        <option value="d_artifacts_mining_3">Artifacts Mining 3 (d_artifacts_mining_3)</option>
+                                        <option value="d_consumer_goods_obsessional_directive">Consumer Goods Obsessional Directive (d_consumer_goods_obsessional_directive)</option>
+                                        <option value="d_guardian_dragon_hoard">Guardian Dragon Hoard (d_guardian_dragon_hoard)</option>
+                                        <option value="d_nanite_harvester_deposit">Nanite Harvester Deposit (d_nanite_harvester_deposit)</option>
+                                        <option value="d_nanite_harvester_deposit_large">Nanite Harvester Deposit Large (d_nanite_harvester_deposit_large)</option>
+                                        <option value="d_nanite_harvester_deposit_regular">Nanite Harvester Deposit Regular (d_nanite_harvester_deposit_regular)</option>
+                                        <option value="d_red_giant_dm">Red Giant Dm (d_red_giant_dm)</option>
+                                        <option value="d_red_giant_unstable">Red Giant Unstable (d_red_giant_unstable)</option>
+                                    </optgroup>
+                                    <optgroup label="🔆 Planetar: Energie-Spezial">
+                                        <option value="d_arid_highlands">Arid Highlands (d_arid_highlands)</option>
+                                        <option value="d_buzzing_plains">Buzzing Plains (d_buzzing_plains)</option>
+                                        <option value="d_frozen_gas_lake">Frozen Gas Lake (d_frozen_gas_lake)</option>
+                                        <option value="d_geothermal_hotspot">Geothermal Hotspot (d_geothermal_hotspot)</option>
+                                        <option value="d_geothermal_vent">Geothermal Vent (d_geothermal_vent)</option>
+                                        <option value="d_hot_springs">Hot Springs (d_hot_springs)</option>
+                                        <option value="d_rushing_waterfalls">Rushing Waterfalls (d_rushing_waterfalls)</option>
+                                        <option value="d_searing_desert">Searing Desert (d_searing_desert)</option>
+                                        <option value="d_tempestous_mountain">Tempestous Mountain (d_tempestous_mountain)</option>
+                                        <option value="d_underwater_vent">Underwater Vent (d_underwater_vent)</option>
+                                    </optgroup>
+                                    <optgroup label="✨ Planetar: Seltene Ressourcen">
+                                        <option value="d_bubbling_swamp">Bubbling Swamp (d_bubbling_swamp)</option>
+                                        <option value="d_crystal_forest">Crystal Forest (d_crystal_forest)</option>
+                                        <option value="d_crystal_reef">Crystal Reef (d_crystal_reef)</option>
+                                        <option value="d_crystalline_caverns">Crystalline Caverns (d_crystalline_caverns)</option>
+                                        <option value="d_dust_caverns">Dust Caverns (d_dust_caverns)</option>
+                                        <option value="d_dust_desert">Dust Desert (d_dust_desert)</option>
+                                        <option value="d_fuming_bog">Fuming Bog (d_fuming_bog)</option>
+                                        <option value="d_volcanic_stifling_atmosphere">Volcanic Stifling Atmosphere (d_volcanic_stifling_atmosphere)</option>
+                                    </optgroup>
+                                    <optgroup label="🔭 Orbital: Forschung (benannt)">
+                                        <option value="d_artifacts_research_1">Artifacts Research 1 (d_artifacts_research_1)</option>
+                                        <option value="d_artifacts_research_2">Artifacts Research 2 (d_artifacts_research_2)</option>
+                                        <option value="d_artifacts_research_3">Artifacts Research 3 (d_artifacts_research_3)</option>
+                                        <option value="d_crystal_rift">Crystal Rift (d_crystal_rift)</option>
+                                        <option value="d_protostar">Protostar (d_protostar)</option>
+                                        <option value="d_vast_unity_deposit">Vast Unity Deposit (d_vast_unity_deposit)</option>
+                                    </optgroup>
+                                    <optgroup label="🧩 Planetar: Sonstige">
+                                        <option value="d_volcanic_basalt_plains">Volcanic Basalt Plains (d_volcanic_basalt_plains)</option>
+                                        <option value="d_volcanic_dried_lavariver">Volcanic Dried Lavariver (d_volcanic_dried_lavariver)</option>
+                                        <option value="d_volcanic_intraplate">Volcanic Intraplate (d_volcanic_intraplate)</option>
+                                        <option value="d_volcanic_stable_plateaus">Volcanic Stable Plateaus (d_volcanic_stable_plateaus)</option>
+                                        <option value="d_volcanic_tranquil_flatlands">Volcanic Tranquil Flatlands (d_volcanic_tranquil_flatlands)</option>
+                                    </optgroup>
+                                    <optgroup label="🌍 Planetar (sonstige)">
+                                        <option value="d_exotic_mountain">Exotic Mountain (d_exotic_mountain)</option>
+                                    </optgroup>
                             </select>
                         </div>
                         
@@ -920,14 +1398,16 @@
                                 <label class="label text-xs">MODIFIER CATEGORY</label>
                                 <select id="moonModifierCategory" class="stellaris-input text-sm" onchange="window.updateMoonModifierOptions()">
                                     <option value="">-- Select Category --</option>
-                                    <option value="resources">Resource Modifiers</option>
-                                    <option value="planetary">Planetary Features</option>
-                                    <option value="deposits">Deposits</option>
-                                    <option value="anomalies">Anomalies</option>
-                                    <option value="special">Special Modifiers</option>
-                                    <option value="pd_terraforming">PD: Terraforming</option>
-                                    <option value="pd_climate">PD: Climate</option>
-                                    <option value="pd_unique">PD: Unique</option>
+                                    <option value="v_res">💰 Vanilla: Ressourcen & Ertrag</option>
+                                    <option value="v_grav">🌀 Vanilla: Schwerkraft & Bahn</option>
+                                    <option value="v_geo">🪨 Vanilla: Geologie & Wetter</option>
+                                    <option value="v_volcanic">🌋 Vanilla: Vulkanwelten</option>
+                                    <option value="v_bio">🌿 Vanilla: Flora & Fauna</option>
+                                    <option value="v_art">🏭 Vanilla: Künstlich & Megastruktur</option>
+                                    <option value="v_special">🌌 Vanilla: Spezial & Shroud</option>
+                                    <option value="terraforming">🌱 Terraforming-Kandidat</option>
+                                    <option value="event_special">⭐ Spezial & Event (verifiziert)</option>
+                                    <option value="pd">🧩 Planetary Diversity (Mod)</option>
                                 </select>
                             </div>
                             <div>
@@ -1058,7 +1538,7 @@
         </div>
 
             <!-- Star Configuration Wizard Modal -->
-            <div id="starConfigModal" class="modal">
+            <div id="starConfigModal" class="modal" style="z-index: 4000;">
                 <div class="modal-content" style="max-width: 700px;">
                     <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
                         <h2 style="margin: 0; color: var(--stellaris-accent);">🌟 Star Configuration Wizard</h2>
@@ -1113,7 +1593,6 @@
                         <label class="label">Star Class</label>
                         <select id="systemStarClass" class="stellaris-input" onchange="window.toggleCustomStarClass()">
                             <optgroup label="⭐ Main Sequence Stars">
-                                <option value="sc_o">O-Star (Hot Blue)</option>
                                 <option value="sc_b">B-Star (Blue)</option>
                                 <option value="sc_a">A-Star (White)</option>
                                 <option value="sc_f">F-Star (Yellow-White)</option>
@@ -1144,6 +1623,17 @@
                                 <option value="sc_trinary_2">Trinary 2 (Two Main Sequence + Compact)</option>
                                 <option value="sc_trinary_3">Trinary 3 (Two Main Sequence + Neutron)</option>
                                 <option value="sc_trinary_4">Trinary 4 (Main Sequence + Two Compact)</option>
+                            </optgroup>
+                            <optgroup label="☠️ Crisis Systems (Advanced)">
+                                <option value="sc_crisis_binary_1">Crisis Binary 1</option>
+                                <option value="sc_crisis_binary_2">Crisis Binary 2</option>
+                                <option value="sc_crisis_binary_5">Crisis Binary 5</option>
+                                <option value="sc_crisis_binary_7_8_9">Crisis Binary 7/8/9</option>
+                                <option value="sc_crisis_binary_10">Crisis Binary 10</option>
+                                <option value="sc_crisis_trinary_1">Crisis Trinary 1</option>
+                                <option value="sc_crisis_trinary_2">Crisis Trinary 2</option>
+                                <option value="sc_crisis_trinary_3">Crisis Trinary 3</option>
+                                <option value="sc_crisis_trinary_4">Crisis Trinary 4</option>
                             </optgroup>
                             <optgroup label="🔧 Custom">
                                 <option value="CUSTOM">🔧 Custom Star Class...</option>
@@ -1275,13 +1765,21 @@
             return [0]; // Fallback
         }
         
+function isStarClass(cls) {
+            if (!cls) return false;
+            return cls === 'star'
+                || /_star$/.test(cls)            // pc_g_star … pc_toxoid_star, pc_rift_star, pc_m_giant_star, Mod-Sterne
+                || cls === 'pc_black_hole'
+                || cls === 'pc_pulsar'
+                || cls === 'pc_protostar';       // ✅ endet nicht auf _star, muss explizit rein
+        }
+        
         let allSystems = [];
         let currentSystemIndex = null;
         let editingPlanetId = null;
         let editingPlanetIndex = null;
-        let editingMoonParentId = null;
-        let editingMoonIndex = null;
-        let editingMoonPlanetIndex = null;
+        let editingMoonParentPath = null; // Pfad zum Elternkörper, z.B. [0] oder [0,2,1]
+        let editingMoonIndex = null;      // Index im moons[] des Elternkörpers; null = neu
         let nextPlanetId = 1;
 
         // ✅ FIX: Default name now ends with _system_initializer for proper import/export compatibility
@@ -1303,110 +1801,159 @@
 
         // Modifier Definitions
         const MODIFIER_DATABASE = {
-            resources: {
-                name: 'Ressourcen-Modifier',
+            'v_res': {
+                name: '💰 Vanilla: Ressourcen & Ertrag',
                 modifiers: [
-                    { id: 'pm_planet_strong_magnetic_field', name: 'Starkes Magnetfeld', desc: '+2 Physik' },
-                    { id: 'natural_beauty', name: 'Natürliche Schönheit', desc: '+5% Annehmlichkeiten' },
-                    { id: 'pm_atmospheric_hallucinogen', name: 'Atmosphärisches Halluzinogen', desc: '+10% Glück' },
-                    { id: 'pm_titanic_life', name: 'Titanisches Leben', desc: '+4 Gesellschaft' },
-                    { id: 'pm_asteroid_belt', name: 'Asteroidengürtel', desc: '+2 Mineralien' },
-                    { id: 'pm_extensive_moon_system', name: 'Ausgedehntes Mondsystem', desc: '+2 Physik' },
-                    { id: 'molten_mineral_rivers', name: 'Geschmolzene Mineralflüsse', desc: 'Mineralien-Bonus' },
-                    { id: 'living_sea', name: 'Lebendiges Meer', desc: 'Gesellschaft +4' }
+                    { id: 'pm_asteroid_belt', name: 'Asteroid Belt', desc: 'pm_asteroid_belt' },
+                    { id: 'pm_extensive_moon_system', name: 'Extensive Moon System', desc: 'pm_extensive_moon_system' },
+                    { id: 'pm_harvested_resources_mining', name: 'Harvested Resources Mining', desc: 'pm_harvested_resources_mining' },
+                    { id: 'pm_mineral_poor', name: 'Mineral Poor', desc: 'pm_mineral_poor' },
+                    { id: 'pm_mineral_rich', name: 'Mineral Rich', desc: 'pm_mineral_rich' },
+                    { id: 'pm_rich_mircoflora', name: 'Rich Mircoflora', desc: 'pm_rich_mircoflora' },
+                    { id: 'pm_titanic_life', name: 'Titanic Life', desc: 'pm_titanic_life' },
+                    { id: 'pm_ultra_rich', name: 'Ultra Rich', desc: 'pm_ultra_rich' },
                 ]
             },
-            planetary: {
-                name: 'Planetare Features',
+            'v_grav': {
+                name: '🌀 Vanilla: Schwerkraft & Bahn',
                 modifiers: [
-                    { id: 'pm_dangerous_wildlife', name: 'Gefährliche Tierwelt', desc: 'Armeen -15%' },
-                    { id: 'lush_planet', name: 'Üppiger Planet', desc: '+25% Landwirtschaft' },
-                    { id: 'pm_bleak', name: 'Trist', desc: '-10% Annehmlichkeiten' },
-                    { id: 'pm_unstable_tectonics', name: 'Instabile Tektonik', desc: 'Häuser -20%' },
-                    { id: 'pm_chthonian_planet', name: 'Chthonischer Planet', desc: 'Ehemaliger Gasriese' },
-                    { id: 'hostile_planet', name: 'Feindlicher Planet', desc: 'Wohnraum -15%' },
-                    { id: 'death_world', name: 'Todeswelt', desc: 'Extreme Überlebensbedingungen' },
-                    { id: 'docile_fauna', name: 'Friedliche Fauna', desc: 'Keine gefährlichen Tiere' },
-                    { id: 'tidal_locked', name: 'Gezeitenverriegelt', desc: 'An Stern gebunden' }
+                    { id: 'pm_calamitous_quartile', name: 'Calamitous Quartile', desc: 'pm_calamitous_quartile' },
+                    { id: 'pm_favorable_trine', name: 'Favorable Trine', desc: 'pm_favorable_trine' },
+                    { id: 'pm_high_gravity', name: 'High Gravity', desc: 'pm_high_gravity' },
+                    { id: 'pm_low_gravity', name: 'Low Gravity', desc: 'pm_low_gravity' },
+                    { id: 'pm_mobile', name: 'Mobile', desc: 'pm_mobile' },
+                    { id: 'pm_stationary', name: 'Stationary', desc: 'pm_stationary' },
+                    { id: 'pm_tidal_locked', name: 'Tidal Locked', desc: 'pm_tidal_locked' },
                 ]
             },
-            deposits: {
-                name: 'Ablagerungen',
+            'v_geo': {
+                name: '🪨 Vanilla: Geologie & Wetter',
                 modifiers: [
-                    { id: 'd_mineral_rich', name: 'Reich an Mineralien', desc: '+3 Mineralien' },
-                    { id: 'd_mineral_poor', name: 'Arm an Mineralien', desc: '-1 Mineralien' },
-                    { id: 'd_rich_mountain', name: 'Reiche Berge', desc: '+4 Mineralien' },
-                    { id: 'd_vast_sinkhole', name: 'Riesiges Erdloch', desc: '+6 Ingenieurwesen' },
-                    { id: 'd_energy_rich', name: 'Reich an Energie', desc: '+3 Energie' },
-                    { id: 'd_rare_crystals', name: 'Seltene Kristalle', desc: 'Kristalle' }
+                    { id: 'pm_abundant_geothermal_activity', name: 'Abundant Geothermal Activity', desc: 'pm_abundant_geothermal_activity' },
+                    { id: 'pm_asteroid_impacts', name: 'Asteroid Impacts', desc: 'pm_asteroid_impacts' },
+                    { id: 'pm_carbon_world', name: 'Carbon World', desc: 'pm_carbon_world' },
+                    { id: 'pm_chthonian_planet', name: 'Chthonian Planet', desc: 'pm_chthonian_planet' },
+                    { id: 'pm_geothermic_metallurgy', name: 'Geothermic Metallurgy', desc: 'pm_geothermic_metallurgy' },
+                    { id: 'pm_hazardous_weather', name: 'Hazardous Weather', desc: 'pm_hazardous_weather' },
+                    { id: 'pm_obsidian_lakes', name: 'Obsidian Lakes', desc: 'pm_obsidian_lakes' },
+                    { id: 'pm_stratovents', name: 'Stratovents', desc: 'pm_stratovents' },
+                    { id: 'pm_strong_magnetic_field', name: 'Strong Magnetic Field', desc: 'pm_strong_magnetic_field' },
+                    { id: 'pm_unstable_tectonics', name: 'Unstable Tectonics', desc: 'pm_unstable_tectonics' },
+                    { id: 'pm_weak_magnetic_field', name: 'Weak Magnetic Field', desc: 'pm_weak_magnetic_field' },
+                    { id: 'pm_wild_storms', name: 'Wild Storms', desc: 'pm_wild_storms' },
                 ]
             },
-            anomalies: {
-                name: 'Anomalien',
+            'v_volcanic': {
+                name: '🌋 Vanilla: Vulkanwelten',
                 modifiers: [
-                    { id: 'pm_ancient_reactor_pits', name: 'Alte Reaktorgruben', desc: 'Physik/Ingenieurwesen' },
-                    { id: 'pm_asteroid_impacts', name: 'Asteroideneinschläge', desc: 'Mineralien +2' },
-                    { id: 'pm_buried_lithoids', name: 'Begrabene Lithoiden', desc: 'Mineralien +3' },
-                    { id: 'pm_crashed_starship', name: 'Abgestürztes Raumschiff', desc: 'Ingenieurwesen +3' }
+                    { id: 'pm_obsidian_lakes_volcanic', name: 'Obsidian Lakes Volcanic', desc: 'pm_obsidian_lakes_volcanic' },
+                    { id: 'pm_volcanic_asteroid_belt', name: 'Volcanic Asteroid Belt', desc: 'pm_volcanic_asteroid_belt' },
+                    { id: 'pm_volcanic_asteroid_impacts', name: 'Volcanic Asteroid Impacts', desc: 'pm_volcanic_asteroid_impacts' },
+                    { id: 'pm_volcanic_critters', name: 'Volcanic Critters', desc: 'pm_volcanic_critters' },
+                    { id: 'pm_volcanic_crystal_lake', name: 'Volcanic Crystal Lake', desc: 'pm_volcanic_crystal_lake' },
+                    { id: 'pm_volcanic_hollow_planet', name: 'Volcanic Hollow Planet', desc: 'pm_volcanic_hollow_planet' },
+                    { id: 'pm_volcanic_lavafall', name: 'Volcanic Lavafall', desc: 'pm_volcanic_lavafall' },
+                    { id: 'pm_volcanic_mineral_poor', name: 'Volcanic Mineral Poor', desc: 'pm_volcanic_mineral_poor' },
+                    { id: 'pm_volcanic_mineral_rich', name: 'Volcanic Mineral Rich', desc: 'pm_volcanic_mineral_rich' },
+                    { id: 'pm_volcanic_subterranean', name: 'Volcanic Subterranean', desc: 'pm_volcanic_subterranean' },
+                    { id: 'pm_volcanic_ultra_rich', name: 'Volcanic Ultra Rich', desc: 'pm_volcanic_ultra_rich' },
                 ]
             },
-            special: {
-                name: 'Spezielle Modifier',
+            'v_bio': {
+                name: '🌿 Vanilla: Flora & Fauna',
                 modifiers: [
-                    { id: 'pm_carbon_world', name: 'Kohlenstoffwelt', desc: 'Diamant-Planet' },
-                    { id: 'metal_planet', name: 'Metallplanet', desc: 'Reiche Metallerze' },
-                    { id: 'wooden_planet', name: 'Holzplanet', desc: 'Organische Strukturen' },
-                    { id: 'collided_planet', name: 'Kollisionsplanet', desc: 'Planetare Kollision' },
-                    { id: 'previously_terraformed_planet', name: 'Vorher Terraformiert', desc: 'Alte Terraforming-Spuren' },
-                    { id: 'pm_class_star', name: 'Klasse-Stern', desc: 'Besondere Sternklasse' },
-                    { id: 'pm_floating_landmass', name: 'Schwebende Landmasse', desc: 'Gravitationsanomalie' },
-                    { id: 'pm_irradiated', name: 'Verstrahlt', desc: 'Radioaktiv' },
-                    { id: 'superflare_planet', name: 'Supereruptions-Planet', desc: 'Intensive Sonneneruptionen' },
-                    { id: 'pulsar_frying_pan', name: 'Pulsar-Bratpfanne', desc: 'Extreme Pulsar-Strahlung' }
+                    { id: 'pm_atmospheric_aphrodisiac', name: 'Atmospheric Aphrodisiac', desc: 'pm_atmospheric_aphrodisiac' },
+                    { id: 'pm_atmospheric_hallucinogen', name: 'Atmospheric Hallucinogen', desc: 'pm_atmospheric_hallucinogen' },
+                    { id: 'pm_bleak', name: 'Bleak', desc: 'pm_bleak' },
+                    { id: 'pm_dangerous_wildlife', name: 'Dangerous Wildlife', desc: 'pm_dangerous_wildlife' },
+                    { id: 'pm_docile_fauna', name: 'Docile Fauna', desc: 'pm_docile_fauna' },
+                    { id: 'pm_hyper_ecosystem', name: 'Hyper Ecosystem', desc: 'pm_hyper_ecosystem' },
+                    { id: 'pm_hypertransmissible_virus', name: 'Hypertransmissible Virus', desc: 'pm_hypertransmissible_virus' },
+                    { id: 'pm_hypertransmissible_virus_gestalt', name: 'Hypertransmissible Virus Gestalt', desc: 'pm_hypertransmissible_virus_gestalt' },
+                    { id: 'pm_lush', name: 'Lush', desc: 'pm_lush' },
+                    { id: 'pm_natural_beauty', name: 'Natural Beauty', desc: 'pm_natural_beauty' },
+                    { id: 'pm_subterranean_wildlife', name: 'Subterranean Wildlife', desc: 'pm_subterranean_wildlife' },
                 ]
             },
-            system_special: {
-                name: '🆕 System Features (4.3)',
+            'v_art': {
+                name: '🏭 Vanilla: Künstlich & Megastruktur',
                 modifiers: [
-                    { id: 'ship_junkyard', name: 'Schiffsfriedhof', desc: 'Verlassene Schiffswracks' },
-                    { id: 'unplugged_battlefield', name: 'Entfesseltes Schlachtfeld', desc: 'Kriegsruinen' },
-                    { id: 'sanctuary_power', name: 'Heiligtums-Macht', desc: 'Schützende Aura' },
-                    { id: 'ancient_warden_boost', name: 'Uralter Wächter', desc: 'Wächter-Bonus' },
-                    { id: 'voidworm_scaling', name: 'Leerentwurm-Skalierung', desc: 'Void-Effekt' },
-                    { id: 'armistice_power', name: 'Waffenstillstands-Macht', desc: 'Friedensbonus' }
+                    { id: 'pm_ancient_automation', name: 'Ancient Automation', desc: 'pm_ancient_automation' },
+                    { id: 'pm_ancient_factory', name: 'Ancient Factory', desc: 'pm_ancient_factory' },
+                    { id: 'pm_ancient_forgeworld', name: 'Ancient Forgeworld', desc: 'pm_ancient_forgeworld' },
+                    { id: 'pm_ancient_weapon', name: 'Ancient Weapon', desc: 'pm_ancient_weapon' },
+                    { id: 'pm_arc_furnace_1', name: 'Arc Furnace 1', desc: 'pm_arc_furnace_1' },
+                    { id: 'pm_arc_furnace_2', name: 'Arc Furnace 2', desc: 'pm_arc_furnace_2' },
+                    { id: 'pm_arc_furnace_3', name: 'Arc Furnace 3', desc: 'pm_arc_furnace_3' },
+                    { id: 'pm_arc_furnace_4', name: 'Arc Furnace 4', desc: 'pm_arc_furnace_4' },
+                    { id: 'pm_dyson_swarm_1', name: 'Dyson Swarm 1', desc: 'pm_dyson_swarm_1' },
+                    { id: 'pm_dyson_swarm_2', name: 'Dyson Swarm 2', desc: 'pm_dyson_swarm_2' },
+                    { id: 'pm_dyson_swarm_3', name: 'Dyson Swarm 3', desc: 'pm_dyson_swarm_3' },
+                    { id: 'pm_obsessional_directive', name: 'Obsessional Directive', desc: 'pm_obsessional_directive' },
+                    { id: 'pm_payback_debris_field', name: 'Payback Debris Field', desc: 'pm_payback_debris_field' },
+                    { id: 'pm_robot_workers', name: 'Robot Workers', desc: 'pm_robot_workers' },
+                    { id: 'pm_unaligned_shields', name: 'Unaligned Shields', desc: 'pm_unaligned_shields' },
+                    { id: 'pm_unplugged_battlefield', name: 'Unplugged Battlefield', desc: 'pm_unplugged_battlefield' },
                 ]
             },
-            terraforming: {
-                name: '🆕 Terraforming Status',
+            'v_special': {
+                name: '🌌 Vanilla: Spezial & Shroud',
                 modifiers: [
-                    { id: 'terraforming_candidate', name: 'Terraform-Kandidat', desc: 'Für Terraforming geeignet' },
-                    { id: 'toxic_terraforming_candidate', name: 'Toxischer Terraform-Kandidat', desc: 'Giftige Atmosphäre, schwierig' }
+                    { id: 'pm_null', name: 'Null', desc: 'pm_null' },
+                    { id: 'pm_radiant_luminary', name: 'Radiant Luminary', desc: 'pm_radiant_luminary' },
+                    { id: 'pm_shroud_portal', name: 'Shroud Portal', desc: 'pm_shroud_portal' },
+                    { id: 'pm_shroud_portal_gestalt', name: 'Shroud Portal Gestalt', desc: 'pm_shroud_portal_gestalt' },
+                    { id: 'pm_shroudfall', name: 'Shroudfall', desc: 'pm_shroudfall' },
+                    { id: 'pm_waning_luminary', name: 'Waning Luminary', desc: 'pm_waning_luminary' },
                 ]
             },
-            pd_terraforming: {
-                name: 'PD: Terraforming',
+            'terraforming': {
+                name: '🌱 Terraforming-Kandidat',
                 modifiers: [
-                    { id: 'pm_pd_terraformed', name: 'Terraformiert', desc: 'PD Terraforming-Status' },
-                    { id: 'pm_pd_terraform_candidate', name: 'Terraform-Kandidat', desc: 'Für Terraforming geeignet' }
+                    { id: 'terraforming_candidate', name: 'Terraforming Candidate', desc: 'terraforming_candidate' },
+                    { id: 'toxic_terraforming_candidate', name: 'Toxic Terraforming Candidate', desc: 'toxic_terraforming_candidate' },
+                    { id: 'frozen_terraforming_candidate', name: 'Frozen Terraforming Candidate', desc: 'frozen_terraforming_candidate' },
                 ]
             },
-            pd_climate: {
-                name: 'PD: Klima',
+            'event_special': {
+                name: '⭐ Spezial & Event (verifiziert)',
                 modifiers: [
-                    { id: 'pm_pd_extreme_heat', name: 'Extreme Hitze', desc: 'PD Klimaeffekt' },
-                    { id: 'pm_pd_extreme_cold', name: 'Extreme Kälte', desc: 'PD Klimaeffekt' },
-                    { id: 'pm_pd_high_gravity', name: 'Hohe Schwerkraft', desc: 'PD Schwerkraft' },
-                    { id: 'pm_pd_low_gravity', name: 'Niedrige Schwerkraft', desc: 'PD Schwerkraft' }
+                    { id: 'holy_planet', name: 'Holy Planet', desc: 'holy_planet' },
+                    { id: 'metal_planet', name: 'Metal Planet', desc: 'metal_planet' },
+                    { id: 'wooden_planet', name: 'Wooden Planet', desc: 'wooden_planet' },
+                    { id: 'collided_planet', name: 'Collided Planet', desc: 'collided_planet' },
+                    { id: 'previously_terraformed_planet', name: 'Previously Terraformed Planet', desc: 'previously_terraformed_planet' },
+                    { id: 'superflare_planet', name: 'Superflare Planet', desc: 'superflare_planet' },
+                    { id: 'pulsar_frying_pan', name: 'Pulsar Frying Pan', desc: 'pulsar_frying_pan' },
+                    { id: 'lush_planet', name: 'Lush Planet', desc: 'lush_planet' },
+                    { id: 'living_sea', name: 'Living Sea', desc: 'living_sea' },
+                    { id: 'death_world', name: 'Death World', desc: 'death_world' },
+                    { id: 'molten_mineral_rivers', name: 'Molten Mineral Rivers', desc: 'molten_mineral_rivers' },
+                    { id: 'hostile_planet', name: 'Hostile Planet', desc: 'hostile_planet' },
+                    { id: 'ship_junkyard', name: 'Ship Junkyard', desc: 'ship_junkyard' },
+                    { id: 'sanctuary_power', name: 'Sanctuary Power', desc: 'sanctuary_power' },
+                    { id: 'ancient_warden_boost', name: 'Ancient Warden Boost', desc: 'ancient_warden_boost' },
+                    { id: 'voidworm_scaling', name: 'Voidworm Scaling', desc: 'voidworm_scaling' },
+                    { id: 'armistice_power', name: 'Armistice Power', desc: 'armistice_power' },
+                    { id: 'locust_planet_cracked', name: 'Locust Planet Cracked', desc: 'locust_planet_cracked' },
+                    { id: 'nascent_locust', name: 'Nascent Locust', desc: 'nascent_locust' },
+                    { id: 'pm_wenkwort_gardens', name: 'Wenkwort Gardens', desc: 'pm_wenkwort_gardens' },
                 ]
             },
-            pd_unique: {
-                name: 'PD: Einzigartige',
+            'pd': {
+                name: '🧩 Planetary Diversity (Mod)',
                 modifiers: [
-                    { id: 'pm_pd_crystal_caverns', name: 'Kristallkavernen', desc: 'PD Einzigartig' },
-                    { id: 'pm_pd_megaflora', name: 'Megaflora', desc: 'PD Riesenvegetation' },
-                    { id: 'pm_pd_magnetic_storms', name: 'Magnetstürme', desc: 'PD Magnetfeld' }
+                    { id: 'pm_pd_terraformed', name: 'Pd Terraformed', desc: 'pm_pd_terraformed' },
+                    { id: 'pm_pd_terraform_candidate', name: 'Pd Terraform Candidate', desc: 'pm_pd_terraform_candidate' },
+                    { id: 'pm_pd_extreme_heat', name: 'Pd Extreme Heat', desc: 'pm_pd_extreme_heat' },
+                    { id: 'pm_pd_extreme_cold', name: 'Pd Extreme Cold', desc: 'pm_pd_extreme_cold' },
+                    { id: 'pm_pd_high_gravity', name: 'Pd High Gravity', desc: 'pm_pd_high_gravity' },
+                    { id: 'pm_pd_low_gravity', name: 'Pd Low Gravity', desc: 'pm_pd_low_gravity' },
+                    { id: 'pm_pd_crystal_caverns', name: 'Pd Crystal Caverns', desc: 'pm_pd_crystal_caverns' },
+                    { id: 'pm_pd_megaflora', name: 'Pd Megaflora', desc: 'pm_pd_megaflora' },
+                    { id: 'pm_pd_magnetic_storms', name: 'Pd Magnetic Storms', desc: 'pm_pd_magnetic_storms' },
                 ]
-            }
+            },
         };
 
         // =====================================================
@@ -2422,15 +2969,11 @@
             }).join('');
         }
 
-        function getCurrentMoon() {
-            if (editingMoonPlanetIndex === null || editingMoonPlanetIndex === undefined) return null;
-            if (editingMoonIndex === null || editingMoonIndex === undefined) return null;
-            if (!allSystems[currentSystemIndex]) return null;
-            
-            const planet = allSystems[currentSystemIndex].planets[editingMoonPlanetIndex];
-            if (!planet || !planet.moons) return null;
-            
-            return planet.moons[editingMoonIndex];
+function getCurrentMoon() {
+            if (editingMoonParentPath === null || editingMoonIndex === null) return null;
+            const parent = getBodyByPath(allSystems[currentSystemIndex], editingMoonParentPath);
+            if (!parent || !parent.moons) return null;
+            return parent.moons[editingMoonIndex];
         }
 
         function updateSelectedModifiersList() {
@@ -2639,6 +3182,12 @@
             return planets.map((planet, index) => {
                 const icon = getPlanetIcon(planet.class);
                 const moonCount = planet.moons.length;
+                        const isStar = isStarClass(planet.class);
+                        // ⭐ Sterne: Planet/Gürtel hinzufügen | 🌍 Planeten: Mond hinzufügen
+                        const addActions = isStar
+                            ? `<button onclick="openAddPlanetModal()" class="stellaris-btn stellaris-btn-secondary text-xs px-2 py-1" title="Add Planet">🪐+</button>
+                                        <button onclick="openAddAsteroidBeltModal()" class="stellaris-btn stellaris-btn-secondary text-xs px-2 py-1" title="Add Belt">☄️+</button>`
+                            : `<button onclick="openAddMoonModal(${planet.id})" class="stellaris-btn stellaris-btn-secondary text-xs px-2 py-1" title="Add Moon">🌙+</button>`;
                 
                 let html = `
                     <div class="planet-item">
@@ -2658,7 +3207,7 @@
                                 ${index > 0 ? `<button onclick="movePlanetUp(${index})" class="stellaris-btn stellaris-btn-secondary text-xs px-2 py-1">↑</button>` : ''}
                                 ${index < planets.length - 1 ? `<button onclick="movePlanetDown(${index})" class="stellaris-btn stellaris-btn-secondary text-xs px-2 py-1">↓</button>` : ''}
                                 <button onclick="openEditPlanetModal(${planet.id}, ${index})" class="stellaris-btn stellaris-btn-secondary text-xs px-2 py-1">✏️</button>
-                                <button onclick="openAddMoonModal(${planet.id})" class="stellaris-btn stellaris-btn-secondary text-xs px-2 py-1">🌙+</button>
+                                ${addActions}
                                 <button onclick="deletePlanet(${index})" class="stellaris-btn stellaris-btn-danger text-xs px-2 py-1">🗑️</button>
                             </div>
                         </div>
@@ -2748,6 +3297,12 @@
                         const index = item.index;
                         const icon = getPlanetIcon(planet.class);
                         const moonCount = planet.moons.length;
+                        const isStar = isStarClass(planet.class);
+                        // ⭐ Sterne: Planet/Gürtel hinzufügen | 🌍 Planeten: Mond hinzufügen
+                        const addActions = isStar
+                            ? `<button onclick="openAddPlanetModal()" class="stellaris-btn stellaris-btn-secondary text-xs px-2 py-1" title="Add Planet">🪐+</button>
+                                        <button onclick="openAddAsteroidBeltModal()" class="stellaris-btn stellaris-btn-secondary text-xs px-2 py-1" title="Add Belt">☄️+</button>`
+                            : `<button onclick="openAddMoonModal([${index}])" class="stellaris-btn stellaris-btn-secondary text-xs px-2 py-1" title="Add Moon">🌙+</button>`;
                         
                         let html = `
                             <div class="bg-gray-800/50 p-3 rounded-lg border border-gray-700 mb-3">
@@ -2766,11 +3321,11 @@
                                         <button onclick="movePlanetUp(${index})" class="stellaris-btn stellaris-btn-secondary text-xs px-2 py-1" ${index === 0 ? 'disabled' : ''}>⬆️</button>
                                         <button onclick="movePlanetDown(${index})" class="stellaris-btn stellaris-btn-secondary text-xs px-2 py-1">⬇️</button>
                                         <button onclick="openEditPlanetModal(${planet.id}, ${index})" class="stellaris-btn text-xs px-2 py-1">✏️</button>
-                                        <button onclick="openAddMoonModal(${planet.id})" class="stellaris-btn stellaris-btn-secondary text-xs px-2 py-1">🌙+</button>
+                                        ${addActions}
                                         <button onclick="deletePlanet(${index})" class="stellaris-btn stellaris-btn-danger text-xs px-2 py-1">🗑️</button>
                                     </div>
                                 </div>
-                                ${planet.moons.length > 0 ? renderMoonsList(planet.moons, planet.id) : ''}
+                                ${planet.moons.length > 0 ? renderMoonsList(planet.moons, [index], 1) : ''}
                             </div>
                         `;
                         return html;
@@ -2796,27 +3351,32 @@
                 }).join('');
              }
 
-            function renderMoonsList(moons, parentPlanetId) {
-                if (moons.length === 0) {
-                    return '';
-                }
-                
-                return '<div class="ml-8 mt-2 space-y-2 border-l-2 border-gray-700 pl-4">' + 
+            function renderMoonsList(moons, parentPath, depth) {
+                if (!moons || moons.length === 0) return '';
+                depth = depth || 1;
+                return '<div class="ml-8 mt-2 space-y-2 border-l-2 border-gray-700 pl-4">' +
                     moons.map((moon, moonIndex) => {
+                        const path = [...parentPath, moonIndex];
                         const startingIcon = moon.isStartingPlanet ? ' <span class="text-green-400">🏠</span>' : '';
+                        const kind = moon.type === 'planet' ? '🪐 S-Typ' : '🌙';
+                        const sub = (moon.moons && moon.moons.length > 0) ? renderMoonsList(moon.moons, path, depth + 1) : '';
                         return `
-                            <div class="bg-gray-900/50 p-2 rounded border border-gray-700 flex items-center justify-between">
-                                <div class="flex items-center gap-2">
-                                    <span class="text-lg">${getPlanetIcon(moon.class)}</span>
-                                    <span class="text-sm">${moon.displayName} (${getClassDisplayName(moon.class)}, Size ${moon.size}, Orbit ${moon.orbitDistance})${startingIcon}</span>
+                            <div class="bg-gray-900/50 p-2 rounded border border-gray-700">
+                                <div class="flex items-center justify-between">
+                                    <div class="flex items-center gap-2">
+                                        <span class="text-lg">${getPlanetIcon(moon.class)}</span>
+                                        <span class="text-sm">${kind} ${moon.displayName} (${getClassDisplayName(moon.class)}, Size ${moon.size}, Orbit ${moon.orbitDistance})${startingIcon}</span>
+                                    </div>
+                                    <div class="flex gap-1">
+                                        <button onclick="editMoon(${JSON.stringify(parentPath)}, ${moonIndex})" class="stellaris-btn stellaris-btn-secondary text-xs px-2 py-1">✏️</button>
+                                        <button onclick="openAddMoonModal(${JSON.stringify(path)})" class="stellaris-btn stellaris-btn-secondary text-xs px-2 py-1" title="Add sub-moon">🌙+</button>
+                                        <button onclick="deleteMoon(${JSON.stringify(parentPath)}, ${moonIndex})" class="stellaris-btn stellaris-btn-danger text-xs px-2 py-1">🗑️</button>
+                                    </div>
                                 </div>
-                                <div class="flex gap-1">
-                                    <button onclick="editMoon(${parentPlanetId}, ${moonIndex})" class="stellaris-btn stellaris-btn-secondary text-xs px-2 py-1">✏️</button>
-                                    <button onclick="deleteMoon(${parentPlanetId}, ${moonIndex})" class="stellaris-btn stellaris-btn-danger text-xs px-2 py-1">🗑️</button>
-                                </div>
+                                ${sub}
                             </div>
                         `;
-                    }).join('') + 
+                    }).join('') +
                 '</div>';
             }
 
@@ -2890,7 +3450,7 @@
             
             // ✅ FEATURE 8: Warn if no stars exist
             const system = allSystems[currentSystemIndex];
-            if (system && !system.planets.some(p => p.class === 'star')) {
+            if (system && !system.planets.some(p => isStarClass(p.class))) {
                 if (!confirm('⚠️ WARNING: No stars in system!\n\nStars must be added before planets. Stars are the first objects in Stellaris systems.\n\nDo you want to add a planet anyway?\n\n(Recommended: Cancel and add a star first)')) {
                     return;
                 }
@@ -3147,8 +3707,40 @@
             }
         }
         
-        function openAddMoonModal(parentPlanetId) {
-            editingMoonParentId = parentPlanetId;
+        // =====================================================
+        // PATH HELPERS für verschachtelte Körper (Planet -> Mond -> Sub-Mond)
+        // path ist ein Index-Array: [planetIndex] oder [planetIndex, moonIndex, ...]
+        // path[0] indiziert system.planets, jeder weitere Index geht in .moons hinein.
+        // =====================================================
+        function getBodyByPath(system, path) {
+            if (!system || !Array.isArray(path) || path.length === 0) return null;
+            if (!Array.isArray(system.planets)) return null;
+            let body = system.planets[path[0]];
+            for (let k = 1; k < path.length; k++) {
+                if (!body || !Array.isArray(body.moons)) return null;
+                body = body.moons[path[k]];
+            }
+            return body || null;
+        }
+
+        function deleteBodyByPath(system, path) {
+            if (!system || !Array.isArray(path) || path.length === 0) return false;
+            const lastIndex = path[path.length - 1];
+            // Top-Level-Körper: direkt aus system.planets entfernen
+            if (path.length === 1) {
+                if (!Array.isArray(system.planets) || lastIndex < 0 || lastIndex >= system.planets.length) return false;
+                system.planets.splice(lastIndex, 1);
+                return true;
+            }
+            // Verschachtelt: Eltern über path ohne letzten Index holen, dann aus .moons löschen
+            const parent = getBodyByPath(system, path.slice(0, -1));
+            if (!parent || !Array.isArray(parent.moons) || lastIndex < 0 || lastIndex >= parent.moons.length) return false;
+            parent.moons.splice(lastIndex, 1);
+            return true;
+        }
+
+        function openAddMoonModal(parentPath) {
+            editingMoonParentPath = parentPath;
             editingMoonIndex = null;
             document.getElementById('moonModalTitle').textContent = '🌙 Add Moon';
             
@@ -3161,14 +3753,11 @@
             document.getElementById('moonUseAutoName').checked = false;
             toggleMoonNameField();
             
-            // NEU: Orbit Angle Standardwerte
             document.getElementById('moonOrbitAngleMode').value = 'range';
             document.getElementById('moonAngleMin').value = '90';
             document.getElementById('moonAngleMax').value = '270';
             toggleMoonOrbitAngleFields();
             
-            // Reset moon modifiers for new moon
-            editingMoonPlanetIndex = allSystems[currentSystemIndex].planets.findIndex(p => p.id === parentPlanetId);
             document.getElementById('selectedMoonModifiersList').innerHTML = '';
             document.getElementById('moonModifierStatusText').textContent = 'No modifiers selected';
             document.getElementById('moonModifierStatusText').className = 'text-gray-400 text-sm mb-3';
@@ -3180,11 +3769,11 @@
             document.getElementById('moonModal').classList.add('active');
         }
 
-        function editMoon(parentPlanetId, moonIndex) {
-            const planet = allSystems[currentSystemIndex].planets.find(p => p.id === parentPlanetId);
-            const moon = planet.moons[moonIndex];
+        function editMoon(parentPath, moonIndex) {
+            const parent = getBodyByPath(allSystems[currentSystemIndex], parentPath);
+            const moon = parent.moons[moonIndex];
             
-            editingMoonParentId = parentPlanetId;
+            editingMoonParentPath = parentPath;
             editingMoonIndex = moonIndex;
             document.getElementById('moonModalTitle').textContent = '✏️ Edit Moon';
             
@@ -3197,7 +3786,6 @@
             document.getElementById('moonUseAutoName').checked = moon.useAutoName || false;
             toggleMoonNameField();
             
-            // NEU: Orbit Angle Setup für Monde
             if (moon.orbitAngleType === 'fixed') {
                 document.getElementById('moonOrbitAngleMode').value = 'preset';
                 document.getElementById('moonAnglePreset').value = moon.orbitAngle.toString();
@@ -3208,12 +3796,7 @@
             }
             toggleMoonOrbitAngleFields();
             
-            // Load moon modifiers
-            if (!moon.modifiers) {
-                moon.modifiers = [];
-            }
-            // Store the planet index for getCurrentMoon
-            editingMoonPlanetIndex = allSystems[currentSystemIndex].planets.findIndex(p => p.id === parentPlanetId);
+            if (!moon.modifiers) moon.modifiers = [];
             updateSelectedMoonModifiersList();
             
             document.getElementById('moonModal').classList.add('active');
@@ -3224,13 +3807,9 @@
             const name = useAutoName ? '' : document.getElementById('moonName').value.trim();
             let moonClass = document.getElementById('moonClass').value;
             
-            // ✅ NEW: Handle custom moon class
             if (moonClass === 'CUSTOM') {
                 const customClass = document.getElementById('moonClassCustom').value.trim();
-                if (!customClass) {
-                    showNotification('⚠️ Please enter a custom moon class!');
-                    return;
-                }
+                if (!customClass) { showNotification('⚠️ Please enter a custom moon class!'); return; }
                 moonClass = customClass;
             }
             
@@ -3239,16 +3818,12 @@
             const isStarting = document.getElementById('moonIsStarting').checked;
             const isGuaranteedHabitable = document.getElementById('moonIsGuaranteedHabitable').checked;
             
-            // NEU: Orbit Angle basierend auf Modus
             const angleMode = document.getElementById('moonOrbitAngleMode').value;
             let orbitAngleType, orbitAngle, orbitAngleMin, orbitAngleMax;
-            
             if (angleMode === 'preset') {
-                const preset = document.getElementById('moonAnglePreset').value;
                 orbitAngleType = 'fixed';
-                orbitAngle = parseInt(preset);
-                orbitAngleMin = 90;
-                orbitAngleMax = 270;
+                orbitAngle = parseInt(document.getElementById('moonAnglePreset').value);
+                orbitAngleMin = 90; orbitAngleMax = 270;
             } else {
                 orbitAngleType = 'range';
                 orbitAngle = 0;
@@ -3256,10 +3831,13 @@
                 orbitAngleMax = parseInt(document.getElementById('moonAngleMax').value);
             }
             
-            const planet = allSystems[currentSystemIndex].planets.find(p => p.id === editingMoonParentId);
+            const parent = getBodyByPath(allSystems[currentSystemIndex], editingMoonParentPath);
+            if (!parent) { showNotification('⚠️ Parent body not found!'); return; }
+            if (!parent.moons) parent.moons = [];
+            const existing = editingMoonIndex !== null ? parent.moons[editingMoonIndex] : null;
             
             const moonData = {
-                id: editingMoonParentId * 1000 + (planet.moons.length + 1),
+                id: existing ? existing.id : nextPlanetId++,
                 type: 'moon',
                 name: name,
                 displayName: name || `🌙 Unbenannt (Orbit ${orbit})`,
@@ -3273,19 +3851,19 @@
                 orbitAngleMax: orbitAngleMax,
                 changeOrbit: 0,
                 hasRing: false,
-                isStartingPlanet: isStarting,  // GEÄNDERT: von false zu isStarting
+                isStartingPlanet: isStarting,
                 isGuaranteedHabitable: isGuaranteedHabitable,
-                modifiers: editingMoonIndex !== null ? planet.moons[editingMoonIndex].modifiers || [] : [],
-                deposits: editingPlanetIndex !== null ? (allSystems[currentSystemIndex].planets[editingPlanetIndex].deposits || []) : [], // ✅ NEW
-                moons: [],
-                flags: []
+                modifiers: existing ? (existing.modifiers || []) : [],
+                deposits: existing ? (existing.deposits || []) : [],
+                moons: existing ? (existing.moons || []) : [],   // ✅ Sub-Monde NICHT verlieren
+                flags: existing ? (existing.flags || []) : []
             };
             
             if (editingMoonIndex !== null) {
-                planet.moons[editingMoonIndex] = moonData;
+                parent.moons[editingMoonIndex] = moonData;
                 showNotification('✅ Moon updated!');
             } else {
-                planet.moons.push(moonData);
+                parent.moons.push(moonData);
                 showNotification('✅ Moon added!');
             }
             
@@ -3293,11 +3871,10 @@
             loadSystemIntoEditor(allSystems[currentSystemIndex]);
         }
 
-        function deleteMoon(parentPlanetId, moonIndex) {
-            if (confirm('Really delete moon?')) {
-                const planet = allSystems[currentSystemIndex].planets.find(p => p.id === parentPlanetId);
-                planet.moons.splice(moonIndex, 1);
-                showNotification('🗑️ Moon deleted!');
+        function deleteMoon(parentPath, moonIndex) {
+            if (confirm('Really delete this body (and its sub-moons)?')) {
+                deleteBodyByPath(allSystems[currentSystemIndex], [...parentPath, moonIndex]);
+                showNotification('🗑️ Deleted!');
                 loadSystemIntoEditor(allSystems[currentSystemIndex]);
             }
         }
@@ -3652,6 +4229,10 @@
             // Render star configuration list
             renderStarConfigList();
             
+            // ✅ FIX: Properties-Modal immer schließen, damit nie zwei Modals gestapelt sind
+            // (verhindert den "über das Fenster gelegt"-Overlay beim manuellen Button)
+            document.getElementById('systemPropertiesModal').classList.remove('active');
+            
             // Show modal
             document.getElementById('starConfigModal').classList.add('active');
         }
@@ -3750,8 +4331,8 @@
             
             const system = allSystems[currentSystemIndex];
             
-            // Clear existing stars
-            system.planets = system.planets.filter(p => !p.class.includes('star') && !p.class.includes('black_hole'));
+            // Clear existing stars (single canonical star check)
+            system.planets = system.planets.filter(p => !isStarClass(p.class));
             
             // Add configured stars
             wizardStarConfig.stars.forEach(star => {
@@ -3878,6 +4459,127 @@
         window.deleteAsteroidBelt = deleteAsteroidBelt;
 
         // =====================================================
+        // MOD FOLDER GENERATOR (FS Access API + ZIP-Fallback)
+        // =====================================================
+
+        // --- Minimaler ZIP-Writer (STORE/unkomprimiert, kein externer Dependency) ---
+        const CRC32_TABLE = (() => {
+            const t = new Uint32Array(256);
+            for (let n = 0; n < 256; n++) {
+                let c = n;
+                for (let k = 0; k < 8; k++) c = (c & 1) ? (0xEDB88320 ^ (c >>> 1)) : (c >>> 1);
+                t[n] = c >>> 0;
+            }
+            return t;
+        })();
+        function crc32(bytes) {
+            let crc = -1;
+            for (let i = 0; i < bytes.length; i++) crc = (crc >>> 8) ^ CRC32_TABLE[(crc ^ bytes[i]) & 0xFF];
+            return (crc ^ -1) >>> 0;
+        }
+        function _concat(arr) {
+            let len = 0; for (const a of arr) len += a.length;
+            const out = new Uint8Array(len); let p = 0;
+            for (const a of arr) { out.set(a, p); p += a.length; }
+            return out;
+        }
+        function buildZip(files) { // files: [{name, bytes:Uint8Array}]
+            const enc = new TextEncoder();
+            const u16 = n => new Uint8Array([n & 0xFF, (n >>> 8) & 0xFF]);
+            const u32 = n => new Uint8Array([n & 0xFF, (n >>> 8) & 0xFF, (n >>> 16) & 0xFF, (n >>> 24) & 0xFF]);
+            const chunks = [], central = []; let offset = 0;
+            for (const f of files) {
+                const nameB = enc.encode(f.name), crc = crc32(f.bytes), size = f.bytes.length;
+                const lfh = _concat([u32(0x04034b50), u16(20), u16(0x0800), u16(0), u16(0), u16(0),
+                    u32(crc), u32(size), u32(size), u16(nameB.length), u16(0), nameB]);
+                chunks.push(lfh, f.bytes);
+                central.push(_concat([u32(0x02014b50), u16(20), u16(20), u16(0x0800), u16(0), u16(0), u16(0),
+                    u32(crc), u32(size), u32(size), u16(nameB.length), u16(0), u16(0), u16(0), u16(0),
+                    u32(0), u32(offset), nameB]));
+                offset += lfh.length + size;
+            }
+            const cen = _concat(central);
+            const eocd = _concat([u32(0x06054b50), u16(0), u16(0), u16(files.length), u16(files.length),
+                u32(cen.length), u32(offset), u16(0)]);
+            chunks.push(cen, eocd);
+            return new Blob(chunks, { type: 'application/zip' });
+        }
+
+        // --- FS-API-Helfer ---
+        async function _mkPath(dir, parts) { let h = dir; for (const p of parts) h = await h.getDirectoryHandle(p, { create: true }); return h; }
+        async function _writeFile(dir, name, bytes) { const fh = await dir.getFileHandle(name, { create: true }); const w = await fh.createWritable(); await w.write(bytes); await w.close(); }
+
+        async function generateModFolder() {
+            if (allSystems.length === 0) { showNotification('⚠️ No systems to export!', 'warning'); return; }
+
+            const mainSystem = allSystems.find(s => s.isMain) || allSystems[0];
+            const baseName = mainSystem.name.replace(/_system_initializer$/, '');
+            const defaultName = baseName.replace(/_/g, ' ').replace(/\b\w/g, c => c.toUpperCase()) + ' Systems';
+            const modName = (prompt('Mod name:', defaultName) || '').trim();
+            if (!modName) { showNotification('Mod generation cancelled.', 'warning'); return; }
+            const folderName = modName.toLowerCase().replace(/[^a-z0-9]+/g, '_').replace(/^_+|_+$/g, '');
+            const supportedVersion = '4.4.*';
+
+            const initializerCode = allSystems.map(sys => generateSystemCode(sys)).join('\n\n');
+            const skipLoc = document.getElementById('skipLocalizationCheckbox')?.checked;
+            const ymlContent = skipLoc ? null : generateLocalizationYML(allSystems);
+
+            const descriptor = `name="${modName}"\nversion="1.0"\nsupported_version="${supportedVersion}"\ntags={\n\t"Galaxy Generation"\n}\n`;
+            const modPointer = `name="${modName}"\npath="mod/${folderName}"\nsupported_version="${supportedVersion}"\ntags={\n\t"Galaxy Generation"\n}\n`;
+
+            const enc = new TextEncoder();
+            const BOM = '\ufeff';
+
+            // 1) Versuch: File System Access API (Chrome/Edge)
+            if (window.showDirectoryPicker) {
+                try {
+                    const dir = await window.showDirectoryPicker({ mode: 'readwrite' });
+                    await _writeFile(dir, `${folderName}.mod`, enc.encode(modPointer));
+                    const modDir = await dir.getDirectoryHandle(folderName, { create: true });
+                    await _writeFile(modDir, 'descriptor.mod', enc.encode(descriptor));
+                    const initDir = await _mkPath(modDir, ['common', 'solar_system_initializers']);
+                    await _writeFile(initDir, `${baseName}_system_initializer.txt`, enc.encode(initializerCode));
+                    if (ymlContent) {
+                        const locDir = await _mkPath(modDir, ['localisation', 'english']);
+                        await _writeFile(locDir, 'initializers_names_l_english.yml', enc.encode(BOM + ymlContent));
+                    }
+                    showNotification(`📦 Mod "${modName}" in den gewählten Ordner geschrieben!`, 'success');
+                    return;
+                } catch (err) {
+                    if (err.name === 'AbortError') { showNotification('Folder selection cancelled.', 'warning'); return; }
+                    console.warn('FS API failed, fallback to ZIP:', err);
+                }
+            }
+
+            // 2) Fallback: ZIP-Download (jeder Browser)
+            const files = [
+                { name: `${folderName}/descriptor.mod`, bytes: enc.encode(descriptor) },
+                { name: `${folderName}.mod`, bytes: enc.encode(modPointer) },
+                { name: `${folderName}/common/solar_system_initializers/${baseName}_system_initializer.txt`, bytes: enc.encode(initializerCode) }
+            ];
+            if (ymlContent) files.push({ name: `${folderName}/localisation/english/initializers_names_l_english.yml`, bytes: enc.encode(BOM + ymlContent) });
+            const url = URL.createObjectURL(buildZip(files));
+            const a = document.createElement('a'); a.href = url; a.download = `${folderName}.zip`; a.click();
+            URL.revokeObjectURL(url);
+            showNotification(`📦 Mod "${modName}" als ZIP heruntergeladen!`, 'success');
+        }
+
+        // OS-spezifischer Pfad-Hinweis für den mod-Ordner
+        function expectedStellarisModDir() {
+            const ua = navigator.userAgent || '', p = navigator.platform || '';
+            if (/Win/i.test(ua) || /Win/i.test(p))            return 'Dokumente\\Paradox Interactive\\Stellaris\\mod';
+            if (/Mac/i.test(ua) || /Mac/i.test(p))            return '~/Documents/Paradox Interactive/Stellaris/mod';
+            if (/Linux|X11|CrOS/i.test(ua) || /Linux/i.test(p)) return '~/.local/share/Paradox Interactive/Stellaris/mod';
+            return 'Paradox Interactive/Stellaris/mod';
+        }
+        (() => {
+            const hint = document.getElementById('modPathHint');
+            if (hint) hint.textContent = '📂 Tipp: dein Stellaris mod-Ordner liegt meist unter ' + expectedStellarisModDir();
+        })();
+
+        document.getElementById('generateModBtn')?.addEventListener('click', generateModFolder);
+
+        // =====================================================
         // CODE GENERATION
         // =====================================================
         
@@ -3893,12 +4595,9 @@
                 code += `\t}\n`;
             });
             
-            // ✅ FEATURE 8: Export stars (planets with class = star or pc_*_star) FIRST
-            const starClasses = ['star', 'pc_g_star', 'pc_k_star', 'pc_m_star', 'pc_f_star', 
-                                 'pc_a_star', 'pc_b_star', 'pc_o_star', 'pc_black_hole', 
-                                 'pc_neutron_star', 'pc_pulsar'];
-            const starPlanets = system.planets.filter(p => starClasses.includes(p.class));
-            const regularPlanets = system.planets.filter(p => !starClasses.includes(p.class));
+            // ✅ FEATURE 8: Export stars FIRST (single canonical star check)
+            const starPlanets = system.planets.filter(p => isStarClass(p.class));
+            const regularPlanets = system.planets.filter(p => !isStarClass(p.class));
             
             // If no star planets exist, generate default primary star
             if (starPlanets.length === 0) {
@@ -4279,16 +4978,9 @@
             // Draw background grid
             drawGrid();
             
-            // ✅ STERN-KLASSEN: Diese Planet-Classes sind eigentlich Sterne
-            const starClasses = [
-                'pc_g_star', 'pc_k_star', 'pc_m_star', 'pc_f_star', 
-                'pc_a_star', 'pc_b_star', 'pc_black_hole', 
-                'pc_neutron_star', 'pc_pulsar'
-            ];
-            
-            // ✅ Filter: Trenne Sterne von echten Planeten
-            const actualPlanets = system.planets.filter(p => !starClasses.includes(p.class));
-            const starPlanets = system.planets.filter(p => starClasses.includes(p.class));
+            // ✅ Filter: Trenne Sterne von echten Planeten (single canonical star check)
+            const actualPlanets = system.planets.filter(p => !isStarClass(p.class));
+            const starPlanets = system.planets.filter(p => isStarClass(p.class));
             
             // Draw main system star (from system.class) - ONLY if no stars in planets list
             if (starPlanets.length === 0) {
