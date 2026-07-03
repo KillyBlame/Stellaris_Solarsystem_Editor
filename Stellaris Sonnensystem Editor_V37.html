@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Stellaris Solar System Editor V36 - Full Editor</title>
+    <title>Stellaris Solar System Editor V37 - Full Editor</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;600;700;800;900&family=Exo+2:wght@300;400;500;600&display=swap');
@@ -125,7 +125,7 @@
                 0 0 0 3px rgba(0, 212, 255, 0.2);
         }
 
-        /* Z-Index Fix für Dropdowns */
+        /* Z-index fix for dropdowns */
         .stellaris-input select {
             position: relative;
             z-index: 100;
@@ -270,7 +270,7 @@
             right: 0;
             bottom: 0;
             background: rgba(0, 0, 0, 0.8);
-            z-index: 3000;  /* GEÄNDERT: von 2000 auf 3000 */
+            z-index: 3000;  /* CHANGED: from 2000 to 3000 */
             justify-content: center;
             align-items: center;
             overflow-y: auto;
@@ -380,7 +380,7 @@
 </head>
 <body>
     <div class="container mx-auto py-8 px-4">
-        <h1 class="stellaris-header">🌌 Stellaris Solar System Editor V36</h1>
+        <h1 class="stellaris-header">🌌 Stellaris Solar System Editor V37</h1>
         <div class="text-center mb-6">
             <span class="text-yellow-400 font-semibold">⭐ Full Editor - Edit systems, planets, and neighbors</span>
         </div>
@@ -473,12 +473,12 @@
                 <div class="form-grid">
                     <div class="form-group">
                         <label class="label">Planet-Name</label>
-                        <input type="text" id="planetName" class="stellaris-input" placeholder="z.B. Earth">
+                        <input type="text" id="planetName" class="stellaris-input" placeholder="e.g. Earth">
                     </div>
                     <div class="form-group flex items-center">
                         <label class="flex items-center cursor-pointer">
                             <input type="checkbox" id="planetUseAutoName" class="mr-2" onchange="togglePlanetNameField()">
-                            <span class="text-gray-300">🤖 Automatische Benennung durch Stellaris</span>
+                            <span class="text-gray-300">🤖 Automate naming through Stellaris</span>
                         </label>
                     </div>
                     <div class="form-group">
@@ -557,7 +557,7 @@
                                 <option value="pc_ai">AI World</option>
                                 <option value="pc_cybrex">Cybrex World</option>
                             </optgroup>
-                            <optgroup label="Asteroiden">
+                            <optgroup label="Asteroids">
                                 <option value="pc_asteroid">Asteroid</option>
                                 <option value="pc_ice_asteroid">Ice Asteroid</option>
                                 <option value="pc_rare_crystal_asteroid">Rare Crystal Asteroid</option>
@@ -572,7 +572,7 @@
                                 <option value="random_non_colonizable">🪨 Random Non-Colonizable</option>
                                 <option value="random_asteroid">☄️ Random Asteroid</option>
                             </optgroup>
-                            <optgroup label="Custome">
+                            <optgroup label="Custom">
                                 <option value="CUSTOM">🔧 Custom Class...</option>
                                 </select>
                                 <!-- ✅ NEW: Custom class input -->
@@ -587,6 +587,19 @@
                     <div class="form-group">
                         <label class="label">Orbit Distance</label>
                         <input type="number" id="planetOrbit" class="stellaris-input" value="25" min="0" max="200">
+                    </div>
+                    <div class="form-group" style="grid-column: span 2;">
+                        <label class="label">Anzahl / count – Doppelplanet (max 3)</label>
+                        <div class="grid grid-cols-2 gap-2">
+                            <div>
+                                <label class="label">Min</label>
+                                <input type="number" id="planetCountMin" class="stellaris-input" value="1" min="1" max="3">
+                            </div>
+                            <div>
+                                <label class="label">Max</label>
+                                <input type="number" id="planetCountMax" class="stellaris-input" value="1" min="1" max="3">
+                            </div>
+                        </div>
                     </div>
                     <div class="form-group" style="grid-column: span 2;">
                         <label class="label">Orbit Angle Mode</label>
@@ -647,7 +660,7 @@
                     <div class="form-group flex items-center">
                         <label class="flex items-center cursor-pointer">
                             <input type="checkbox" id="planetIsGuaranteedHabitable" class="mr-2">
-                            <span class="text-gray-300">🌿 Garantierter bewohnbarer Planet</span>
+                            <span class="text-gray-300">🌿 Guaranteed Habitable Planet</span>
                         </label>
                     </div>
                     <div class="form-group flex items-center">
@@ -683,20 +696,21 @@
                                 <label class="label text-xs">MODIFIER CATEGORY</label>
                                 <select id="modifierCategory" class="stellaris-input text-sm" onchange="window.updateModifierOptions()">
                                     <option value="">-- Select Category --</option>
-                                    <option value="v_res">💰 Vanilla: Ressourcen & Ertrag</option>
-                                    <option value="v_grav">🌀 Vanilla: Schwerkraft & Bahn</option>
-                                    <option value="v_geo">🪨 Vanilla: Geologie & Wetter</option>
-                                    <option value="v_volcanic">🌋 Vanilla: Vulkanwelten</option>
+                                    <option value="v_res">💰 Vanilla: Resources & Yield</option>
+                                    <option value="v_grav">🌀 Vanilla: Gravity & Orbit</option>
+                                    <option value="v_geo">🪨 Vanilla: Geology & Weather</option>
+                                    <option value="v_volcanic">🌋 Vanilla: Volcanic Worlds</option>
                                     <option value="v_bio">🌿 Vanilla: Flora & Fauna</option>
-                                    <option value="v_art">🏭 Vanilla: Künstlich & Megastruktur</option>
-                                    <option value="v_special">🌌 Vanilla: Spezial & Shroud</option>
-                                    <option value="terraforming">🌱 Terraforming-Kandidat</option>
-                                    <option value="event_special">⭐ Spezial & Event (verifiziert)</option>
+                                    <option value="v_art">🏭 Vanilla: Artificial & Megastructure</option>
+                                    <option value="v_special">🌌 Vanilla: Special & Shroud</option>
+                                    <option value="terraforming">🌱 Terraforming Candidate</option>
+                                    <option value="event_special">⭐ Special & Event (verified)</option>
                                     <option value="pd">🧩 Planetary Diversity (Mod)</option>
                                 </select>
                             </div>
                             <div>
                                 <label class="label text-xs">MODIFIER</label>
+                                <input type="text" id="modifierSelectionFilter" class="stellaris-input text-sm mb-1" placeholder="🔍 Filter modifiers...">
                                 <select id="modifierSelection" class="stellaris-input text-sm" disabled>
                                     <option value="">-- Select Modifier --</option>
                                 </select>
@@ -729,160 +743,161 @@
                         
                         <div class="mb-2">
                             <label class="label text-xs">SELECT DEPOSIT</label>
+                            <input type="text" id="depositSelectionFilter" class="stellaris-input text-sm mb-1" placeholder="🔍 Filter deposits...">
                             <select id="depositSelection" class="stellaris-input text-sm">
                                 <option value="">-- Select Deposit --</option>
-                                    <optgroup label="⛏️ Mineralien (Mining)">
-                                        <option value="d_minerals_1">Minerals 1 (d_minerals_1)</option>
-                                        <option value="d_minerals_2">Minerals 2 (d_minerals_2)</option>
-                                        <option value="d_minerals_3">Minerals 3 (d_minerals_3)</option>
-                                        <option value="d_minerals_4">Minerals 4 (d_minerals_4)</option>
-                                        <option value="d_minerals_5">Minerals 5 (d_minerals_5)</option>
-                                        <option value="d_minerals_6">Minerals 6 (d_minerals_6)</option>
-                                        <option value="d_minerals_7">Minerals 7 (d_minerals_7)</option>
-                                        <option value="d_minerals_8">Minerals 8 (d_minerals_8)</option>
-                                        <option value="d_minerals_9">Minerals 9 (d_minerals_9)</option>
-                                        <option value="d_minerals_10">Minerals 10 (d_minerals_10)</option>
+                                    <optgroup label="⛏️ Minerals (Mining)">
+                                        <option value="d_minerals_1">Minerals 1 (d_minerals_1) → +1 Minerals</option>
+                                        <option value="d_minerals_2">Minerals 2 (d_minerals_2) → +2 Minerals</option>
+                                        <option value="d_minerals_3">Minerals 3 (d_minerals_3) → +3 Minerals</option>
+                                        <option value="d_minerals_4">Minerals 4 (d_minerals_4) → +4 Minerals</option>
+                                        <option value="d_minerals_5">Minerals 5 (d_minerals_5) → +5 Minerals</option>
+                                        <option value="d_minerals_6">Minerals 6 (d_minerals_6) → +6 Minerals</option>
+                                        <option value="d_minerals_7">Minerals 7 (d_minerals_7) → +7 Minerals</option>
+                                        <option value="d_minerals_8">Minerals 8 (d_minerals_8) → +8 Minerals</option>
+                                        <option value="d_minerals_9">Minerals 9 (d_minerals_9) → +9 Minerals</option>
+                                        <option value="d_minerals_10">Minerals 10 (d_minerals_10) → +10 Minerals</option>
                                     </optgroup>
-                                    <optgroup label="⚡ Energie (Mining)">
-                                        <option value="d_energy_1">Energy 1 (d_energy_1)</option>
-                                        <option value="d_energy_2">Energy 2 (d_energy_2)</option>
-                                        <option value="d_energy_3">Energy 3 (d_energy_3)</option>
-                                        <option value="d_energy_4">Energy 4 (d_energy_4)</option>
-                                        <option value="d_energy_5">Energy 5 (d_energy_5)</option>
-                                        <option value="d_energy_6">Energy 6 (d_energy_6)</option>
-                                        <option value="d_energy_7">Energy 7 (d_energy_7)</option>
-                                        <option value="d_energy_8">Energy 8 (d_energy_8)</option>
-                                        <option value="d_energy_9">Energy 9 (d_energy_9)</option>
-                                        <option value="d_energy_10">Energy 10 (d_energy_10)</option>
+                                    <optgroup label="⚡ Energy (Mining)">
+                                        <option value="d_energy_1">Energy 1 (d_energy_1) → +1 Energy</option>
+                                        <option value="d_energy_2">Energy 2 (d_energy_2) → +2 Energy</option>
+                                        <option value="d_energy_3">Energy 3 (d_energy_3) → +3 Energy</option>
+                                        <option value="d_energy_4">Energy 4 (d_energy_4) → +4 Energy</option>
+                                        <option value="d_energy_5">Energy 5 (d_energy_5) → +5 Energy</option>
+                                        <option value="d_energy_6">Energy 6 (d_energy_6) → +6 Energy</option>
+                                        <option value="d_energy_7">Energy 7 (d_energy_7) → +7 Energy</option>
+                                        <option value="d_energy_8">Energy 8 (d_energy_8) → +8 Energy</option>
+                                        <option value="d_energy_9">Energy 9 (d_energy_9) → +9 Energy</option>
+                                        <option value="d_energy_10">Energy 10 (d_energy_10) → +10 Energy</option>
                                     </optgroup>
-                                    <optgroup label="🌾 Nahrung (Mining)">
-                                        <option value="d_food_3">Food 3 (d_food_3)</option>
-                                        <option value="d_food_4">Food 4 (d_food_4)</option>
-                                        <option value="d_food_5">Food 5 (d_food_5)</option>
-                                        <option value="d_food_6">Food 6 (d_food_6)</option>
-                                        <option value="d_food_7">Food 7 (d_food_7)</option>
-                                        <option value="d_food_10">Food 10 (d_food_10)</option>
+                                    <optgroup label="🌾 Food (Mining)">
+                                        <option value="d_food_3">Food 3 (d_food_3) → +3 Food</option>
+                                        <option value="d_food_4">Food 4 (d_food_4) → +4 Food</option>
+                                        <option value="d_food_5">Food 5 (d_food_5) → +5 Food</option>
+                                        <option value="d_food_6">Food 6 (d_food_6) → +6 Food</option>
+                                        <option value="d_food_7">Food 7 (d_food_7) → +7 Food</option>
+                                        <option value="d_food_10">Food 10 (d_food_10) → +10 Food</option>
                                     </optgroup>
-                                    <optgroup label="🔩 Legierungen (Mining)">
-                                        <option value="d_alloys_1">Alloys 1 (d_alloys_1)</option>
-                                        <option value="d_alloys_2">Alloys 2 (d_alloys_2)</option>
-                                        <option value="d_alloys_3">Alloys 3 (d_alloys_3)</option>
-                                        <option value="d_alloys_4">Alloys 4 (d_alloys_4)</option>
-                                        <option value="d_alloys_5">Alloys 5 (d_alloys_5)</option>
-                                        <option value="d_alloys_10">Alloys 10 (d_alloys_10)</option>
-                                        <option value="d_alloys_25">Alloys 25 (d_alloys_25)</option>
+                                    <optgroup label="🔩 Alloys (Mining)">
+                                        <option value="d_alloys_1">Alloys 1 (d_alloys_1) → +1 Alloys</option>
+                                        <option value="d_alloys_2">Alloys 2 (d_alloys_2) → +2 Alloys</option>
+                                        <option value="d_alloys_3">Alloys 3 (d_alloys_3) → +3 Alloys</option>
+                                        <option value="d_alloys_4">Alloys 4 (d_alloys_4) → +4 Alloys</option>
+                                        <option value="d_alloys_5">Alloys 5 (d_alloys_5) → +5 Alloys</option>
+                                        <option value="d_alloys_10">Alloys 10 (d_alloys_10) → +10 Alloys</option>
+                                        <option value="d_alloys_25">Alloys 25 (d_alloys_25) → +25 Alloys</option>
                                     </optgroup>
-                                    <optgroup label="💰 Handelswert (Mining)">
-                                        <option value="d_trade_value_1">Trade Value 1 (d_trade_value_1)</option>
-                                        <option value="d_trade_value_2">Trade Value 2 (d_trade_value_2)</option>
-                                        <option value="d_trade_value_3">Trade Value 3 (d_trade_value_3)</option>
-                                        <option value="d_trade_value_4">Trade Value 4 (d_trade_value_4)</option>
-                                        <option value="d_trade_value_5">Trade Value 5 (d_trade_value_5)</option>
-                                        <option value="d_trade_value_6">Trade Value 6 (d_trade_value_6)</option>
-                                        <option value="d_trade_value_7">Trade Value 7 (d_trade_value_7)</option>
-                                        <option value="d_trade_value_8">Trade Value 8 (d_trade_value_8)</option>
-                                        <option value="d_trade_value_9">Trade Value 9 (d_trade_value_9)</option>
-                                        <option value="d_trade_value_10">Trade Value 10 (d_trade_value_10)</option>
+                                    <optgroup label="💰 Trade Value (Mining)">
+                                        <option value="d_trade_value_1">Trade Value 1 (d_trade_value_1) → +1 Trade</option>
+                                        <option value="d_trade_value_2">Trade Value 2 (d_trade_value_2) → +2 Trade</option>
+                                        <option value="d_trade_value_3">Trade Value 3 (d_trade_value_3) → +3 Trade</option>
+                                        <option value="d_trade_value_4">Trade Value 4 (d_trade_value_4) → +4 Trade</option>
+                                        <option value="d_trade_value_5">Trade Value 5 (d_trade_value_5) → +5 Trade</option>
+                                        <option value="d_trade_value_6">Trade Value 6 (d_trade_value_6) → +6 Trade</option>
+                                        <option value="d_trade_value_7">Trade Value 7 (d_trade_value_7) → +7 Trade</option>
+                                        <option value="d_trade_value_8">Trade Value 8 (d_trade_value_8) → +8 Trade</option>
+                                        <option value="d_trade_value_9">Trade Value 9 (d_trade_value_9) → +9 Trade</option>
+                                        <option value="d_trade_value_10">Trade Value 10 (d_trade_value_10) → +10 Trade</option>
                                     </optgroup>
-                                    <optgroup label="🔬 Physik-Forschung">
-                                        <option value="d_physics_1">Physics 1 (d_physics_1)</option>
-                                        <option value="d_physics_2">Physics 2 (d_physics_2)</option>
-                                        <option value="d_physics_3">Physics 3 (d_physics_3)</option>
-                                        <option value="d_physics_4">Physics 4 (d_physics_4)</option>
-                                        <option value="d_physics_5">Physics 5 (d_physics_5)</option>
-                                        <option value="d_physics_6">Physics 6 (d_physics_6)</option>
-                                        <option value="d_physics_7">Physics 7 (d_physics_7)</option>
-                                        <option value="d_physics_8">Physics 8 (d_physics_8)</option>
-                                        <option value="d_physics_9">Physics 9 (d_physics_9)</option>
-                                        <option value="d_physics_10">Physics 10 (d_physics_10)</option>
-                                        <option value="d_physics_25">Physics 25 (d_physics_25)</option>
+                                    <optgroup label="🔬 Physics Research">
+                                        <option value="d_physics_1">Physics 1 (d_physics_1) → +1 Physics Research</option>
+                                        <option value="d_physics_2">Physics 2 (d_physics_2) → +2 Physics Research</option>
+                                        <option value="d_physics_3">Physics 3 (d_physics_3) → +3 Physics Research</option>
+                                        <option value="d_physics_4">Physics 4 (d_physics_4) → +4 Physics Research</option>
+                                        <option value="d_physics_5">Physics 5 (d_physics_5) → +5 Physics Research</option>
+                                        <option value="d_physics_6">Physics 6 (d_physics_6) → +6 Physics Research</option>
+                                        <option value="d_physics_7">Physics 7 (d_physics_7) → +7 Physics Research</option>
+                                        <option value="d_physics_8">Physics 8 (d_physics_8) → +8 Physics Research</option>
+                                        <option value="d_physics_9">Physics 9 (d_physics_9) → +9 Physics Research</option>
+                                        <option value="d_physics_10">Physics 10 (d_physics_10) → +10 Physics Research</option>
+                                        <option value="d_physics_25">Physics 25 (d_physics_25) → +25 Physics Research</option>
                                     </optgroup>
-                                    <optgroup label="🧬 Gesellschafts-Forschung">
-                                        <option value="d_society_1">Society 1 (d_society_1)</option>
-                                        <option value="d_society_2">Society 2 (d_society_2)</option>
-                                        <option value="d_society_3">Society 3 (d_society_3)</option>
-                                        <option value="d_society_4">Society 4 (d_society_4)</option>
-                                        <option value="d_society_5">Society 5 (d_society_5)</option>
-                                        <option value="d_society_6">Society 6 (d_society_6)</option>
-                                        <option value="d_society_7">Society 7 (d_society_7)</option>
-                                        <option value="d_society_8">Society 8 (d_society_8)</option>
-                                        <option value="d_society_9">Society 9 (d_society_9)</option>
-                                        <option value="d_society_10">Society 10 (d_society_10)</option>
-                                        <option value="d_society_15">Society 15 (d_society_15)</option>
-                                        <option value="d_society_25">Society 25 (d_society_25)</option>
+                                    <optgroup label="🧬 Society Research">
+                                        <option value="d_society_1">Society 1 (d_society_1) → +1 Society Research</option>
+                                        <option value="d_society_2">Society 2 (d_society_2) → +2 Society Research</option>
+                                        <option value="d_society_3">Society 3 (d_society_3) → +3 Society Research</option>
+                                        <option value="d_society_4">Society 4 (d_society_4) → +4 Society Research</option>
+                                        <option value="d_society_5">Society 5 (d_society_5) → +5 Society Research</option>
+                                        <option value="d_society_6">Society 6 (d_society_6) → +6 Society Research</option>
+                                        <option value="d_society_7">Society 7 (d_society_7) → +7 Society Research</option>
+                                        <option value="d_society_8">Society 8 (d_society_8) → +8 Society Research</option>
+                                        <option value="d_society_9">Society 9 (d_society_9) → +9 Society Research</option>
+                                        <option value="d_society_10">Society 10 (d_society_10) → +10 Society Research</option>
+                                        <option value="d_society_15">Society 15 (d_society_15) → +15 Society Research</option>
+                                        <option value="d_society_25">Society 25 (d_society_25) → +25 Society Research</option>
                                     </optgroup>
-                                    <optgroup label="⚙️ Ingenieurs-Forschung">
-                                        <option value="d_engineering_1">Engineering 1 (d_engineering_1)</option>
-                                        <option value="d_engineering_2">Engineering 2 (d_engineering_2)</option>
-                                        <option value="d_engineering_3">Engineering 3 (d_engineering_3)</option>
-                                        <option value="d_engineering_4">Engineering 4 (d_engineering_4)</option>
-                                        <option value="d_engineering_5">Engineering 5 (d_engineering_5)</option>
-                                        <option value="d_engineering_6">Engineering 6 (d_engineering_6)</option>
-                                        <option value="d_engineering_7">Engineering 7 (d_engineering_7)</option>
-                                        <option value="d_engineering_8">Engineering 8 (d_engineering_8)</option>
-                                        <option value="d_engineering_9">Engineering 9 (d_engineering_9)</option>
-                                        <option value="d_engineering_10">Engineering 10 (d_engineering_10)</option>
-                                        <option value="d_engineering_25">Engineering 25 (d_engineering_25)</option>
+                                    <optgroup label="⚙️ Engineering Research">
+                                        <option value="d_engineering_1">Engineering 1 (d_engineering_1) → +1 Engineering Research</option>
+                                        <option value="d_engineering_2">Engineering 2 (d_engineering_2) → +2 Engineering Research</option>
+                                        <option value="d_engineering_3">Engineering 3 (d_engineering_3) → +3 Engineering Research</option>
+                                        <option value="d_engineering_4">Engineering 4 (d_engineering_4) → +4 Engineering Research</option>
+                                        <option value="d_engineering_5">Engineering 5 (d_engineering_5) → +5 Engineering Research</option>
+                                        <option value="d_engineering_6">Engineering 6 (d_engineering_6) → +6 Engineering Research</option>
+                                        <option value="d_engineering_7">Engineering 7 (d_engineering_7) → +7 Engineering Research</option>
+                                        <option value="d_engineering_8">Engineering 8 (d_engineering_8) → +8 Engineering Research</option>
+                                        <option value="d_engineering_9">Engineering 9 (d_engineering_9) → +9 Engineering Research</option>
+                                        <option value="d_engineering_10">Engineering 10 (d_engineering_10) → +10 Engineering Research</option>
+                                        <option value="d_engineering_25">Engineering 25 (d_engineering_25) → +25 Engineering Research</option>
                                     </optgroup>
-                                    <optgroup label="💎 Strategische Ressourcen">
-                                        <option value="d_exotic_gases_1">Exotic Gases 1 (d_exotic_gases_1)</option>
-                                        <option value="d_exotic_gases_2">Exotic Gases 2 (d_exotic_gases_2)</option>
-                                        <option value="d_exotic_gases_3">Exotic Gases 3 (d_exotic_gases_3)</option>
-                                        <option value="d_exotic_gases_4">Exotic Gases 4 (d_exotic_gases_4)</option>
-                                        <option value="d_exotic_gases_5">Exotic Gases 5 (d_exotic_gases_5)</option>
-                                        <option value="d_volatile_motes_1">Volatile Motes 1 (d_volatile_motes_1)</option>
-                                        <option value="d_volatile_motes_2">Volatile Motes 2 (d_volatile_motes_2)</option>
-                                        <option value="d_volatile_motes_3">Volatile Motes 3 (d_volatile_motes_3)</option>
-                                        <option value="d_volatile_motes_4">Volatile Motes 4 (d_volatile_motes_4)</option>
-                                        <option value="d_volatile_motes_5">Volatile Motes 5 (d_volatile_motes_5)</option>
-                                        <option value="d_rare_crystals_1">Rare Crystals 1 (d_rare_crystals_1)</option>
-                                        <option value="d_rare_crystals_2">Rare Crystals 2 (d_rare_crystals_2)</option>
-                                        <option value="d_rare_crystals_3">Rare Crystals 3 (d_rare_crystals_3)</option>
-                                        <option value="d_rare_crystals_4">Rare Crystals 4 (d_rare_crystals_4)</option>
-                                        <option value="d_rare_crystals_5">Rare Crystals 5 (d_rare_crystals_5)</option>
-                                        <option value="d_zro_deposit_1">Zro Deposit 1 (d_zro_deposit_1)</option>
-                                        <option value="d_zro_deposit_2">Zro Deposit 2 (d_zro_deposit_2)</option>
-                                        <option value="d_zro_deposit_3">Zro Deposit 3 (d_zro_deposit_3)</option>
-                                        <option value="d_zro_deposit_4">Zro Deposit 4 (d_zro_deposit_4)</option>
-                                        <option value="d_zro_deposit_5">Zro Deposit 5 (d_zro_deposit_5)</option>
-                                        <option value="d_dark_matter_deposit_1">Dark Matter Deposit 1 (d_dark_matter_deposit_1)</option>
-                                        <option value="d_dark_matter_deposit_2">Dark Matter Deposit 2 (d_dark_matter_deposit_2)</option>
-                                        <option value="d_dark_matter_deposit_3">Dark Matter Deposit 3 (d_dark_matter_deposit_3)</option>
-                                        <option value="d_dark_matter_deposit_10">Dark Matter Deposit 10 (d_dark_matter_deposit_10)</option>
-                                        <option value="d_astral_threads_deposit_1">Astral Threads Deposit 1 (d_astral_threads_deposit_1)</option>
-                                        <option value="d_astral_threads_deposit_2">Astral Threads Deposit 2 (d_astral_threads_deposit_2)</option>
-                                        <option value="d_astral_threads_deposit_3">Astral Threads Deposit 3 (d_astral_threads_deposit_3)</option>
-                                        <option value="d_living_metal_deposit">Living Metal Deposit (d_living_metal_deposit)</option>
-                                        <option value="d_nanites_deposit">Nanites Deposit (d_nanites_deposit)</option>
+                                    <optgroup label="💎 Strategic Resources">
+                                        <option value="d_exotic_gases_1">Exotic Gases 1 (d_exotic_gases_1) → +1 Exotic Gases</option>
+                                        <option value="d_exotic_gases_2">Exotic Gases 2 (d_exotic_gases_2) → +2 Exotic Gases</option>
+                                        <option value="d_exotic_gases_3">Exotic Gases 3 (d_exotic_gases_3) → +3 Exotic Gases</option>
+                                        <option value="d_exotic_gases_4">Exotic Gases 4 (d_exotic_gases_4) → +4 Exotic Gases</option>
+                                        <option value="d_exotic_gases_5">Exotic Gases 5 (d_exotic_gases_5) → +5 Exotic Gases</option>
+                                        <option value="d_volatile_motes_1">Volatile Motes 1 (d_volatile_motes_1) → +1 Volatile Motes</option>
+                                        <option value="d_volatile_motes_2">Volatile Motes 2 (d_volatile_motes_2) → +2 Volatile Motes</option>
+                                        <option value="d_volatile_motes_3">Volatile Motes 3 (d_volatile_motes_3) → +3 Volatile Motes</option>
+                                        <option value="d_volatile_motes_4">Volatile Motes 4 (d_volatile_motes_4) → +4 Volatile Motes</option>
+                                        <option value="d_volatile_motes_5">Volatile Motes 5 (d_volatile_motes_5) → +5 Volatile Motes</option>
+                                        <option value="d_rare_crystals_1">Rare Crystals 1 (d_rare_crystals_1) → +1 Rare Crystals</option>
+                                        <option value="d_rare_crystals_2">Rare Crystals 2 (d_rare_crystals_2) → +2 Rare Crystals</option>
+                                        <option value="d_rare_crystals_3">Rare Crystals 3 (d_rare_crystals_3) → +3 Rare Crystals</option>
+                                        <option value="d_rare_crystals_4">Rare Crystals 4 (d_rare_crystals_4) → +4 Rare Crystals</option>
+                                        <option value="d_rare_crystals_5">Rare Crystals 5 (d_rare_crystals_5) → +5 Rare Crystals</option>
+                                        <option value="d_zro_deposit_1">Zro Deposit 1 (d_zro_deposit_1) → +1 Zro</option>
+                                        <option value="d_zro_deposit_2">Zro Deposit 2 (d_zro_deposit_2) → +2 Zro</option>
+                                        <option value="d_zro_deposit_3">Zro Deposit 3 (d_zro_deposit_3) → +3 Zro</option>
+                                        <option value="d_zro_deposit_4">Zro Deposit 4 (d_zro_deposit_4) → +4 Zro</option>
+                                        <option value="d_zro_deposit_5">Zro Deposit 5 (d_zro_deposit_5) → +5 Zro</option>
+                                        <option value="d_dark_matter_deposit_1">Dark Matter Deposit 1 (d_dark_matter_deposit_1) → +1 Dark Matter</option>
+                                        <option value="d_dark_matter_deposit_2">Dark Matter Deposit 2 (d_dark_matter_deposit_2) → +2 Dark Matter</option>
+                                        <option value="d_dark_matter_deposit_3">Dark Matter Deposit 3 (d_dark_matter_deposit_3) → +3 Dark Matter</option>
+                                        <option value="d_dark_matter_deposit_10">Dark Matter Deposit 10 (d_dark_matter_deposit_10) → +10 Dark Matter</option>
+                                        <option value="d_astral_threads_deposit_1">Astral Threads Deposit 1 (d_astral_threads_deposit_1) → +1 Astral Threads</option>
+                                        <option value="d_astral_threads_deposit_2">Astral Threads Deposit 2 (d_astral_threads_deposit_2) → +2 Astral Threads</option>
+                                        <option value="d_astral_threads_deposit_3">Astral Threads Deposit 3 (d_astral_threads_deposit_3) → +3 Astral Threads</option>
+                                        <option value="d_living_metal_deposit">Living Metal Deposit (d_living_metal_deposit) → +1 Living Metal</option>
+                                        <option value="d_nanites_deposit">Nanites Deposit (d_nanites_deposit) → +3 Nanites</option>
                                     </optgroup>
-                                    <optgroup label="🌟 Planetar: Spezial/Event (benannt)">
+                                    <optgroup label="🌟 Planetary: Special/Event (named)">
                                         <option value="d_abandoned_black_needle_base">Abandoned Black Needle Base (d_abandoned_black_needle_base)</option>
                                         <option value="d_abandoned_primitive_homesteads">Abandoned Primitive Homesteads (d_abandoned_primitive_homesteads)</option>
-                                        <option value="d_admirals_bickering_crashed_cargo_ship">Admirals Bickering Crashed Cargo Ship (d_admirals_bickering_crashed_cargo_ship)</option>
+                                        <option value="d_admirals_bickering_crashed_cargo_ship">Admirals Bickering Crashed Cargo Ship (d_admirals_bickering_crashed_cargo_ship) → +3 Minerals</option>
                                         <option value="d_alien_pets_deposit">Alien Pets Deposit (d_alien_pets_deposit)</option>
                                         <option value="d_alien_sanctuary">Alien Sanctuary (d_alien_sanctuary)</option>
                                         <option value="d_ancient_battlefield">Ancient Battlefield (d_ancient_battlefield)</option>
                                         <option value="d_ancient_bombardment_craters">Ancient Bombardment Craters (d_ancient_bombardment_craters)</option>
                                         <option value="d_ancient_cloaking_array">Ancient Cloaking Array (d_ancient_cloaking_array)</option>
                                         <option value="d_ancient_facilities">Ancient Facilities (d_ancient_facilities)</option>
-                                        <option value="d_ancient_manufactorium_crater">Ancient Manufactorium Crater (d_ancient_manufactorium_crater)</option>
+                                        <option value="d_ancient_manufactorium_crater">Ancient Manufactorium Crater (d_ancient_manufactorium_crater) → +1 Alloys, +1 Minerals</option>
                                         <option value="d_ancient_manufactorium_scrapyard">Ancient Manufactorium Scrapyard (d_ancient_manufactorium_scrapyard)</option>
                                         <option value="d_ancient_manufactorium_vaultexploration">Ancient Manufactorium Vaultexploration (d_ancient_manufactorium_vaultexploration)</option>
                                         <option value="d_ancient_manufactorium_working">Ancient Manufactorium Working (d_ancient_manufactorium_working)</option>
                                         <option value="d_ancient_mining_site">Ancient Mining Site (d_ancient_mining_site)</option>
-                                        <option value="d_ancient_one">Ancient One (d_ancient_one)</option>
+                                        <option value="d_ancient_one">Ancient One (d_ancient_one) → +4 Society Research</option>
                                         <option value="d_ancient_particle_accelerator">Ancient Particle Accelerator (d_ancient_particle_accelerator)</option>
-                                        <option value="d_arcane_device">Arcane Device (d_arcane_device)</option>
+                                        <option value="d_arcane_device">Arcane Device (d_arcane_device) → +8 Alloys</option>
                                         <option value="d_arcane_generator">Arcane Generator (d_arcane_generator)</option>
                                         <option value="d_arcane_replicator">Arcane Replicator (d_arcane_replicator)</option>
-                                        <option value="d_artifacts_planet_1">Artifacts Planet 1 (d_artifacts_planet_1)</option>
-                                        <option value="d_artifacts_planet_2">Artifacts Planet 2 (d_artifacts_planet_2)</option>
-                                        <option value="d_artifacts_planet_3">Artifacts Planet 3 (d_artifacts_planet_3)</option>
+                                        <option value="d_artifacts_planet_1">Artifacts Planet 1 (d_artifacts_planet_1) → +1 Minor Artifacts</option>
+                                        <option value="d_artifacts_planet_2">Artifacts Planet 2 (d_artifacts_planet_2) → +2 Minor Artifacts</option>
+                                        <option value="d_artifacts_planet_3">Artifacts Planet 3 (d_artifacts_planet_3) → +3 Minor Artifacts</option>
                                         <option value="d_astrogarbage_collector">Astrogarbage Collector (d_astrogarbage_collector)</option>
-                                        <option value="d_avian_reserve">Avian Reserve (d_avian_reserve)</option>
+                                        <option value="d_avian_reserve">Avian Reserve (d_avian_reserve) → +4 Society Research</option>
                                         <option value="d_betharian_deposit">Betharian Deposit (d_betharian_deposit)</option>
                                         <option value="d_black_needle_base">Black Needle Base (d_black_needle_base)</option>
-                                        <option value="d_blue_lava">Blue Lava (d_blue_lava)</option>
+                                        <option value="d_blue_lava">Blue Lava (d_blue_lava) → +5 Alloys, +3 Exotic Gases</option>
                                         <option value="d_bluelotus">Bluelotus (d_bluelotus)</option>
                                         <option value="d_bluelotus2">Bluelotus2 (d_bluelotus2)</option>
                                         <option value="d_bogplants">Bogplants (d_bogplants)</option>
@@ -895,11 +910,11 @@
                                         <option value="d_compact_modules">Compact Modules (d_compact_modules)</option>
                                         <option value="d_crashed_slaver_ship">Crashed Slaver Ship (d_crashed_slaver_ship)</option>
                                         <option value="d_crashed_slaver_ship_memorial">Crashed Slaver Ship Memorial (d_crashed_slaver_ship_memorial)</option>
-                                        <option value="d_crater_bluelotus">Crater Bluelotus (d_crater_bluelotus)</option>
-                                        <option value="d_cryonic_clones">Cryonic Clones (d_cryonic_clones)</option>
-                                        <option value="d_crystal_kraken_body">Crystal Kraken Body (d_crystal_kraken_body)</option>
+                                        <option value="d_crater_bluelotus">Crater Bluelotus (d_crater_bluelotus) → +2 Alloys</option>
+                                        <option value="d_cryonic_clones">Cryonic Clones (d_cryonic_clones) → +6 Society Research</option>
+                                        <option value="d_crystal_kraken_body">Crystal Kraken Body (d_crystal_kraken_body) → +10 Unity</option>
                                         <option value="d_crystal_kraken_body_bombed">Crystal Kraken Body Bombed (d_crystal_kraken_body_bombed)</option>
-                                        <option value="d_crystaline_growths">Crystaline Growths (d_crystaline_growths)</option>
+                                        <option value="d_crystaline_growths">Crystaline Growths (d_crystaline_growths) → +2 Rare Crystals</option>
                                         <option value="d_crystalline_glacier">Crystalline Glacier (d_crystalline_glacier)</option>
                                         <option value="d_dark_matter_monolith">Dark Matter Monolith (d_dark_matter_monolith)</option>
                                         <option value="d_dayside_farm">Dayside Farm (d_dayside_farm)</option>
@@ -907,8 +922,8 @@
                                         <option value="d_dimensional_manipulation_device">Dimensional Manipulation Device (d_dimensional_manipulation_device)</option>
                                         <option value="d_disco_planet">Disco Planet (d_disco_planet)</option>
                                         <option value="d_disco_planet2">Disco Planet2 (d_disco_planet2)</option>
-                                        <option value="d_dragon_monument">Dragon Monument (d_dragon_monument)</option>
-                                        <option value="d_eater_deposit">Eater Deposit (d_eater_deposit)</option>
+                                        <option value="d_dragon_monument">Dragon Monument (d_dragon_monument) → +15 Unity</option>
+                                        <option value="d_eater_deposit">Eater Deposit (d_eater_deposit) → +6 Physics Research, +6 Society Research</option>
                                         <option value="d_electric_storm_1_engineering">Electric Storm 1 Engineering (d_electric_storm_1_engineering)</option>
                                         <option value="d_electric_storm_2_unity">Electric Storm 2 Unity (d_electric_storm_2_unity)</option>
                                         <option value="d_electric_storm_3_physics">Electric Storm 3 Physics (d_electric_storm_3_physics)</option>
@@ -928,21 +943,21 @@
                                         <option value="d_genesis_monument">Genesis Monument (d_genesis_monument)</option>
                                         <option value="d_genesis_preserve">Genesis Preserve (d_genesis_preserve)</option>
                                         <option value="d_geocentric_experiment">Geocentric Experiment (d_geocentric_experiment)</option>
-                                        <option value="d_ghostly_canyon">Ghostly Canyon (d_ghostly_canyon)</option>
+                                        <option value="d_ghostly_canyon">Ghostly Canyon (d_ghostly_canyon) → +1 Zro</option>
                                         <option value="d_gravity_storm_1_districts">Gravity Storm 1 Districts (d_gravity_storm_1_districts)</option>
                                         <option value="d_gravity_storm_2_unity">Gravity Storm 2 Unity (d_gravity_storm_2_unity)</option>
                                         <option value="d_gravity_storm_3_engineering">Gravity Storm 3 Engineering (d_gravity_storm_3_engineering)</option>
-                                        <option value="d_hab_alloy_1">Hab Alloy 1 (d_hab_alloy_1)</option>
-                                        <option value="d_hab_alloy_10">Hab Alloy 10 (d_hab_alloy_10)</option>
-                                        <option value="d_hab_alloy_2">Hab Alloy 2 (d_hab_alloy_2)</option>
-                                        <option value="d_hab_alloy_25">Hab Alloy 25 (d_hab_alloy_25)</option>
-                                        <option value="d_hab_alloy_3">Hab Alloy 3 (d_hab_alloy_3)</option>
-                                        <option value="d_hab_alloy_4">Hab Alloy 4 (d_hab_alloy_4)</option>
-                                        <option value="d_hab_alloy_5">Hab Alloy 5 (d_hab_alloy_5)</option>
+                                        <option value="d_hab_alloy_1">Hab Alloy 1 (d_hab_alloy_1) → +1 Alloys</option>
+                                        <option value="d_hab_alloy_10">Hab Alloy 10 (d_hab_alloy_10) → +10 Alloys</option>
+                                        <option value="d_hab_alloy_2">Hab Alloy 2 (d_hab_alloy_2) → +2 Alloys</option>
+                                        <option value="d_hab_alloy_25">Hab Alloy 25 (d_hab_alloy_25) → +25 Alloys</option>
+                                        <option value="d_hab_alloy_3">Hab Alloy 3 (d_hab_alloy_3) → +3 Alloys</option>
+                                        <option value="d_hab_alloy_4">Hab Alloy 4 (d_hab_alloy_4) → +4 Alloys</option>
+                                        <option value="d_hab_alloy_5">Hab Alloy 5 (d_hab_alloy_5) → +5 Alloys</option>
                                         <option value="d_hab_astral_threads_1">Hab Astral Threads 1 (d_hab_astral_threads_1)</option>
                                         <option value="d_hab_astral_threads_2">Hab Astral Threads 2 (d_hab_astral_threads_2)</option>
                                         <option value="d_hab_astral_threads_3">Hab Astral Threads 3 (d_hab_astral_threads_3)</option>
-                                        <option value="d_hab_consumer_goods_2">Hab Consumer Goods 2 (d_hab_consumer_goods_2)</option>
+                                        <option value="d_hab_consumer_goods_2">Hab Consumer Goods 2 (d_hab_consumer_goods_2) → +2 Consumer Goods</option>
                                         <option value="d_hab_crystal_1">Hab Crystal 1 (d_hab_crystal_1)</option>
                                         <option value="d_hab_crystal_2">Hab Crystal 2 (d_hab_crystal_2)</option>
                                         <option value="d_hab_crystal_3">Hab Crystal 3 (d_hab_crystal_3)</option>
@@ -957,26 +972,26 @@
                                         <option value="d_hab_gas_3">Hab Gas 3 (d_hab_gas_3)</option>
                                         <option value="d_hab_gas_4">Hab Gas 4 (d_hab_gas_4)</option>
                                         <option value="d_hab_gas_5">Hab Gas 5 (d_hab_gas_5)</option>
-                                        <option value="d_hab_harvester_nanites_1">Hab Harvester Nanites 1 (d_hab_harvester_nanites_1)</option>
-                                        <option value="d_hab_harvester_nanites_2">Hab Harvester Nanites 2 (d_hab_harvester_nanites_2)</option>
-                                        <option value="d_hab_harvester_nanites_3">Hab Harvester Nanites 3 (d_hab_harvester_nanites_3)</option>
+                                        <option value="d_hab_harvester_nanites_1">Hab Harvester Nanites 1 (d_hab_harvester_nanites_1) → +0.1 Nanites</option>
+                                        <option value="d_hab_harvester_nanites_2">Hab Harvester Nanites 2 (d_hab_harvester_nanites_2) → +1.6 Nanites</option>
+                                        <option value="d_hab_harvester_nanites_3">Hab Harvester Nanites 3 (d_hab_harvester_nanites_3) → +25.2 Nanites</option>
                                         <option value="d_hab_living_metal_1">Hab Living Metal 1 (d_hab_living_metal_1)</option>
-                                        <option value="d_hab_lonely_bot_deposit">Hab Lonely Bot Deposit (d_hab_lonely_bot_deposit)</option>
-                                        <option value="d_hab_lonely_bot_deposit_2">Hab Lonely Bot Deposit 2 (d_hab_lonely_bot_deposit_2)</option>
-                                        <option value="d_hab_lonely_bot_deposit_3">Hab Lonely Bot Deposit 3 (d_hab_lonely_bot_deposit_3)</option>
+                                        <option value="d_hab_lonely_bot_deposit">Hab Lonely Bot Deposit (d_hab_lonely_bot_deposit) → +5 Alloys</option>
+                                        <option value="d_hab_lonely_bot_deposit_2">Hab Lonely Bot Deposit 2 (d_hab_lonely_bot_deposit_2) → +5 Alloys, +1 Exotic Gases, +1 Volatile Motes</option>
+                                        <option value="d_hab_lonely_bot_deposit_3">Hab Lonely Bot Deposit 3 (d_hab_lonely_bot_deposit_3) → +5 Alloys, +1 Exotic Gases, +1 Volatile Motes</option>
                                         <option value="d_hab_mote_1">Hab Mote 1 (d_hab_mote_1)</option>
                                         <option value="d_hab_mote_2">Hab Mote 2 (d_hab_mote_2)</option>
                                         <option value="d_hab_mote_3">Hab Mote 3 (d_hab_mote_3)</option>
                                         <option value="d_hab_mote_4">Hab Mote 4 (d_hab_mote_4)</option>
                                         <option value="d_hab_mote_5">Hab Mote 5 (d_hab_mote_5)</option>
-                                        <option value="d_hab_nanites_3">Hab Nanites 3 (d_hab_nanites_3)</option>
+                                        <option value="d_hab_nanites_3">Hab Nanites 3 (d_hab_nanites_3) → +3 Nanites</option>
                                         <option value="d_hab_zro_1">Hab Zro 1 (d_hab_zro_1)</option>
                                         <option value="d_hab_zro_2">Hab Zro 2 (d_hab_zro_2)</option>
                                         <option value="d_hab_zro_3">Hab Zro 3 (d_hab_zro_3)</option>
                                         <option value="d_hab_zro_4">Hab Zro 4 (d_hab_zro_4)</option>
                                         <option value="d_hab_zro_5">Hab Zro 5 (d_hab_zro_5)</option>
                                         <option value="d_harvester_fields">Harvester Fields (d_harvester_fields)</option>
-                                        <option value="d_hive_dwelling">Hive Dwelling (d_hive_dwelling)</option>
+                                        <option value="d_hive_dwelling">Hive Dwelling (d_hive_dwelling) → +10 Unity</option>
                                         <option value="d_hostile_fauna">Hostile Fauna (d_hostile_fauna)</option>
                                         <option value="d_hostile_flora">Hostile Flora (d_hostile_flora)</option>
                                         <option value="d_house_turtle">House Turtle (d_house_turtle)</option>
@@ -990,19 +1005,19 @@
                                         <option value="d_junk_canals">Junk Canals (d_junk_canals)</option>
                                         <option value="d_junk_hollows">Junk Hollows (d_junk_hollows)</option>
                                         <option value="d_junk_wastes">Junk Wastes (d_junk_wastes)</option>
-                                        <option value="d_knights_calibrator">Knights Calibrator (d_knights_calibrator)</option>
-                                        <option value="d_landed_dragon">Landed Dragon (d_landed_dragon)</option>
+                                        <option value="d_knights_calibrator">Knights Calibrator (d_knights_calibrator) → +10 Energy</option>
+                                        <option value="d_landed_dragon">Landed Dragon (d_landed_dragon) → +5 Unity</option>
                                         <option value="d_landgrab_blocker">Landgrab Blocker (d_landgrab_blocker)</option>
                                         <option value="d_landgrab_foreign_holdings">Landgrab Foreign Holdings (d_landgrab_foreign_holdings)</option>
                                         <option value="d_lava_tubes">Lava Tubes (d_lava_tubes)</option>
-                                        <option value="d_liquid_dark_matter">Liquid Dark Matter (d_liquid_dark_matter)</option>
+                                        <option value="d_liquid_dark_matter">Liquid Dark Matter (d_liquid_dark_matter) → +2 Dark Matter</option>
                                         <option value="d_lithoid_crater">Lithoid Crater (d_lithoid_crater)</option>
                                         <option value="d_living_metal_medium">Living Metal Medium (d_living_metal_medium)</option>
                                         <option value="d_living_metal_small">Living Metal Small (d_living_metal_small)</option>
                                         <option value="d_living_metal_tiny">Living Metal Tiny (d_living_metal_tiny)</option>
                                         <option value="d_living_snow_reserve">Living Snow Reserve (d_living_snow_reserve)</option>
                                         <option value="d_machine_care_home">Machine Care Home (d_machine_care_home)</option>
-                                        <option value="d_machine_minerals">Machine Minerals (d_machine_minerals)</option>
+                                        <option value="d_machine_minerals">Machine Minerals (d_machine_minerals) → +25 Minerals</option>
                                         <option value="d_magnetic_storm_1_minerals">Magnetic Storm 1 Minerals (d_magnetic_storm_1_minerals)</option>
                                         <option value="d_magnetic_storm_2_alloys">Magnetic Storm 2 Alloys (d_magnetic_storm_2_alloys)</option>
                                         <option value="d_magnetic_storm_3_mix">Magnetic Storm 3 Mix (d_magnetic_storm_3_mix)</option>
@@ -1017,7 +1032,7 @@
                                         <option value="d_mountains_of_steel">Mountains Of Steel (d_mountains_of_steel)</option>
                                         <option value="d_msi_air_freshener">Msi Air Freshener (d_msi_air_freshener)</option>
                                         <option value="d_mutant_landfill">Mutant Landfill (d_mutant_landfill)</option>
-                                        <option value="d_mutation_vats">Mutation Vats (d_mutation_vats)</option>
+                                        <option value="d_mutation_vats">Mutation Vats (d_mutation_vats) → +1 Exotic Gases, +12 Society Research</option>
                                         <option value="d_myrmeku_power_farms">Myrmeku Power Farms (d_myrmeku_power_farms)</option>
                                         <option value="d_nanites_medium">Nanites Medium (d_nanites_medium)</option>
                                         <option value="d_nanites_small">Nanites Small (d_nanites_small)</option>
@@ -1027,7 +1042,7 @@
                                         <option value="d_numas_breath">Numas Breath (d_numas_breath)</option>
                                         <option value="d_odd_factory">Odd Factory (d_odd_factory)</option>
                                         <option value="d_organic_landfill">Organic Landfill (d_organic_landfill)</option>
-                                        <option value="d_organic_slurry">Organic Slurry (d_organic_slurry)</option>
+                                        <option value="d_organic_slurry">Organic Slurry (d_organic_slurry) → +15 Food</option>
                                         <option value="d_particle_storm_1_society">Particle Storm 1 Society (d_particle_storm_1_society)</option>
                                         <option value="d_particle_storm_2_unity">Particle Storm 2 Unity (d_particle_storm_2_unity)</option>
                                         <option value="d_particle_storm_3_motes">Particle Storm 3 Motes (d_particle_storm_3_motes)</option>
@@ -1035,27 +1050,27 @@
                                         <option value="d_polaris_city">Polaris City (d_polaris_city)</option>
                                         <option value="d_portal_research_zone">Portal Research Zone (d_portal_research_zone)</option>
                                         <option value="d_prisoner_intergration">Prisoner Intergration (d_prisoner_intergration)</option>
-                                        <option value="d_processing_pens">Processing Pens (d_processing_pens)</option>
+                                        <option value="d_processing_pens">Processing Pens (d_processing_pens) → +14 Food</option>
                                         <option value="d_progenitor">Progenitor (d_progenitor)</option>
                                         <option value="d_progenitor_empty">Progenitor Empty (d_progenitor_empty)</option>
                                         <option value="d_project_cornucopia">Project Cornucopia (d_project_cornucopia)</option>
                                         <option value="d_psionic_sands">Psionic Sands (d_psionic_sands)</option>
                                         <option value="d_pulsar_scarred">Pulsar Scarred (d_pulsar_scarred)</option>
                                         <option value="d_radiotrophic_preserve">Radiotrophic Preserve (d_radiotrophic_preserve)</option>
-                                        <option value="d_red_desert">Red Desert (d_red_desert)</option>
+                                        <option value="d_red_desert">Red Desert (d_red_desert) → +2 Minerals</option>
                                         <option value="d_relic_dense_ruins">Relic Dense Ruins (d_relic_dense_ruins)</option>
                                         <option value="d_rockworm_hive">Rockworm Hive (d_rockworm_hive)</option>
                                         <option value="d_rockworm_hive_volcanic">Rockworm Hive Volcanic (d_rockworm_hive_volcanic)</option>
-                                        <option value="d_ruin_bluelotus">Ruin Bluelotus (d_ruin_bluelotus)</option>
-                                        <option value="d_ruined_hive_dwelling">Ruined Hive Dwelling (d_ruined_hive_dwelling)</option>
+                                        <option value="d_ruin_bluelotus">Ruin Bluelotus (d_ruin_bluelotus) → +5 Alloys</option>
+                                        <option value="d_ruined_hive_dwelling">Ruined Hive Dwelling (d_ruined_hive_dwelling) → +10 Unity</option>
                                         <option value="d_savage_wildlands">Savage Wildlands (d_savage_wildlands)</option>
                                         <option value="d_sentinels">Sentinels (d_sentinels)</option>
-                                        <option value="d_sentinels_metal">Sentinels Metal (d_sentinels_metal)</option>
-                                        <option value="d_sentinels_monument">Sentinels Monument (d_sentinels_monument)</option>
-                                        <option value="d_shroud_flora_deposit">Shroud Flora Deposit (d_shroud_flora_deposit)</option>
-                                        <option value="d_shroud_rift_deposit">Shroud Rift Deposit (d_shroud_rift_deposit)</option>
+                                        <option value="d_sentinels_metal">Sentinels Metal (d_sentinels_metal) → +2 Living Metal</option>
+                                        <option value="d_sentinels_monument">Sentinels Monument (d_sentinels_monument) → +15 Unity</option>
+                                        <option value="d_shroud_flora_deposit">Shroud Flora Deposit (d_shroud_flora_deposit) → +1 Zro</option>
+                                        <option value="d_shroud_rift_deposit">Shroud Rift Deposit (d_shroud_rift_deposit) → +2 Zro</option>
                                         <option value="d_shroud_storm_1_society">Shroud Storm 1 Society (d_shroud_storm_1_society)</option>
-                                        <option value="d_shroud_storm_2_zro">Shroud Storm 2 Zro (d_shroud_storm_2_zro)</option>
+                                        <option value="d_shroud_storm_2_zro">Shroud Storm 2 Zro (d_shroud_storm_2_zro) → +2 Zro</option>
                                         <option value="d_shroud_storm_3_happy">Shroud Storm 3 Happy (d_shroud_storm_3_happy)</option>
                                         <option value="d_sky_mountain">Sky Mountain (d_sky_mountain)</option>
                                         <option value="d_solar_storm_1_energy">Solar Storm 1 Energy (d_solar_storm_1_energy)</option>
@@ -1066,9 +1081,9 @@
                                         <option value="d_spore_vents">Spore Vents (d_spore_vents)</option>
                                         <option value="d_star_mall_promenade">Star Mall Promenade (d_star_mall_promenade)</option>
                                         <option value="d_stasis_prison">Stasis Prison (d_stasis_prison)</option>
-                                        <option value="d_stellarite_trophy">Stellarite Trophy (d_stellarite_trophy)</option>
-                                        <option value="d_the_zone">The Zone (d_the_zone)</option>
-                                        <option value="d_titanic_life_blocker">Titanic Life Blocker (d_titanic_life_blocker)</option>
+                                        <option value="d_stellarite_trophy">Stellarite Trophy (d_stellarite_trophy) → +5 Unity</option>
+                                        <option value="d_the_zone">The Zone (d_the_zone) → +3 Unity</option>
+                                        <option value="d_titanic_life_blocker">Titanic Life Blocker (d_titanic_life_blocker) → +8 Society Research</option>
                                         <option value="d_toxic_god_blight_upon_the_land">Toxic God Blight Upon The Land (d_toxic_god_blight_upon_the_land)</option>
                                         <option value="d_toxic_god_blight_upon_the_land_upgraded">Toxic God Blight Upon The Land Upgraded (d_toxic_god_blight_upon_the_land_upgraded)</option>
                                         <option value="d_toxic_god_deitys_swarms">Toxic God Deitys Swarms (d_toxic_god_deitys_swarms)</option>
@@ -1108,7 +1123,7 @@
                                         <option value="d_worm_farm">Worm Farm (d_worm_farm)</option>
                                         <option value="d_worm_mine">Worm Mine (d_worm_mine)</option>
                                     </optgroup>
-                                    <optgroup label="🍃 Planetar: Nahrungs-Spezial">
+                                    <optgroup label="🍃 Planetary: Food Special">
                                         <option value="d_andisol_soil">Andisol Soil (d_andisol_soil)</option>
                                         <option value="d_black_soil">Black Soil (d_black_soil)</option>
                                         <option value="d_boggy_fens">Boggy Fens (d_boggy_fens)</option>
@@ -1129,7 +1144,7 @@
                                         <option value="d_teeming_reef">Teeming Reef (d_teeming_reef)</option>
                                         <option value="d_tropical_island">Tropical Island (d_tropical_island)</option>
                                     </optgroup>
-                                    <optgroup label="🪨 Planetar: Mineralien-Spezial">
+                                    <optgroup label="🪨 Planetary: Minerals Special">
                                         <option value="d_mineral_fields">Mineral Fields (d_mineral_fields)</option>
                                         <option value="d_mineral_striations">Mineral Striations (d_mineral_striations)</option>
                                         <option value="d_ore_rich_caverns">Ore Rich Caverns (d_ore_rich_caverns)</option>
@@ -1148,7 +1163,7 @@
                                         <option value="d_volcanic_rich_mountain">Volcanic Rich Mountain (d_volcanic_rich_mountain)</option>
                                         <option value="d_volcanic_weak_crust">Volcanic Weak Crust (d_volcanic_weak_crust)</option>
                                     </optgroup>
-                                    <optgroup label="❔ Ohne Kategorie">
+                                    <optgroup label="❔ Uncategorized">
                                         <option value="d_abandoned_mining_tunnels">Abandoned Mining Tunnels (d_abandoned_mining_tunnels)</option>
                                         <option value="d_ancient_reactor_pits">Ancient Reactor Pits (d_ancient_reactor_pits)</option>
                                         <option value="d_boswash_metropolitan_axis">Boswash Metropolitan Axis (d_boswash_metropolitan_axis)</option>
@@ -1164,23 +1179,23 @@
                                         <option value="d_scandinavian_reclamation_sector">Scandinavian Reclamation Sector (d_scandinavian_reclamation_sector)</option>
                                         <option value="d_space_junk_hazards">Space Junk Hazards (d_space_junk_hazards)</option>
                                     </optgroup>
-                                    <optgroup label="⛏️ Orbital: Mining (benannt)">
-                                        <option value="d_arc_furnace_1">Arc Furnace 1 (d_arc_furnace_1)</option>
-                                        <option value="d_arc_furnace_2">Arc Furnace 2 (d_arc_furnace_2)</option>
-                                        <option value="d_arc_furnace_3">Arc Furnace 3 (d_arc_furnace_3)</option>
-                                        <option value="d_arc_furnace_4">Arc Furnace 4 (d_arc_furnace_4)</option>
-                                        <option value="d_artifacts_mining_1">Artifacts Mining 1 (d_artifacts_mining_1)</option>
-                                        <option value="d_artifacts_mining_2">Artifacts Mining 2 (d_artifacts_mining_2)</option>
-                                        <option value="d_artifacts_mining_3">Artifacts Mining 3 (d_artifacts_mining_3)</option>
-                                        <option value="d_consumer_goods_obsessional_directive">Consumer Goods Obsessional Directive (d_consumer_goods_obsessional_directive)</option>
-                                        <option value="d_guardian_dragon_hoard">Guardian Dragon Hoard (d_guardian_dragon_hoard)</option>
-                                        <option value="d_nanite_harvester_deposit">Nanite Harvester Deposit (d_nanite_harvester_deposit)</option>
-                                        <option value="d_nanite_harvester_deposit_large">Nanite Harvester Deposit Large (d_nanite_harvester_deposit_large)</option>
-                                        <option value="d_nanite_harvester_deposit_regular">Nanite Harvester Deposit Regular (d_nanite_harvester_deposit_regular)</option>
-                                        <option value="d_red_giant_dm">Red Giant Dm (d_red_giant_dm)</option>
-                                        <option value="d_red_giant_unstable">Red Giant Unstable (d_red_giant_unstable)</option>
+                                    <optgroup label="⛏️ Orbital: Mining (named)">
+                                        <option value="d_arc_furnace_1">Arc Furnace 1 (d_arc_furnace_1) → +1 Minerals</option>
+                                        <option value="d_arc_furnace_2">Arc Furnace 2 (d_arc_furnace_2) → +2 Minerals</option>
+                                        <option value="d_arc_furnace_3">Arc Furnace 3 (d_arc_furnace_3) → +1 Alloys, +2 Minerals</option>
+                                        <option value="d_arc_furnace_4">Arc Furnace 4 (d_arc_furnace_4) → +2 Alloys, +2 Minerals</option>
+                                        <option value="d_artifacts_mining_1">Artifacts Mining 1 (d_artifacts_mining_1) → +1 Minor Artifacts</option>
+                                        <option value="d_artifacts_mining_2">Artifacts Mining 2 (d_artifacts_mining_2) → +2 Minor Artifacts</option>
+                                        <option value="d_artifacts_mining_3">Artifacts Mining 3 (d_artifacts_mining_3) → +3 Minor Artifacts</option>
+                                        <option value="d_consumer_goods_obsessional_directive">Consumer Goods Obsessional Directive (d_consumer_goods_obsessional_directive) → +2 Consumer Goods</option>
+                                        <option value="d_guardian_dragon_hoard">Guardian Dragon Hoard (d_guardian_dragon_hoard) → +30 Energy, +30 Minerals</option>
+                                        <option value="d_nanite_harvester_deposit">Nanite Harvester Deposit (d_nanite_harvester_deposit) → +0.1 Nanites</option>
+                                        <option value="d_nanite_harvester_deposit_large">Nanite Harvester Deposit Large (d_nanite_harvester_deposit_large) → +25.6 Nanites</option>
+                                        <option value="d_nanite_harvester_deposit_regular">Nanite Harvester Deposit Regular (d_nanite_harvester_deposit_regular) → +1.6 Nanites</option>
+                                        <option value="d_red_giant_dm">Red Giant Dm (d_red_giant_dm) → +10 Energy, +5 Dark Matter</option>
+                                        <option value="d_red_giant_unstable">Red Giant Unstable (d_red_giant_unstable) → +5 Energy</option>
                                     </optgroup>
-                                    <optgroup label="🔆 Planetar: Energie-Spezial">
+                                    <optgroup label="🔆 Planetary: Energy Special">
                                         <option value="d_arid_highlands">Arid Highlands (d_arid_highlands)</option>
                                         <option value="d_buzzing_plains">Buzzing Plains (d_buzzing_plains)</option>
                                         <option value="d_frozen_gas_lake">Frozen Gas Lake (d_frozen_gas_lake)</option>
@@ -1192,7 +1207,7 @@
                                         <option value="d_tempestous_mountain">Tempestous Mountain (d_tempestous_mountain)</option>
                                         <option value="d_underwater_vent">Underwater Vent (d_underwater_vent)</option>
                                     </optgroup>
-                                    <optgroup label="✨ Planetar: Seltene Ressourcen">
+                                    <optgroup label="✨ Planetary: Rare Resources">
                                         <option value="d_bubbling_swamp">Bubbling Swamp (d_bubbling_swamp)</option>
                                         <option value="d_crystal_forest">Crystal Forest (d_crystal_forest)</option>
                                         <option value="d_crystal_reef">Crystal Reef (d_crystal_reef)</option>
@@ -1202,23 +1217,23 @@
                                         <option value="d_fuming_bog">Fuming Bog (d_fuming_bog)</option>
                                         <option value="d_volcanic_stifling_atmosphere">Volcanic Stifling Atmosphere (d_volcanic_stifling_atmosphere)</option>
                                     </optgroup>
-                                    <optgroup label="🔭 Orbital: Forschung (benannt)">
-                                        <option value="d_artifacts_research_1">Artifacts Research 1 (d_artifacts_research_1)</option>
-                                        <option value="d_artifacts_research_2">Artifacts Research 2 (d_artifacts_research_2)</option>
-                                        <option value="d_artifacts_research_3">Artifacts Research 3 (d_artifacts_research_3)</option>
-                                        <option value="d_crystal_rift">Crystal Rift (d_crystal_rift)</option>
-                                        <option value="d_protostar">Protostar (d_protostar)</option>
-                                        <option value="d_vast_unity_deposit">Vast Unity Deposit (d_vast_unity_deposit)</option>
+                                    <optgroup label="🔭 Orbital: Research (named)">
+                                        <option value="d_artifacts_research_1">Artifacts Research 1 (d_artifacts_research_1) → +1 Minor Artifacts</option>
+                                        <option value="d_artifacts_research_2">Artifacts Research 2 (d_artifacts_research_2) → +2 Minor Artifacts</option>
+                                        <option value="d_artifacts_research_3">Artifacts Research 3 (d_artifacts_research_3) → +3 Minor Artifacts</option>
+                                        <option value="d_crystal_rift">Crystal Rift (d_crystal_rift) → +10 Physics Research, +10 Unity</option>
+                                        <option value="d_protostar">Protostar (d_protostar) → +5 Energy, +10 Physics Research</option>
+                                        <option value="d_vast_unity_deposit">Vast Unity Deposit (d_vast_unity_deposit) → +3 Unity</option>
                                     </optgroup>
-                                    <optgroup label="🧩 Planetar: Sonstige">
+                                    <optgroup label="🧩 Planetary: Other">
                                         <option value="d_volcanic_basalt_plains">Volcanic Basalt Plains (d_volcanic_basalt_plains)</option>
                                         <option value="d_volcanic_dried_lavariver">Volcanic Dried Lavariver (d_volcanic_dried_lavariver)</option>
                                         <option value="d_volcanic_intraplate">Volcanic Intraplate (d_volcanic_intraplate)</option>
                                         <option value="d_volcanic_stable_plateaus">Volcanic Stable Plateaus (d_volcanic_stable_plateaus)</option>
                                         <option value="d_volcanic_tranquil_flatlands">Volcanic Tranquil Flatlands (d_volcanic_tranquil_flatlands)</option>
                                     </optgroup>
-                                    <optgroup label="🌍 Planetar (sonstige)">
-                                        <option value="d_exotic_mountain">Exotic Mountain (d_exotic_mountain)</option>
+                                    <optgroup label="🌍 Planetary (other)">
+                                        <option value="d_exotic_mountain">Exotic Mountain (d_exotic_mountain) → +4 Exotic Gases</option>
                                     </optgroup>
                             </select>
                         </div>
@@ -1252,12 +1267,12 @@
                 <div class="form-grid">
                     <div class="form-group">
                         <label class="label">Moon-Name</label>
-                        <input type="text" id="moonName" class="stellaris-input" placeholder="z.B. Luna">
+                        <input type="text" id="moonName" class="stellaris-input" placeholder="e.g. Luna">
                     </div>
                     <div class="form-group flex items-center">
                         <label class="flex items-center cursor-pointer">
                             <input type="checkbox" id="moonUseAutoName" class="mr-2" onchange="toggleMoonNameField()">
-                            <span class="text-gray-300">🤖 Automatische Benennung durch Stellaris</span>
+                            <span class="text-gray-300">🤖 Automate naming through Stellaris</span>
                         </label>
                     </div>
                     <div class="form-group">
@@ -1302,7 +1317,7 @@
                                 <option value="pc_rare_crystal_asteroid">Rare Crystal Asteroid</option>
                                 <option value="pc_crystal_asteroid">Crystal Asteroid</option>
                             </optgroup>
-                            <optgroup label="Custome">
+                            <optgroup label="Custom">
                                 <option value="CUSTOM">🔧 Custom Class...</option>
                                 </select>
                                 <!-- ✅ NEW: Custom class input -->
@@ -1317,6 +1332,19 @@
                     <div class="form-group">
                         <label class="label">Orbit Distance from Planet</label>
                         <input type="number" id="moonOrbit" class="stellaris-input" value="10" min="5" max="30">
+                    </div>
+                    <div class="form-group" style="grid-column: span 2;">
+                        <label class="label">Anzahl / count – Doppelmond (max 3)</label>
+                        <div class="grid grid-cols-2 gap-2">
+                            <div>
+                                <label class="label">Min</label>
+                                <input type="number" id="moonCountMin" class="stellaris-input" value="1" min="1" max="3">
+                            </div>
+                            <div>
+                                <label class="label">Max</label>
+                                <input type="number" id="moonCountMax" class="stellaris-input" value="1" min="1" max="3">
+                            </div>
+                        </div>
                     </div>
 
                     <div class="form-group" style="grid-column: span 2;">
@@ -1375,7 +1403,7 @@
                     </div>
                 </div>
 
-                <!-- Modifier System für Monde -->
+                <!-- Modifier system for moons -->
                 <div class="mt-6 p-4 bg-gradient-to-br from-purple-900/30 to-pink-900/20 rounded-lg border border-purple-700/50">
                     <h3 class="text-lg font-semibold text-purple-300 mb-3 flex items-center">
                         🌙 Moon Modifier System
@@ -1398,20 +1426,21 @@
                                 <label class="label text-xs">MODIFIER CATEGORY</label>
                                 <select id="moonModifierCategory" class="stellaris-input text-sm" onchange="window.updateMoonModifierOptions()">
                                     <option value="">-- Select Category --</option>
-                                    <option value="v_res">💰 Vanilla: Ressourcen & Ertrag</option>
-                                    <option value="v_grav">🌀 Vanilla: Schwerkraft & Bahn</option>
-                                    <option value="v_geo">🪨 Vanilla: Geologie & Wetter</option>
-                                    <option value="v_volcanic">🌋 Vanilla: Vulkanwelten</option>
+                                    <option value="v_res">💰 Vanilla: Resources & Yield</option>
+                                    <option value="v_grav">🌀 Vanilla: Gravity & Orbit</option>
+                                    <option value="v_geo">🪨 Vanilla: Geology & Weather</option>
+                                    <option value="v_volcanic">🌋 Vanilla: Volcanic Worlds</option>
                                     <option value="v_bio">🌿 Vanilla: Flora & Fauna</option>
-                                    <option value="v_art">🏭 Vanilla: Künstlich & Megastruktur</option>
-                                    <option value="v_special">🌌 Vanilla: Spezial & Shroud</option>
-                                    <option value="terraforming">🌱 Terraforming-Kandidat</option>
-                                    <option value="event_special">⭐ Spezial & Event (verifiziert)</option>
+                                    <option value="v_art">🏭 Vanilla: Artificial & Megastructure</option>
+                                    <option value="v_special">🌌 Vanilla: Special & Shroud</option>
+                                    <option value="terraforming">🌱 Terraforming Candidate</option>
+                                    <option value="event_special">⭐ Special & Event (verified)</option>
                                     <option value="pd">🧩 Planetary Diversity (Mod)</option>
                                 </select>
                             </div>
                             <div>
                                 <label class="label text-xs">MODIFIER</label>
+                                <input type="text" id="moonModifierSelectionFilter" class="stellaris-input text-sm mb-1" placeholder="🔍 Filter modifiers...">
                                 <select id="moonModifierSelection" class="stellaris-input text-sm" disabled>
                                     <option value="">-- Select Modifier --</option>
                                 </select>
@@ -1461,7 +1490,7 @@
                         <p class="text-xs text-gray-400">Or enter manually:</p>
                     </div>
                     
-                    <input type="text" id="neighborDisplayName" class="stellaris-input" placeholder="z.B. Apsu">
+                    <input type="text" id="neighborDisplayName" class="stellaris-input" placeholder="e.g. Apsu">
                     <p class="text-xs text-gray-400 mt-1">Will be converted to: <span id="neighborPreviewIdentifier" class="text-blue-300">-</span></p>
                 </div>
 
@@ -1692,7 +1721,7 @@
         <!-- Add Asteroid Belt Modal -->
         <div id="asteroidBeltModal" class="modal">
             <div class="modal-content">
-                <h2 class="text-2xl font-bold mb-4 text-yellow-300">☄️ Add Asteroid Belt</h2>
+                <h2 id="beltModalTitle" class="text-2xl font-bold mb-4 text-yellow-300">☄️ Add Asteroid Belt</h2>
                 
                 <div class="form-grid">
                     <div class="form-group">
@@ -1768,18 +1797,19 @@
 function isStarClass(cls) {
             if (!cls) return false;
             return cls === 'star'
-                || /_star$/.test(cls)            // pc_g_star … pc_toxoid_star, pc_rift_star, pc_m_giant_star, Mod-Sterne
+                || /_star$/.test(cls)            // pc_g_star … pc_toxoid_star, pc_rift_star, pc_m_giant_star, mod stars
                 || cls === 'pc_black_hole'
                 || cls === 'pc_pulsar'
-                || cls === 'pc_protostar';       // ✅ endet nicht auf _star, muss explizit rein
+                || cls === 'pc_protostar';       // ✅ doesn't end in _star, must be included explicitly
         }
         
         let allSystems = [];
         let currentSystemIndex = null;
         let editingPlanetId = null;
         let editingPlanetIndex = null;
-        let editingMoonParentPath = null; // Pfad zum Elternkörper, z.B. [0] oder [0,2,1]
-        let editingMoonIndex = null;      // Index im moons[] des Elternkörpers; null = neu
+        let editingMoonParentPath = null; // path to parent body, e.g. [0] or [0,2,1]
+        let editingMoonIndex = null;      // index within the parent's moons[]; null = new
+        let editingBeltIndex = null;      // index within asteroidBelts[]; null = new
         let nextPlanetId = 1;
 
         // ✅ FIX: Default name now ends with _system_initializer for proper import/export compatibility
@@ -1802,7 +1832,7 @@ function isStarClass(cls) {
         // Modifier Definitions
         const MODIFIER_DATABASE = {
             'v_res': {
-                name: '💰 Vanilla: Ressourcen & Ertrag',
+                name: '💰 Vanilla: Resources & Yield',
                 modifiers: [
                     { id: 'pm_asteroid_belt', name: 'Asteroid Belt', desc: 'pm_asteroid_belt' },
                     { id: 'pm_extensive_moon_system', name: 'Extensive Moon System', desc: 'pm_extensive_moon_system' },
@@ -1815,7 +1845,7 @@ function isStarClass(cls) {
                 ]
             },
             'v_grav': {
-                name: '🌀 Vanilla: Schwerkraft & Bahn',
+                name: '🌀 Vanilla: Gravity & Orbit',
                 modifiers: [
                     { id: 'pm_calamitous_quartile', name: 'Calamitous Quartile', desc: 'pm_calamitous_quartile' },
                     { id: 'pm_favorable_trine', name: 'Favorable Trine', desc: 'pm_favorable_trine' },
@@ -1827,7 +1857,7 @@ function isStarClass(cls) {
                 ]
             },
             'v_geo': {
-                name: '🪨 Vanilla: Geologie & Wetter',
+                name: '🪨 Vanilla: Geology & Weather',
                 modifiers: [
                     { id: 'pm_abundant_geothermal_activity', name: 'Abundant Geothermal Activity', desc: 'pm_abundant_geothermal_activity' },
                     { id: 'pm_asteroid_impacts', name: 'Asteroid Impacts', desc: 'pm_asteroid_impacts' },
@@ -1844,7 +1874,7 @@ function isStarClass(cls) {
                 ]
             },
             'v_volcanic': {
-                name: '🌋 Vanilla: Vulkanwelten',
+                name: '🌋 Vanilla: Volcanic Worlds',
                 modifiers: [
                     { id: 'pm_obsidian_lakes_volcanic', name: 'Obsidian Lakes Volcanic', desc: 'pm_obsidian_lakes_volcanic' },
                     { id: 'pm_volcanic_asteroid_belt', name: 'Volcanic Asteroid Belt', desc: 'pm_volcanic_asteroid_belt' },
@@ -1876,7 +1906,7 @@ function isStarClass(cls) {
                 ]
             },
             'v_art': {
-                name: '🏭 Vanilla: Künstlich & Megastruktur',
+                name: '🏭 Vanilla: Artificial & Megastructure',
                 modifiers: [
                     { id: 'pm_ancient_automation', name: 'Ancient Automation', desc: 'pm_ancient_automation' },
                     { id: 'pm_ancient_factory', name: 'Ancient Factory', desc: 'pm_ancient_factory' },
@@ -1897,7 +1927,7 @@ function isStarClass(cls) {
                 ]
             },
             'v_special': {
-                name: '🌌 Vanilla: Spezial & Shroud',
+                name: '🌌 Vanilla: Special & Shroud',
                 modifiers: [
                     { id: 'pm_null', name: 'Null', desc: 'pm_null' },
                     { id: 'pm_radiant_luminary', name: 'Radiant Luminary', desc: 'pm_radiant_luminary' },
@@ -1908,7 +1938,7 @@ function isStarClass(cls) {
                 ]
             },
             'terraforming': {
-                name: '🌱 Terraforming-Kandidat',
+                name: '🌱 Terraforming Candidate',
                 modifiers: [
                     { id: 'terraforming_candidate', name: 'Terraforming Candidate', desc: 'terraforming_candidate' },
                     { id: 'toxic_terraforming_candidate', name: 'Toxic Terraforming Candidate', desc: 'toxic_terraforming_candidate' },
@@ -1916,7 +1946,7 @@ function isStarClass(cls) {
                 ]
             },
             'event_special': {
-                name: '⭐ Spezial & Event (verifiziert)',
+                name: '⭐ Special & Event (verified)',
                 modifiers: [
                     { id: 'holy_planet', name: 'Holy Planet', desc: 'holy_planet' },
                     { id: 'metal_planet', name: 'Metal Planet', desc: 'metal_planet' },
@@ -2055,7 +2085,7 @@ function isStarClass(cls) {
                     });
                 }
                 
-                // Parse neighbor_systems mit Bracket-Counting
+                // Parse neighbor_systems using bracket counting
                 let i = 0;
                 while (i < blockContent.length) {
                     const neighborKeyword = blockContent.indexOf('neighbor_system', i);
@@ -2220,6 +2250,10 @@ function isStarClass(cls) {
 
                 planet.moons = this.extractMoons(blockContent, id);
 
+                const _pc = this.extractCount(blockContent);
+                planet.countMin = _pc.min;
+                planet.countMax = _pc.max;
+
                 return planet;
             }
 
@@ -2276,6 +2310,10 @@ function isStarClass(cls) {
                         moons: [],
                         flags: []
                     };
+
+                    const _mc = this.extractCount(moonBlock);
+                    moon.countMin = _mc.min;
+                    moon.countMax = _mc.max;
 
                     moons.push(moon);
                     moonId++;
@@ -2342,6 +2380,26 @@ function isStarClass(cls) {
                 return false;
             }
 
+            extractCount(block) {
+                // Top-level only (braceDepth 0) + left word boundary: ignores the count of a
+                // nested moon block and keys like extra_planet_count. Cap [1,3].
+                let depth = 0, i = 0;
+                while (i < block.length) {
+                    const c = block[i];
+                    if (c === '{') { depth++; i++; continue; }
+                    if (c === '}') { depth--; i++; continue; }
+                    if (depth === 0 && (i === 0 || /\s|\{|\}/.test(block[i - 1]))) {
+                        const rem = block.substring(i);
+                        const r = rem.match(/^count\s*=\s*\{\s*min\s*=\s*(\d+)\s*max\s*=\s*(\d+)\s*\}/);
+                        if (r) return { min: clampCount(r[1]), max: clampCount(r[2]) };
+                        const f = rem.match(/^count\s*=\s*(\d+)/);
+                        if (f) { const n = clampCount(f[1]); return { min: n, max: n }; }
+                    }
+                    i++;
+                }
+                return { min: 1, max: 1 };
+            }
+
             extractValue(block, key) {
                 let braceDepth = 0;
                 let i = 0;
@@ -2391,13 +2449,13 @@ function isStarClass(cls) {
         // =====================================================
         
         function linkNeighborSystemsAfterImport() {
-            // Erstelle Mapping von Initializer-Namen zu System-Indizes
+            // Build mapping from initializer names to system indices
             const systemMap = new Map();
             allSystems.forEach((system, index) => {
                 systemMap.set(system.name, index);
             });
             
-            // ✅ FIX: Sammle alle Systeme, die als Nachbarn referenziert werden
+            // ✅ FIX: Collect all systems referenced as neighbors
             const referencedAsNeighbor = new Set();
             allSystems.forEach(system => {
                 system.neighborSystems.forEach(neighbor => {
@@ -2405,18 +2463,18 @@ function isStarClass(cls) {
                 });
             });
             
-            // Durchlaufe alle Systeme und verknüpfe Nachbarn
+            // Iterate over all systems and link neighbors
             allSystems.forEach((system, systemIndex) => {
-                // ✅ FIX: Markiere System als Nachbarsystem wenn es referenziert wird
+                // ✅ FIX: Mark system as neighbor system when it is referenced
                 system.isNeighborSystem = referencedAsNeighbor.has(system.name);
 
-                // ✅ FIX: Nachbarsysteme haben keine usage (nur Hauptsystem hat custom_empire)
+                // ✅ FIX: Neighbor systems have no usage (only the main system has custom_empire)
                 if (system.isNeighborSystem && !system.isMain) {
                     system.usage = 'none';
                 }
 
                 system.neighborSystems.forEach(neighbor => {
-                    // Prüfe ob das referenzierte System existiert
+                    // Check whether the referenced system exists
                     if (systemMap.has(neighbor.initializer)) {
                         neighbor.linkedSystemIndex = systemMap.get(neighbor.initializer);
                         neighbor.exists = true;
@@ -2473,7 +2531,7 @@ function isStarClass(cls) {
                                 allSystems[0].isMain = true;
                             }
                             
-                            // Auto-Verknüpfung von Nachbarsystemen
+                            // Auto-linking of neighbor systems
                             linkNeighborSystemsAfterImport();
                             
                             updateSystemList();
@@ -2641,7 +2699,7 @@ function isStarClass(cls) {
             const modifierSelect = document.getElementById('modifierSelection');
             const addBtn = document.getElementById('addModifierBtn');
             
-            modifierSelect.innerHTML = '<option value="">-- Modifier wählen --</option>';
+            modifierSelect.innerHTML = '<option value="">-- Select Modifier --</option>';
             
             if (category && MODIFIER_DATABASE[category]) {
                 modifierSelect.disabled = false;
@@ -2656,6 +2714,10 @@ function isStarClass(cls) {
                 modifierSelect.disabled = true;
                 addBtn.disabled = true;
             }
+            // Refresh the filter snapshot after (re)populating this select
+            SELECT_SNAPSHOTS[modifierSelect.id] = modifierSelect.innerHTML;
+            const filterInput = document.getElementById(modifierSelect.id + 'Filter');
+            if (filterInput) filterInput.value = '';
         };
 
         window.addModifierToPlanet = function() {
@@ -2663,7 +2725,7 @@ function isStarClass(cls) {
             const modifierId = document.getElementById('modifierSelection').value;
             
             if (!modifierId) {
-                alert('Bitte wählen Sie einen Modifier aus.');
+                alert('Please select a modifier.');
                 return;
             }
             const currentPlanet = getCurrentPlanet();
@@ -2688,11 +2750,11 @@ function isStarClass(cls) {
                 
                 // Reset selections
                 document.getElementById('modifierCategory').value = '';
-                document.getElementById('modifierSelection').innerHTML = '<option value="">-- Modifier wählen --</option>';
+                document.getElementById('modifierSelection').innerHTML = '<option value="">-- Select Modifier --</option>';
                 document.getElementById('modifierSelection').disabled = true;
                 document.getElementById('addModifierBtn').disabled = true;
             } else {
-                alert('Dieser Modifier wurde bereits hinzugefügt.');
+                alert('This modifier is already added.');
             }
             // Scroll to modifiers list
             const modifiersList = document.getElementById('selectedModifiersList');
@@ -2832,7 +2894,7 @@ function isStarClass(cls) {
             const modifierSelect = document.getElementById('moonModifierSelection');
             const addBtn = document.getElementById('addMoonModifierBtn');
             
-            modifierSelect.innerHTML = '<option value="">-- Modifier wählen --</option>';
+            modifierSelect.innerHTML = '<option value="">-- Select Modifier --</option>';
             
             if (category && MODIFIER_DATABASE[category]) {
                 modifierSelect.disabled = false;
@@ -2847,6 +2909,10 @@ function isStarClass(cls) {
                 modifierSelect.disabled = true;
                 addBtn.disabled = true;
             }
+            // Refresh the filter snapshot after (re)populating this select
+            SELECT_SNAPSHOTS[modifierSelect.id] = modifierSelect.innerHTML;
+            const filterInput = document.getElementById(modifierSelect.id + 'Filter');
+            if (filterInput) filterInput.value = '';
         };
 
         window.addModifierToMoon = function() {
@@ -2854,7 +2920,7 @@ function isStarClass(cls) {
             const modifierId = document.getElementById('moonModifierSelection').value;
             
             if (!modifierId) {
-                alert('Bitte wählen Sie einen Modifier aus.');
+                alert('Please select a modifier.');
                 return;
             }
             const currentMoon = getCurrentMoon();
@@ -2883,7 +2949,7 @@ function isStarClass(cls) {
                 document.getElementById('moonModifierSelection').disabled = true;
                 document.getElementById('addMoonModifierBtn').disabled = true;
             } else {
-                alert('Dieser Modifier wurde bereits hinzugefügt.');
+                alert('This modifier is already added.');
             }
         };
 
@@ -3183,7 +3249,7 @@ function getCurrentMoon() {
                 const icon = getPlanetIcon(planet.class);
                 const moonCount = planet.moons.length;
                         const isStar = isStarClass(planet.class);
-                        // ⭐ Sterne: Planet/Gürtel hinzufügen | 🌍 Planeten: Mond hinzufügen
+                        // ⭐ Stars: add planet/belt | 🌍 Planets: add moon
                         const addActions = isStar
                             ? `<button onclick="openAddPlanetModal()" class="stellaris-btn stellaris-btn-secondary text-xs px-2 py-1" title="Add Planet">🪐+</button>
                                         <button onclick="openAddAsteroidBeltModal()" class="stellaris-btn stellaris-btn-secondary text-xs px-2 py-1" title="Add Belt">☄️+</button>`
@@ -3197,9 +3263,9 @@ function getCurrentMoon() {
                                 <div>
                                     <div class="font-semibold text-blue-300">${index + 1}. ${planet.displayName}</div>
                                     <div class="text-sm text-gray-400">
-                                        ${getClassDisplayName(planet.class)} • Größe ${planet.size} • Orbit ${planet.orbitDistance}
-                                        ${planet.isStartingPlanet ? ' • <span class="text-green-400">🏠 Startplanet</span>' : ''}
-                                        ${planet.isGuaranteedHabitable ? ' • <span class="text-blue-400">🌍 Garantiert</span>' : ''}
+                                        ${getClassDisplayName(planet.class)} • Size ${planet.size} • Orbit ${planet.orbitDistance}
+                                        ${planet.isStartingPlanet ? ' • <span class="text-green-400">🏠 Starting Planet</span>' : ''}
+                                        ${planet.isGuaranteedHabitable ? ' • <span class="text-blue-400">🌍 Guaranteed</span>' : ''}
                                     </div>
                                 </div>
                             </div>
@@ -3222,7 +3288,7 @@ function getCurrentMoon() {
                             <div class="moon-item flex items-center justify-between">
                                 <div class="flex items-center gap-2">
                                     <span class="text-lg">${getPlanetIcon(moon.class)}</span>
-                                    <span class="text-sm">${moon.displayName} (${getClassDisplayName(moon.class)}, Größe ${moon.size})${startingIcon}${guaranteedIcon}</span>
+                                    <span class="text-sm">${moon.displayName} (${getClassDisplayName(moon.class)}, Size ${moon.size})${startingIcon}${guaranteedIcon}</span>
                                 </div>
                                 <div class="flex gap-1">
                                     <button onclick="editMoon(${planet.id}, ${moonIndex})" class="stellaris-btn stellaris-btn-secondary text-xs px-2 py-1">✏️</button>
@@ -3257,10 +3323,10 @@ function getCurrentMoon() {
         }
 
         function renderCombinedCelestialBodies(planets, asteroidBelts) {
-            // Kombiniere Planeten und Asteroidengürtel mit korrekter Orbit-Berechnung
+            // Combine planets and asteroid belts with correct orbit calculation
             const combined = [];
             
-            // Berechne kumulative Positionen für Planeten
+            // Compute cumulative positions for planets
             let cumulativeOrbit = 0;
             planets.forEach((planet, index) => {
                 cumulativeOrbit += planet.orbitDistance;
@@ -3269,11 +3335,11 @@ function getCurrentMoon() {
                     data: planet,
                     index: index,
                     orbit: cumulativeOrbit,  // Kumulative Position
-                    displayOrbit: planet.orbitDistance  // Original für Anzeige
+                    displayOrbit: planet.orbitDistance  // original for display
                 });
             });
             
-            // Füge Asteroidengürtel mit absoluter Position hinzu
+            // Add asteroid belts with absolute position
             asteroidBelts.forEach((belt, index) => {
                 combined.push({
                     type: 'asteroid',
@@ -3284,7 +3350,7 @@ function getCurrentMoon() {
                 });
             });
             
-            // Sortiere nach tatsächlicher Orbit-Position
+            // Sort by actual orbit position
             combined.sort((a, b) => a.orbit - b.orbit);
                 
                 if (combined.length === 0) {
@@ -3298,7 +3364,7 @@ function getCurrentMoon() {
                         const icon = getPlanetIcon(planet.class);
                         const moonCount = planet.moons.length;
                         const isStar = isStarClass(planet.class);
-                        // ⭐ Sterne: Planet/Gürtel hinzufügen | 🌍 Planeten: Mond hinzufügen
+                        // ⭐ Stars: add planet/belt | 🌍 Planets: add moon
                         const addActions = isStar
                             ? `<button onclick="openAddPlanetModal()" class="stellaris-btn stellaris-btn-secondary text-xs px-2 py-1" title="Add Planet">🪐+</button>
                                         <button onclick="openAddAsteroidBeltModal()" class="stellaris-btn stellaris-btn-secondary text-xs px-2 py-1" title="Add Belt">☄️+</button>`
@@ -3330,7 +3396,7 @@ function getCurrentMoon() {
                         `;
                         return html;
                     } else {
-                        // Asteroidengürtel
+                        // Asteroid belts
                         const belt = item.data;
                         const index = item.index;
                         return `
@@ -3343,7 +3409,10 @@ function getCurrentMoon() {
                                             <div class="text-xs text-gray-400">${belt.type} • Radius: ${item.displayOrbit} (Position: ${item.orbit})</div>
                                         </div>
                                     </div>
-                                    <button onclick="deleteAsteroidBelt(${index})" class="stellaris-btn stellaris-btn-danger text-xs px-2 py-1">🗑️</button>
+                                    <div class="flex gap-1">
+                                        <button onclick="openEditAsteroidBeltModal(${index})" class="stellaris-btn stellaris-btn-secondary text-xs px-2 py-1" title="Edit Belt">\u270f\ufe0f</button>
+                                        <button onclick="deleteAsteroidBelt(${index})" class="stellaris-btn stellaris-btn-danger text-xs px-2 py-1">\ud83d\uddd1\ufe0f</button>
+                                    </div>
                                 </div>
                             </div>
                         `;
@@ -3388,7 +3457,7 @@ function getCurrentMoon() {
             return neighbors.map((neighbor, index) => {
                 const jumps = `${neighbor.hyperlaneJumps.min}-${neighbor.hyperlaneJumps.max} Hyperlane Jumps`;
                 
-                // Status-Icon und Info
+                // Status icon and info
                 let statusIcon = '🔗';
                 let statusColor = 'text-purple-400';
                 let displayName = neighbor.initializer;
@@ -3436,10 +3505,10 @@ function getCurrentMoon() {
             if (useAutoName) {
                 nameField.disabled = true;
                 nameField.value = '';
-                nameField.placeholder = 'Wird automatisch von Stellaris gesetzt';
+                nameField.placeholder = 'Set automatically by Stellaris';
             } else {
                 nameField.disabled = false;
-                nameField.placeholder = 'z.B. Earth';
+                nameField.placeholder = 'e.g. Earth';
             }
         }
         
@@ -3461,6 +3530,8 @@ function getCurrentMoon() {
             document.getElementById('planetClass').value = 'pc_continental';
             document.getElementById('planetSize').value = '16';
             document.getElementById('planetOrbit').value = '25';
+            document.getElementById('planetCountMin').value = '1';
+            document.getElementById('planetCountMax').value = '1';
             
             // NEU: Orbit Angle Preset Setup
             document.getElementById('orbitAngleMode').value = 'preset';
@@ -3490,6 +3561,8 @@ function getCurrentMoon() {
             document.getElementById('planetClass').value = 'star';
             document.getElementById('planetSize').value = '30';  // Default star size
             document.getElementById('planetOrbit').value = '0';   // Primary star at center
+            document.getElementById('planetCountMin').value = '1';
+            document.getElementById('planetCountMax').value = '1';
             
             // Orbit angle
             document.getElementById('orbitAngleMode').value = 'preset';
@@ -3548,6 +3621,8 @@ function getCurrentMoon() {
             document.getElementById('planetClass').value = planet.class;
             document.getElementById('planetSize').value = planet.size;
             document.getElementById('planetOrbit').value = planet.orbitDistance;
+            document.getElementById('planetCountMin').value = planet.countMin ?? 1;
+            document.getElementById('planetCountMax').value = planet.countMax ?? 1;
             
             // NEU: Orbit Angle Setup basierend auf Planet-Daten
             if (planet.orbitAngleType === 'fixed') {
@@ -3601,6 +3676,9 @@ function getCurrentMoon() {
             const size = parseInt(document.getElementById('planetSize').value);
             const orbit = parseInt(document.getElementById('planetOrbit').value);
             const changeOrbit = parseInt(document.getElementById('planetChangeOrbit').value);
+            let countMin = clampCount(document.getElementById('planetCountMin')?.value);
+            let countMax = clampCount(document.getElementById('planetCountMax')?.value);
+            if (countMax < countMin) countMax = countMin;
             const hasRing = document.getElementById('planetHasRing').checked;
             const isStarting = document.getElementById('planetIsStarting').checked;
             const isHomePlanet = document.getElementById('planetIsHomePlanet').checked;
@@ -3615,13 +3693,30 @@ function getCurrentMoon() {
                 const preset = document.getElementById('planetAnglePreset').value;
                 orbitAngleType = 'fixed';
                 orbitAngle = parseInt(preset);
-                orbitAngleMin = 90;  // Fallback für Export
+                orbitAngleMin = 90;  // fallback for export
                 orbitAngleMax = 270;
             } else {
                 orbitAngleType = 'range';
                 orbitAngle = 0;
                 orbitAngleMin = parseInt(document.getElementById('planetAngleMin').value);
                 orbitAngleMax = parseInt(document.getElementById('planetAngleMax').value);
+            }
+
+            // ✅ Input validation: don't let invalid numbers into the model/export.
+            //    Prevents "orbit_distance = NaN" / "size = NaN" in the generated file.
+            const planetNumChecks = [['Orbit Distance', orbit], ['Size', size], ['Change Orbit', changeOrbit]];
+            if (orbitAngleType === 'range') {
+                planetNumChecks.push(['Orbit Angle Min', orbitAngleMin], ['Orbit Angle Max', orbitAngleMax]);
+            }
+            for (const [label, val] of planetNumChecks) {
+                if (!Number.isFinite(val)) {
+                    showNotification(`⚠️ Invalid value for ${label} – please enter a number.`);
+                    return;
+                }
+            }
+            if (orbit < 0) {  // orbit_distance is a distance → must not be negative
+                showNotification('⚠️ Orbit Distance must not be negative.');
+                return;
             }
             
             const planetData = {
@@ -3638,6 +3733,8 @@ function getCurrentMoon() {
                 orbitAngleMin: orbitAngleMin,
                 orbitAngleMax: orbitAngleMax,
                 changeOrbit: changeOrbit,
+                countMin: countMin,
+                countMax: countMax,
                 hasRing: hasRing,
                 isStartingPlanet: isStarting,
                 isHomePlanet: isHomePlanet,
@@ -3700,17 +3797,17 @@ function getCurrentMoon() {
             if (useAutoName) {
                 nameField.disabled = true;
                 nameField.value = '';
-                nameField.placeholder = 'Wird automatisch von Stellaris gesetzt';
+                nameField.placeholder = 'Set automatically by Stellaris';
             } else {
                 nameField.disabled = false;
-                nameField.placeholder = 'z.B. Luna';
+                nameField.placeholder = 'e.g. Luna';
             }
         }
         
         // =====================================================
-        // PATH HELPERS für verschachtelte Körper (Planet -> Mond -> Sub-Mond)
-        // path ist ein Index-Array: [planetIndex] oder [planetIndex, moonIndex, ...]
-        // path[0] indiziert system.planets, jeder weitere Index geht in .moons hinein.
+        // PATH HELPERS for nested bodies (planet -> moon -> sub-moon)
+        // path is an index array: [planetIndex] or [planetIndex, moonIndex, ...]
+        // path[0] indexes system.planets; each further index descends into .moons.
         // =====================================================
         function getBodyByPath(system, path) {
             if (!system || !Array.isArray(path) || path.length === 0) return null;
@@ -3726,13 +3823,13 @@ function getCurrentMoon() {
         function deleteBodyByPath(system, path) {
             if (!system || !Array.isArray(path) || path.length === 0) return false;
             const lastIndex = path[path.length - 1];
-            // Top-Level-Körper: direkt aus system.planets entfernen
+            // Top-level body: remove directly from system.planets
             if (path.length === 1) {
                 if (!Array.isArray(system.planets) || lastIndex < 0 || lastIndex >= system.planets.length) return false;
                 system.planets.splice(lastIndex, 1);
                 return true;
             }
-            // Verschachtelt: Eltern über path ohne letzten Index holen, dann aus .moons löschen
+            // Nested: get the parent via path without the last index, then delete from .moons
             const parent = getBodyByPath(system, path.slice(0, -1));
             if (!parent || !Array.isArray(parent.moons) || lastIndex < 0 || lastIndex >= parent.moons.length) return false;
             parent.moons.splice(lastIndex, 1);
@@ -3748,6 +3845,8 @@ function getCurrentMoon() {
             document.getElementById('moonClass').value = 'pc_barren_cold';
             document.getElementById('moonSize').value = '8';
             document.getElementById('moonOrbit').value = '10';
+            document.getElementById('moonCountMin').value = '1';
+            document.getElementById('moonCountMax').value = '1';
             document.getElementById('moonIsStarting').checked = false;
             document.getElementById('moonIsGuaranteedHabitable').checked = false;
             document.getElementById('moonUseAutoName').checked = false;
@@ -3781,6 +3880,8 @@ function getCurrentMoon() {
             document.getElementById('moonClass').value = moon.class;
             document.getElementById('moonSize').value = moon.size;
             document.getElementById('moonOrbit').value = moon.orbitDistance;
+            document.getElementById('moonCountMin').value = moon.countMin ?? 1;
+            document.getElementById('moonCountMax').value = moon.countMax ?? 1;
             document.getElementById('moonIsStarting').checked = moon.isStartingPlanet || false;
             document.getElementById('moonIsGuaranteedHabitable').checked = false;
             document.getElementById('moonUseAutoName').checked = moon.useAutoName || false;
@@ -3815,6 +3916,9 @@ function getCurrentMoon() {
             
             const size = parseInt(document.getElementById('moonSize').value);
             const orbit = parseInt(document.getElementById('moonOrbit').value);
+            let countMin = clampCount(document.getElementById('moonCountMin')?.value);
+            let countMax = clampCount(document.getElementById('moonCountMax')?.value);
+            if (countMax < countMin) countMax = countMin;
             const isStarting = document.getElementById('moonIsStarting').checked;
             const isGuaranteedHabitable = document.getElementById('moonIsGuaranteedHabitable').checked;
             
@@ -3829,6 +3933,22 @@ function getCurrentMoon() {
                 orbitAngle = 0;
                 orbitAngleMin = parseInt(document.getElementById('moonAngleMin').value);
                 orbitAngleMax = parseInt(document.getElementById('moonAngleMax').value);
+            }
+
+            // ✅ Input validation: no invalid numbers (prevents "NaN" in the export).
+            const moonNumChecks = [['Orbit Distance', orbit], ['Size', size]];
+            if (orbitAngleType === 'range') {
+                moonNumChecks.push(['Orbit Angle Min', orbitAngleMin], ['Orbit Angle Max', orbitAngleMax]);
+            }
+            for (const [label, val] of moonNumChecks) {
+                if (!Number.isFinite(val)) {
+                    showNotification(`⚠️ Invalid value for ${label} – please enter a number.`);
+                    return;
+                }
+            }
+            if (orbit < 0) {
+                showNotification('⚠️ Orbit Distance must not be negative.');
+                return;
             }
             
             const parent = getBodyByPath(allSystems[currentSystemIndex], editingMoonParentPath);
@@ -3850,12 +3970,14 @@ function getCurrentMoon() {
                 orbitAngleMin: orbitAngleMin,
                 orbitAngleMax: orbitAngleMax,
                 changeOrbit: 0,
+                countMin: countMin,
+                countMax: countMax,
                 hasRing: false,
                 isStartingPlanet: isStarting,
                 isGuaranteedHabitable: isGuaranteedHabitable,
                 modifiers: existing ? (existing.modifiers || []) : [],
                 deposits: existing ? (existing.deposits || []) : [],
-                moons: existing ? (existing.moons || []) : [],   // ✅ Sub-Monde NICHT verlieren
+                moons: existing ? (existing.moons || []) : [],   // ✅ do NOT lose sub-moons
                 flags: existing ? (existing.flags || []) : []
             };
             
@@ -3942,7 +4064,7 @@ function getCurrentMoon() {
             document.getElementById('neighborSpawnChance').disabled = true;
             document.getElementById('neighborSpawnChance').value = '100';
             
-            // Fülle System-Auswahl
+            // Populate system selection
             const select = document.getElementById('neighborSystemSelect');
             select.innerHTML = '<option value="">-- Select from list or enter manually --</option>';
             
@@ -3995,13 +4117,13 @@ function getCurrentMoon() {
                 return;
             }
             
-            // ✅ FIX: Verwende echten System-Identifier wenn aus Liste gewählt, sonst generiere neu
+            // ✅ FIX: Use the real system identifier when chosen from the list, otherwise generate a new one
             let identifier;
             if (selectedSystemIndex !== '') {
-                // Benutzer hat existierendes System aus Dropdown gewählt
+                // User picked an existing system from the dropdown
                 identifier = allSystems[selectedSystemIndex].name;
             } else {
-                // Benutzer hat manuell einen Namen eingegeben
+                // User entered a name manually
                 identifier = generateNeighborIdentifier(displayName);
             }
             
@@ -4042,26 +4164,55 @@ function getCurrentMoon() {
         // =====================================================
         
         function openAddAsteroidBeltModal() {
+            editingBeltIndex = null;
+            document.getElementById('beltModalTitle').textContent = '\u2604\ufe0f Add Asteroid Belt';
             document.getElementById('beltType').value = 'rocky_asteroid_belt';
             document.getElementById('beltRadius').value = '90';
             
             document.getElementById('asteroidBeltModal').classList.add('active');
         }
 
+        function openEditAsteroidBeltModal(index) {
+            const belt = allSystems[currentSystemIndex].asteroidBelts[index];
+            if (!belt) { showNotification('\u26a0\ufe0f Asteroid belt not found!'); return; }
+            editingBeltIndex = index;
+            document.getElementById('beltModalTitle').textContent = '\u2604\ufe0f Edit Asteroid Belt';
+            // Preserve imported/mod belt types not present in the dropdown
+            const sel = document.getElementById('beltType');
+            if (![...sel.options].some(o => o.value === belt.type)) {
+                const opt = document.createElement('option');
+                opt.value = belt.type;
+                opt.textContent = belt.type + ' (imported)';
+                sel.appendChild(opt);
+            }
+            sel.value = belt.type;
+            document.getElementById('beltRadius').value = belt.radius;
+            document.getElementById('asteroidBeltModal').classList.add('active');
+        }
+
         function saveAsteroidBelt() {
             const type = document.getElementById('beltType').value;
             const radius = parseInt(document.getElementById('beltRadius').value);
-            
-            const beltData = {
-                id: Date.now() + Math.random(),
-                type: type,
-                radius: radius
-            };
-            
-            allSystems[currentSystemIndex].asteroidBelts.push(beltData);
-            
+
+            // Input validation: no invalid numbers into the model/export
+            if (!type) { showNotification('\u26a0\ufe0f Please select a belt type.'); return; }
+            if (!Number.isFinite(radius) || radius < 0) {
+                showNotification('\u26a0\ufe0f Invalid value for Radius \– please enter a number \≥ 0.');
+                return;
+            }
+
+            const belts = allSystems[currentSystemIndex].asteroidBelts;
+            if (editingBeltIndex !== null && belts[editingBeltIndex]) {
+                belts[editingBeltIndex].type = type;
+                belts[editingBeltIndex].radius = radius;
+                showNotification('\✅ Asteroid belt updated!');
+            } else {
+                belts.push({ id: Date.now() + Math.random(), type: type, radius: radius });
+                showNotification('\✅ Asteroid belt added!');
+            }
+            editingBeltIndex = null;
+
             document.getElementById('asteroidBeltModal').classList.remove('active');
-            showNotification('✅ Asteroid belt added!');
             loadSystemIntoEditor(allSystems[currentSystemIndex]);
         }
 
@@ -4229,8 +4380,8 @@ function getCurrentMoon() {
             // Render star configuration list
             renderStarConfigList();
             
-            // ✅ FIX: Properties-Modal immer schließen, damit nie zwei Modals gestapelt sind
-            // (verhindert den "über das Fenster gelegt"-Overlay beim manuellen Button)
+            // ✅ FIX: Always close the properties modal so two modals are never stacked
+            // (prevents the overlay-stacked-on-the-window effect when using the manual button)
             document.getElementById('systemPropertiesModal').classList.remove('active');
             
             // Show modal
@@ -4341,10 +4492,10 @@ function getCurrentMoon() {
                     displayName: star.name, // ✅ FIX: Add displayName for visualizer
                     class: star.class,
                     size: star.size,
-                    orbitDistance: star.orbitDistance,
+                    orbitDistance: Number.isFinite(star.orbitDistance) ? star.orbitDistance : 0,
                     // ✅ FIX: Set orbitAngleType for proper export
                     orbitAngleType: 'fixed',
-                    orbitAngle: star.orbitAngle,
+                    orbitAngle: Number.isFinite(star.orbitAngle) ? star.orbitAngle : 0,
                     orbitAngleMin: 90,
                     orbitAngleMax: 270,
                     hasRing: false,
@@ -4456,13 +4607,42 @@ function getCurrentMoon() {
         window.openAddNeighborModal = openAddNeighborModal;
         window.deleteNeighborSystem = deleteNeighborSystem;
         window.openAddAsteroidBeltModal = openAddAsteroidBeltModal;
+        window.openEditAsteroidBeltModal = openEditAsteroidBeltModal;
         window.deleteAsteroidBelt = deleteAsteroidBelt;
+
+        // --- Select filter (deposits & modifiers) ---
+        // Rebuilds the select from a snapshot on every input; empty query restores all.
+        const SELECT_SNAPSHOTS = {};
+        function attachSelectFilter(selectId) {
+            const input = document.getElementById(selectId + 'Filter');
+            const sel = document.getElementById(selectId);
+            if (!input || !sel) return;
+            if (!(selectId in SELECT_SNAPSHOTS)) SELECT_SNAPSHOTS[selectId] = sel.innerHTML;
+            input.addEventListener('input', () => {
+                const q = input.value.trim().toLowerCase();
+                const prev = sel.value;
+                sel.innerHTML = SELECT_SNAPSHOTS[selectId];
+                if (q) {
+                    [...sel.querySelectorAll('option')].forEach(o => {
+                        if (o.value && !(o.textContent.toLowerCase().includes(q) || o.value.toLowerCase().includes(q))) o.remove();
+                    });
+                    [...sel.querySelectorAll('optgroup')].forEach(g => {
+                        if (!g.querySelector('option')) g.remove();
+                    });
+                }
+                // Keep the previous selection if it still matches the filter
+                if (prev && [...sel.options].some(o => o.value === prev)) sel.value = prev;
+            });
+        }
+        attachSelectFilter('depositSelection');
+        attachSelectFilter('modifierSelection');
+        attachSelectFilter('moonModifierSelection');
 
         // =====================================================
         // MOD FOLDER GENERATOR (FS Access API + ZIP-Fallback)
         // =====================================================
 
-        // --- Minimaler ZIP-Writer (STORE/unkomprimiert, kein externer Dependency) ---
+        // --- Minimal ZIP writer (STORE/uncompressed, no external dependency) ---
         const CRC32_TABLE = (() => {
             const t = new Uint32Array(256);
             for (let n = 0; n < 256; n++) {
@@ -4543,7 +4723,7 @@ function getCurrentMoon() {
                         const locDir = await _mkPath(modDir, ['localisation', 'english']);
                         await _writeFile(locDir, 'initializers_names_l_english.yml', enc.encode(BOM + ymlContent));
                     }
-                    showNotification(`📦 Mod "${modName}" in den gewählten Ordner geschrieben!`, 'success');
+                    showNotification(`📦 Mod "${modName}" written to the selected folder!`, 'success');
                     return;
                 } catch (err) {
                     if (err.name === 'AbortError') { showNotification('Folder selection cancelled.', 'warning'); return; }
@@ -4551,7 +4731,7 @@ function getCurrentMoon() {
                 }
             }
 
-            // 2) Fallback: ZIP-Download (jeder Browser)
+            // 2) Fallback: ZIP download (any browser)
             const files = [
                 { name: `${folderName}/descriptor.mod`, bytes: enc.encode(descriptor) },
                 { name: `${folderName}.mod`, bytes: enc.encode(modPointer) },
@@ -4561,20 +4741,20 @@ function getCurrentMoon() {
             const url = URL.createObjectURL(buildZip(files));
             const a = document.createElement('a'); a.href = url; a.download = `${folderName}.zip`; a.click();
             URL.revokeObjectURL(url);
-            showNotification(`📦 Mod "${modName}" als ZIP heruntergeladen!`, 'success');
+            showNotification(`📦 Mod "${modName}" downloaded as ZIP!`, 'success');
         }
 
-        // OS-spezifischer Pfad-Hinweis für den mod-Ordner
+        // OS-specific path hint for the mod folder
         function expectedStellarisModDir() {
             const ua = navigator.userAgent || '', p = navigator.platform || '';
-            if (/Win/i.test(ua) || /Win/i.test(p))            return 'Dokumente\\Paradox Interactive\\Stellaris\\mod';
+            if (/Win/i.test(ua) || /Win/i.test(p))            return 'Documents\\Paradox Interactive\\Stellaris\\mod';
             if (/Mac/i.test(ua) || /Mac/i.test(p))            return '~/Documents/Paradox Interactive/Stellaris/mod';
             if (/Linux|X11|CrOS/i.test(ua) || /Linux/i.test(p)) return '~/.local/share/Paradox Interactive/Stellaris/mod';
             return 'Paradox Interactive/Stellaris/mod';
         }
         (() => {
             const hint = document.getElementById('modPathHint');
-            if (hint) hint.textContent = '📂 Tipp: dein Stellaris mod-Ordner liegt meist unter ' + expectedStellarisModDir();
+            if (hint) hint.textContent = '📂 Tip: your Stellaris mod folder is usually located at ' + expectedStellarisModDir();
         })();
 
         document.getElementById('generateModBtn')?.addEventListener('click', generateModFolder);
@@ -4585,7 +4765,15 @@ function getCurrentMoon() {
         
         function generateSystemCode(system) {
             let code = `${system.name} = {\n`;
-            code += `\tname = "${system.displayName}"\n`;
+            // ✅ Loc-consistent: with localization enabled, reference the generated loc key
+            //    (vanilla style). With "skip localization", the plain-text name stays inline.
+            const skipLoc = document.getElementById('skipLocalizationCheckbox')?.checked || false;
+            if (skipLoc) {
+                code += `\tname = "${system.displayName}"\n`;
+            } else {
+                const locBaseName = system.name.replace(/_system_initializer$/, '');
+                code += `\tname = "${locBaseName}_system_initializer_NAME"\n`;
+            }
             code += `\tclass = "${system.class}"\n`;
             
             system.asteroidBelts.forEach(belt => {
@@ -4677,18 +4865,27 @@ function getCurrentMoon() {
             return code;
         }
 
-        function generatePlanetCode(planet, indentLevel) {
+        function generatePlanetCode(planet, indentLevel, blockKeyword = 'planet') {
             const tab = '\t'.repeat(indentLevel);
             let code = `\n${tab}planet = {\n`;
+
+            // count: double/multiple planets (vanilla: count as first key, max 3)
+            const _cMin = clampCount(planet.countMin ?? 1);
+            const _cMax = clampCount(planet.countMax ?? 1);
+            if (_cMin === _cMax) {
+                if (_cMin > 1) code += `${tab}\tcount = ${_cMin}\n`;
+            } else {
+                code += `${tab}\tcount = { min = ${Math.min(_cMin, _cMax)} max = ${Math.max(_cMin, _cMax)} }\n`;
+            }
             
             // ✅ Check modifier format preference
             const useLegacyModifiers = document.getElementById('legacyModifierFormatCheckbox')?.checked || false;
             
-            // Nur Name exportieren wenn nicht automatisch von Stellaris gesetzt werden soll
+            // Only export the name if it shouldn't be set automatically by Stellaris
             if (!planet.useAutoName && planet.name) {
                 code += `${tab}\tname = "${planet.name}"\n`;
             }
-            // Verwende ideal_design_class für garantierte bewohnbare Planeten
+            // Use ideal_design_class for guaranteed habitable planets
             if (planet.isGuaranteedHabitable) {
                 code += `${tab}\tclass = ideal_design_class\n`;
             } else {
@@ -4808,8 +5005,7 @@ function getCurrentMoon() {
             }
             
             planet.moons.forEach(moon => {
-                const moonCode = generatePlanetCode(moon, indentLevel + 1);
-                code += moonCode.replace(/\n\s*planet\s*=\s*\{/, '\n' + tab + '\tmoon = {');
+                code += generatePlanetCode(moon, indentLevel + 1, 'moon');
             });
             
             code += `${tab}}\n`;
@@ -4839,6 +5035,12 @@ function getCurrentMoon() {
         // HELPER FUNCTIONS
         // =====================================================
         
+        function clampCount(v) {
+            const n = parseInt(v);
+            if (!Number.isFinite(n)) return 1;
+            return Math.min(3, Math.max(1, n));
+        }
+
         function getPlanetIcon(planetClass) {
             const icons = {
                 'pc_g_star': '☀️', 'pc_k_star': '🌟', 'pc_m_star': '🔴',
@@ -4978,7 +5180,7 @@ function getCurrentMoon() {
             // Draw background grid
             drawGrid();
             
-            // ✅ Filter: Trenne Sterne von echten Planeten (single canonical star check)
+            // ✅ Filter: separate stars from real planets (single canonical star check)
             const actualPlanets = system.planets.filter(p => !isStarClass(p.class));
             const starPlanets = system.planets.filter(p => isStarClass(p.class));
             
@@ -5000,7 +5202,8 @@ function getCurrentMoon() {
                 }
                 
                 const distance = cumulativeStarOrbit * canvasScale;
-                const angle = (starPlanet.orbitAngleType === 'fixed' ? starPlanet.orbitAngle : 90) * Math.PI / 180;
+                const _starAngleDeg = (starPlanet.orbitAngleType === 'fixed' && Number.isFinite(starPlanet.orbitAngle)) ? starPlanet.orbitAngle : 90;
+                const angle = _starAngleDeg * Math.PI / 180;
                 const x = canvasOffsetX + Math.cos(angle) * distance;
                 const y = canvasOffsetY + Math.sin(angle) * distance;
                 
@@ -5042,18 +5245,18 @@ function getCurrentMoon() {
                 }
             });
             
-            // ✅ KUMULATIVE Orbit-Berechnung für ECHTE Planeten mit orbit_distance = 0 Support
+            // ✅ CUMULATIVE orbit calculation for REAL planets with orbit_distance = 0 support
             let cumulativePlanetOrbit = 0;
-            let sharedOrbitGroup = []; // Gruppe von Planeten auf derselben Bahn
-            let globalPlanetAngleIndex = 0; // ✅ Globaler Winkel-Counter für visuelle Verteilung
+            let sharedOrbitGroup = []; // group of planets on the same orbit
+            let globalPlanetAngleIndex = 0; // ✅ global angle counter for visual distribution
             
             actualPlanets.forEach((planet, index) => {
-                // Berechne kumulative Orbit-Position
+                // Compute cumulative orbit position
                 if (planet.orbitDistance > 0) {
-                    // Zeichne vorherige Gruppe mit orbit_distance = 0
+                    // Draw previous group with orbit_distance = 0
                     if (sharedOrbitGroup.length > 0) {
                         drawPlanetsAndMoons(sharedOrbitGroup, cumulativePlanetOrbit, globalPlanetAngleIndex);
-                        globalPlanetAngleIndex += sharedOrbitGroup.length; // Erhöhe Counter
+                        globalPlanetAngleIndex += sharedOrbitGroup.length; // increment counter
                         sharedOrbitGroup = [];
                     }
                     
@@ -5061,55 +5264,61 @@ function getCurrentMoon() {
                     drawOrbit(cumulativePlanetOrbit);
                 }
                 
-                // Erster Planet mit orbit_distance = 0
+                // First planet with orbit_distance = 0
                 if (index === 0 && planet.orbitDistance === 0) {
                     cumulativePlanetOrbit = 30;
                     drawOrbit(cumulativePlanetOrbit);
                 }
                 
-                // Füge Planet zur aktuellen Orbit-Gruppe hinzu
+                // Add planet to the current orbit group
                 sharedOrbitGroup.push({
                     planet: planet,
                     orbitDistance: cumulativePlanetOrbit
                 });
             });
             
-            // Zeichne letzte Gruppe
+            // Draw last group
             if (sharedOrbitGroup.length > 0) {
                 drawPlanetsAndMoons(sharedOrbitGroup, cumulativePlanetOrbit, globalPlanetAngleIndex);
             }
             
-            // ✅ ABSOLUTE Position für Asteroid-Gürtel
+            // ✅ ABSOLUTE position for asteroid belts
             system.asteroidBelts.forEach(belt => {
                 drawAsteroidBelt(belt.radius);
             });
         }
         
-        // ✅ NEW: Zeichne Planeten-Gruppe und ihre Monde
+        // ✅ NEW: Draw planet group and its moons
         function drawPlanetsAndMoons(planetGroup, orbitDistance, startAngleIndex) {
-            // ✅ Wenn Gruppe nur 1 Planet hat: Verwende globale Verteilung (0°, 90°, 180°, 270°)
-            // ✅ Wenn Gruppe mehrere Planeten hat: Verteile sie gleichmäßig auf dieser Bahn
-            const useGlobalDistribution = planetGroup.length === 1;
-            const angleStep = useGlobalDistribution ? 90 : (360 / planetGroup.length);
-            
-            planetGroup.forEach((item, index) => {
-                const planet = item.planet;
+            // ✅ If the group has only 1 planet: use global distribution (0°, 90°, 180°, 270°)
+            // ✅ If the group has multiple planets: distribute them evenly on this orbit
+            // count: fan out each planet into its display instances (range max)
+            const planetInstances = [];
+            planetGroup.forEach(item => {
+                const cnt = Math.max(1, clampCount(item.planet.countMax ?? item.planet.countMin ?? 1));
+                for (let k = 0; k < cnt; k++) planetInstances.push(item.planet);
+            });
+
+            const useGlobalDistribution = planetInstances.length === 1;
+            const angleStep = useGlobalDistribution ? 90 : (360 / planetInstances.length);
+
+            planetInstances.forEach((planet, index) => {
                 const angleIndex = useGlobalDistribution ? startAngleIndex : index;
                 const planetAngle = (angleIndex * angleStep) * Math.PI / 180;
                 //```
                 //
                 //---
 
-                //## ✅ **Was wurde gefixt:**
+                //## ✅ **What was fixed:**
 
-                //### **Neue Winkelverteilung:**
-                //1. ✅ **Einzelne Planeten auf verschiedenen Orbits**: 0°, 90°, 180°, 270°, 0°, 90°, ...
-                //2. ✅ **Mehrere Planeten auf demselben Orbit**: Gleichmäßig verteilt auf 360° / Anzahl
-                //3. ✅ **Globaler Counter** zählt alle Planeten für bessere visuelle Verteilung
+                //### **New angle distribution:**
+                //1. ✅ **Single planets on different orbits**: 0°, 90°, 180°, 270°, 0°, 90°, ...
+                //2. ✅ **Multiple planets on the same orbit**: evenly distributed over 360° / count
+                //3. ✅ **Global counter** counts all planets for better visual distribution
 
-                //### **Beispiele:**
+                //### **Examples:**
                 //```
-                //System mit 8 Planeten auf verschiedenen Orbits:
+                //System with 8 planets on different orbits:
                 //- Planet 1 (Orbit 10): 0°
                 //- Planet 2 (Orbit 25): 90°
                 //- Planet 3 (Orbit 40): 180°
@@ -5119,15 +5328,15 @@ function getCurrentMoon() {
                 //- Planet 7 (Orbit 120): 180°
                 //- Planet 8 (Orbit 150): 270°
 
-                //System mit 3 Planeten auf EINEM Orbit (orbit_distance = 0):
+                //System with 3 planets on ONE orbit (orbit_distance = 0):
                 //- Planet 1: 0°
                 //- Planet 2: 120°
                 //- Planet 3: 240°//
                 
-                // ✅ Zeichne Planeten an seiner Position
+                // ✅ Draw planet at its position
                 drawPlanet(planet, orbitDistance, planetAngle);
                 
-                // ✅ Zeichne Monde um diesen Planeten
+                // ✅ Draw moons around this planet
                 if (planet.moons && planet.moons.length > 0) {
                     const planetDistance = orbitDistance * canvasScale;
                     const planetX = canvasOffsetX + Math.cos(planetAngle) * planetDistance;
@@ -5138,7 +5347,7 @@ function getCurrentMoon() {
                     
                     planet.moons.forEach((moon, moonIndex) => {
                         if (moon.orbitDistance > 0) {
-                            // Zeichne vorherige Mond-Gruppe
+                            // Draw previous moon group
                             if (sharedMoonGroup.length > 0) {
                                 drawMoonGroup(sharedMoonGroup, planetX, planetY, cumulativeMoonOrbit);
                                 sharedMoonGroup = [];
@@ -5156,7 +5365,7 @@ function getCurrentMoon() {
                         sharedMoonGroup.push(moon);
                     });
                     
-                    // Zeichne letzte Mond-Gruppe
+                    // Draw last moon group
                     if (sharedMoonGroup.length > 0) {
                         drawMoonGroup(sharedMoonGroup, planetX, planetY, cumulativeMoonOrbit);
                     }
@@ -5164,17 +5373,24 @@ function getCurrentMoon() {
             });
         }
         
-        // ✅ NEW: Zeichne Mond-Gruppe um Planeten
+        // ✅ NEW: Draw moon group around planet
         function drawMoonGroup(moons, planetX, planetY, moonOrbitRadius) {
-            const angleStep = 360 / moons.length;
-            
-            moons.forEach((moon, index) => {
+            // count: fan out moons into their display instances (range max)
+            const moonInstances = [];
+            moons.forEach(m => {
+                const cnt = Math.max(1, clampCount(m.countMax ?? m.countMin ?? 1));
+                for (let k = 0; k < cnt; k++) moonInstances.push(m);
+            });
+
+            const angleStep = 360 / moonInstances.length;
+
+            moonInstances.forEach((moon, index) => {
                 const moonAngle = (index * angleStep) * Math.PI / 180;
                 drawMoonAroundPlanet(moon, planetX, planetY, moonOrbitRadius, moonAngle);
             });
         }
 
-        // ✅ NEW: Zeichne Mond-Umlaufbahn um Planeten (nicht um Stern!)
+        // ✅ NEW: Draw moon orbit around the planet (not around the star!)
         function drawMoonOrbit(planetOrbit, planetAngle, moonOrbitRadius) {
             // Calculate planet position
             const planetDistance = planetOrbit * canvasScale;
@@ -5195,15 +5411,17 @@ function getCurrentMoon() {
             ctx.setLineDash([]);
         }
         
-        // ✅ NEW: Zeichne Mond relativ zum Planeten
+        // ✅ NEW: Draw moon relative to the planet
         function drawMoonAroundPlanet(moon, planetX, planetY, moonOrbitRadius, moonAngle) {
-            const moonDistance = moonOrbitRadius * canvasScale;
+            const _moonAngle = Number.isFinite(moonAngle) ? moonAngle : 0;
+            const moonDistance = (Number.isFinite(moonOrbitRadius) ? moonOrbitRadius : 0) * canvasScale;
             
             // Moon position relative to planet
-            const x = planetX + Math.cos(moonAngle) * moonDistance;
-            const y = planetY + Math.sin(moonAngle) * moonDistance;
+            const x = planetX + Math.cos(_moonAngle) * moonDistance;
+            const y = planetY + Math.sin(_moonAngle) * moonDistance;
             
-            const radius = Math.max(2, Math.log(moon.size + 1) * canvasScale);
+            const _moonSize = Number.isFinite(moon.size) ? moon.size : 8;
+            const radius = Math.max(2, Math.log(_moonSize + 1) * canvasScale);
             
             // Moon color
             ctx.fillStyle = '#9ca3af';
@@ -5320,11 +5538,14 @@ function getCurrentMoon() {
                 : (planet.orbitAngleType === 'fixed' ? planet.orbitAngle : 90) * Math.PI / 180;
             const distance = absoluteOrbit * canvasScale;
             
-            const x = canvasOffsetX + Math.cos(angle) * distance;
-            const y = canvasOffsetY + Math.sin(angle) * distance;
+            const _safeAngle = Number.isFinite(angle) ? angle : (90 * Math.PI / 180);
+            const _safeDistance = Number.isFinite(distance) ? distance : 0;
+            const x = canvasOffsetX + Math.cos(_safeAngle) * _safeDistance;
+            const y = canvasOffsetY + Math.sin(_safeAngle) * _safeDistance;
             
             // Calculate size (logarithmic scale for better visualization)
-            const baseSize = Math.max(3, Math.log(planet.size + 1) * 2) * canvasScale;
+            const _planetSize = Number.isFinite(planet.size) ? planet.size : 16;
+            const baseSize = Math.max(3, Math.log(_planetSize + 1) * 2) * canvasScale;
             const radius = Math.max(3, baseSize);
             
             // Planet color based on class
