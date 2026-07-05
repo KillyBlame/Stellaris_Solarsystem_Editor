@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Stellaris Solar System Editor V38 - Full Editor</title>
+    <title>Stellaris Solar System Editor V39 - Full Editor</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;600;700;800;900&family=Exo+2:wght@300;400;500;600&display=swap');
@@ -380,7 +380,7 @@
 </head>
 <body>
     <div class="container mx-auto py-8 px-4">
-        <h1 class="stellaris-header">🌌 Stellaris Solar System Editor V38</h1>
+        <h1 class="stellaris-header">🌌 Stellaris Solar System Editor V39</h1>
         <div class="text-center mb-6">
             <span class="text-yellow-400 font-semibold">⭐ Full Editor - Edit systems, planets, and neighbors</span>
         </div>
@@ -2145,6 +2145,12 @@ function isStarClass(cls) {
             extractPlanets(code) {
                 const planets = [];
                 let planetId = 1;
+                // Top-level change_orbit statements between planet blocks shift the
+                // orbit chain pointer additively (vanilla: ancient_relics, nomad files).
+                // They are folded into the next parsed planet's orbitDistance,
+                // which is in-game identical and keeps the data model unchanged.
+                let pendingChangeOrbit = 0;
+                let lastConsumedEnd = 0;
                 
                 let i = 0;
                 while (i < code.length) {
@@ -2178,6 +2184,10 @@ function isStarClass(cls) {
                     
                     const planetBlock = code.substring(braceStart + 1, blockEnd);
                     
+                    // Fold top-level change_orbit statements found between blocks
+                    pendingChangeOrbit += this.sumTopLevelChangeOrbit(code.substring(lastConsumedEnd, planetKeyword));
+                    lastConsumedEnd = blockEnd + 1;
+                    
                     try {
                         const planet = this.parsePlanetBlock(planetBlock, planetId);
                         
@@ -2195,6 +2205,11 @@ function isStarClass(cls) {
                             } else {
                                 planet.class = 'pc_asteroid';
                             }
+                        }
+                        
+                        if (pendingChangeOrbit !== 0) {
+                            planet.orbitDistance += pendingChangeOrbit;
+                            pendingChangeOrbit = 0;
                         }
                         
                         planets.push(planet);
@@ -2228,7 +2243,7 @@ function isStarClass(cls) {
                     orbitAngle: 0,
                     orbitAngleMin: 90,
                     orbitAngleMax: 270,
-                    changeOrbit: parseInt(this.extractValue(blockContent, 'change_orbit') || '0'),
+                    changeOrbit: (parseInt(this.extractValue(blockContent, 'change_orbit') || '0', 10) || 0),
                     hasRing: this.extractValue(blockContent, 'has_ring') === 'yes',
                     isStartingPlanet: this.checkStartingPlanetAtTopLevel(blockContent),
                     isGuaranteedHabitable: blockContent.includes('prescripted_ideal') || blockContent.includes('ideal_design_class'),
@@ -2411,6 +2426,36 @@ function isStarClass(cls) {
                     i++;
                 }
                 return { min: 1, max: 1 };
+            }
+
+            // Depth-0 scan of inter-block text for additive top-level change_orbit
+            // statements. Comment lines (#) are skipped; non-numeric (@variable)
+            // values are skipped with a console warning (no variable resolution).
+            sumTopLevelChangeOrbit(gap) {
+                let sum = 0;
+                let depth = 0;
+                let i = 0;
+                while (i < gap.length) {
+                    const ch = gap[i];
+                    if (ch === '#') {
+                        const nl = gap.indexOf('\n', i);
+                        i = nl === -1 ? gap.length : nl + 1;
+                        continue;
+                    }
+                    if (ch === '{') { depth++; i++; continue; }
+                    if (ch === '}') { depth--; i++; continue; }
+                    if (depth !== 0 || ch !== 'c') { i++; continue; }
+                    if (i > 0 && /[A-Za-z0-9_]/.test(gap[i - 1])) { i++; continue; }
+                    const m = gap.slice(i).match(/^change_orbit\s*=\s*(-?\d+|@[A-Za-z0-9_]+)/);
+                    if (!m) { i++; continue; }
+                    if (m[1][0] === '@') {
+                        console.warn('Import: top-level change_orbit with variable value skipped:', m[1]);
+                    } else {
+                        sum += parseInt(m[1], 10);
+                    }
+                    i += m[0].length;
+                }
+                return sum;
             }
 
             extractValue(block, key) {
@@ -3365,13 +3410,29 @@ function getCurrentMoon() {
             
             // Sort by actual orbit position
             combined.sort((a, b) => a.orbit - b.orbit);
+            
+            // ── Belt grouping (display-only) ──
+            // Asteroid-class bodies whose absolute position equals a belt radius are
+            // rendered nested under that belt card. Data model and export unchanged.
+            const ASTEROID_CLASSES = ['pc_asteroid', 'pc_ice_asteroid', 'pc_crystal_asteroid', 'pc_rare_crystal_asteroid'];
+            const claimed = new Set();
+            combined.forEach(item => {
+                if (item.type !== 'asteroid') return;
+                item.members = combined.filter(p =>
+                    p.type === 'planet' &&
+                    !claimed.has(p) &&
+                    ASTEROID_CLASSES.includes(p.data.class) &&
+                    p.orbit === item.orbit
+                );
+                item.members.forEach(p => claimed.add(p));
+            });
+            const topLevel = combined.filter(item => !claimed.has(item));
                 
                 if (combined.length === 0) {
                     return '<p class="text-gray-400 text-sm">No celestial bodies. Click on "Planet" or "Belt" to add.</p>';
                 }
                 
-                return combined.map(item => {
-                    if (item.type === 'planet') {
+                const renderPlanetItem = (item) => {
                         const planet = item.data;
                         const index = item.index;
                         const icon = getPlanetIcon(planet.class);
@@ -3408,6 +3469,11 @@ function getCurrentMoon() {
                             </div>
                         `;
                         return html;
+                };
+                
+                return topLevel.map(item => {
+                    if (item.type === 'planet') {
+                        return renderPlanetItem(item);
                     } else {
                         // Asteroid belts
                         const belt = item.data;
@@ -3423,10 +3489,12 @@ function getCurrentMoon() {
                                         </div>
                                     </div>
                                     <div class="flex gap-1">
+                                        <button onclick="addAsteroidToBelt(${index})" class="stellaris-btn stellaris-btn-secondary text-xs px-2 py-1" title="Add asteroid at belt position">\u2604\ufe0f+</button>
                                         <button onclick="openEditAsteroidBeltModal(${index})" class="stellaris-btn stellaris-btn-secondary text-xs px-2 py-1" title="Edit Belt">\u270f\ufe0f</button>
                                         <button onclick="deleteAsteroidBelt(${index})" class="stellaris-btn stellaris-btn-danger text-xs px-2 py-1">\ud83d\uddd1\ufe0f</button>
                                     </div>
                                 </div>
+                                ${item.members && item.members.length > 0 ? `<div class="ml-8 mt-2 space-y-2 border-l-2 border-yellow-600/30 pl-4">${item.members.map(renderPlanetItem).join('')}</div>` : ''}
                             </div>
                         `;
                     }
@@ -4235,6 +4303,64 @@ function getCurrentMoon() {
                 showNotification('🗑️ Asteroid belt deleted!');
                 loadSystemIntoEditor(allSystems[currentSystemIndex]);
             }
+        }
+
+        // Inserts a new asteroid into the cumulative orbit chain so that its
+        // absolute position equals the belt radius. The following body's
+        // orbit_distance is compensated so all other positions stay unchanged.
+        function addAsteroidToBelt(beltIndex) {
+            const system = allSystems[currentSystemIndex];
+            const belt = system.asteroidBelts[beltIndex];
+            if (!belt) { showNotification('\u26a0\ufe0f Asteroid belt not found!'); return; }
+            const planets = system.planets;
+            
+            // Insertion point: after the last body at position <= belt radius
+            let cumulative = 0;
+            let insertAt = 0;
+            let prevCumulative = 0;
+            for (let k = 0; k < planets.length; k++) {
+                cumulative += planets[k].orbitDistance;
+                if (cumulative <= belt.radius) {
+                    insertAt = k + 1;
+                    prevCumulative = cumulative;
+                }
+            }
+            const delta = belt.radius - prevCumulative;
+            
+            const asteroid = {
+                id: nextPlanetId++,
+                type: 'planet',
+                name: '',
+                displayName: `\u2604\ufe0f Unnamed (Belt ${belt.radius})`,
+                useAutoName: true,
+                class: 'pc_asteroid',
+                size: 8,
+                orbitDistance: delta,
+                orbitAngleType: 'range',
+                orbitAngle: 0,
+                orbitAngleMin: 90,
+                orbitAngleMax: 270,
+                changeOrbit: 0,
+                countMin: 1,
+                countMax: 1,
+                hasRing: false,
+                isStartingPlanet: false,
+                isHomePlanet: false,
+                isGuaranteedHabitable: false,
+                isTerraformingCandidate: false,
+                modifiers: [],
+                deposits: [],
+                moons: [],
+                flags: []
+            };
+            
+            planets.splice(insertAt, 0, asteroid);
+            // Compensate the following body so downstream positions are unchanged
+            if (delta !== 0 && insertAt + 1 < planets.length) {
+                planets[insertAt + 1].orbitDistance -= delta;
+            }
+            showNotification('\u2604\ufe0f Asteroid added to belt!');
+            loadSystemIntoEditor(system);
         }
 
         // =====================================================
