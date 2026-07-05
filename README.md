@@ -1,153 +1,161 @@
 Stellaris Solar System Editor
 
-A user-friendly, "no-code" web editor for creating and editing solar systems for the game Stellaris. This tool aims to simplify the modding process for system initializers and localization files by providing an intuitive graphical user interface and reducing the need for manual script editing.
+A user-friendly, "no-code" web editor for creating and editing solar systems for the game Stellaris. This tool simplifies the modding process for system initializers and localization files by providing an intuitive graphical user interface, reducing the need for manual script editing.
+
 Table of Contents
 
-    Stellaris Solar System Editor
 
-        Table of Contents
+About the Project
+Features
+Usage
 
-        About the Project
+Use Online
+Import Files
+Export Files
+Mod Setup in Stellaris
 
-        Features
 
-        Usage
 
-            Use Online
+Local Development
+Design Principles
+Future Development Ideas
+Contributing
+License
 
-            Import Files
-
-            Export Files
-
-            Mod Setup in Stellaris
-
-        Local Development
-
-            Prerequisites
-
-            Setup
-
-        Future Development Ideas
-
-        Contributing
-
-        License
 
 About the Project
 
-The Stellaris Solar System Editor was developed to fill a gap in the Stellaris modding community: the need for an accessible tool to create and edit solar systems without programming knowledge. Existing solutions are either outdated, require manual script editing, or do not offer comprehensive editing functionality for existing systems. This project provides a visual interface that abstracts the complexity of Paradox script syntax, making the modding process accessible to all players.
+The Stellaris Solar System Editor was developed to fill a gap in the Stellaris modding community: the need for an accessible tool to create and edit solar systems without programming knowledge. Existing solutions are either outdated, require manual script editing, or do not offer comprehensive editing functionality for existing systems. This project provides a visual interface that abstracts the complexity of Clausewitz script syntax, making the modding process accessible to all players.
+
+The editor is a single-file HTML/JavaScript application with no external dependencies — no frameworks, no CDN libraries, no build step. Open it in a browser and start editing.
+
 Features
 
-    Visual System Creation: Add and intuitively position stars, planets, and moons.
+System Management
 
-    Property Editing: Edit system, planet, and moon properties such as names, classes, sizes, orbit distances, and angles using user-friendly forms.
 
-    Simple Visualization: A basic graphical representation helps you understand your system's layout.
+Multiple systems per project: Create and manage several system initializers in one session; all systems are exported into a single initializer file.
+System properties: Identifier, display name, star class, usage type (Custom Empire / Empire Init / Fallen Empire Init / Misc System Init / Origin / Neighbor-only), mandatory-neighbor flag, and optional home-system resource generation.
+Neighbor system linking: Define neighbor_system blocks with distance, hyperlane distance, hyperlane jumps, orientation angles, and spawn chance — including automatic re-linking of neighbor references when importing files that contain multiple systems.
 
-    File Import: Upload existing Stellaris .txt system initializer and .yml localization files to edit them in the editor.
 
-    File Export: Download the generated .txt system initializer and .yml localization files directly, ready for your Stellaris mod folder.
+Celestial Bodies
 
-    Automatic Localization: The editor generates the necessary localization entries for system, planet, and moon names.
 
-    Correct File Encoding: Ensures that exported .yml files have the required UTF-8 with BOM encoding.
+Stars, planets, and moons with full property editing: names, classes, sizes, orbit distances, and orbit angles (fixed values, ranges, or presets with smart-angle calculation).
+Multi-star systems: A star configuration wizard sets up binary and trinary systems with vanilla-correct structure — P-type (circumbinary) planets placed after the star chain, S-type planets nested inside a star's planet = {} block.
+Asteroid belts: Add and edit asteroid belts (radius and type) directly via a dedicated modal.
+Planet flags: Starting planet, home planet, guaranteed habitable, terraforming candidate, planet ring, and change_orbit pointer resets.
+Auto-naming: Bodies can use Stellaris' automatic name generation instead of fixed names.
+
+
+Deposits & Modifiers
+
+
+Built-in databases of vanilla deposit and planet modifier IDs, sourced from the actual game files — including yield annotations for deposits with unconditional produces blocks.
+Filterable selection lists for deposits and modifiers (works across browsers, including Safari), plus free-text input for custom IDs.
+Legacy modifier format toggle for compatibility with older modifier = syntax versus init_effect-based add_modifier.
+
+
+Visualization
+
+
+Canvas-based system view with zoom (mouse wheel) and pan, orbit rendering, asteroid belts, moons grouped around their planets, and labels at higher zoom levels.
+
+
+Import
+
+
+Robust .txt import of existing system initializer files, including files containing multiple systems. The parser uses brace matching (not regex), so nested structures are handled correctly.
+Imported bodies, deposits, modifiers, belts, and neighbor definitions are loaded into the editor for further editing.
+
+
+Export
+
+
+.txt system initializer download (all systems in one file), plus in-browser preview and copy-to-clipboard.
+.yml localization download (initializers_names_l_english.yml) with correct UTF-8 with BOM encoding; localization export can optionally be skipped.
+Complete mod folder generation: One click creates the full mod structure — descriptor.mod, common/solar_system_initializers/, and localisation/english/ — written directly to disk via the File System Access API (Chrome/Edge), with a pure-JavaScript ZIP download (own CRC32 implementation, no libraries) as fallback for all other browsers.
+
 
 Usage
+
 Use Online
 
-The editor is a pure HTML/CSS/JavaScript application and can be used directly in any modern web browser. You just need to open the index.html file.
+The editor is a pure HTML/CSS/JavaScript application and runs directly in any modern web browser. Just open the HTML file — no installation, no server required. (For full mod-folder generation to disk, a Chromium-based browser is needed; other browsers receive a ZIP file instead.)
+
 Import Files
 
-    In the "Import / Export" section, click "Select File" under "Stellaris .txt Code (Import)" to upload an existing .txt system initializer file from your computer.
 
-    Repeat the process for "Stellaris .yml Code (Import)" to upload the associated localization file.
+In the "Import / Export" section, select an existing .txt system initializer file from your computer.
+The editor parses the contents — including multi-system files — and populates the system list and celestial body editors.
+Names found in name = "..." lines are used as display names and exported to the localization file; localization .yml files themselves are not imported.
 
-    The editor parses the contents and updates the user interface with the system details and celestial bodies.
 
 Export Files
 
-    After editing or creating your system, click "Download as .txt" to download the generated system initializer file.
+You have three options:
 
-    Click "Download as .yml" to download the associated localization file.
+
+Download as .txt — the generated system initializer file (plus the matching .yml localization file, unless skipped).
+Copy / Preview — inspect the generated script in the browser or copy it to the clipboard.
+Generate Mod Folder — creates the complete, ready-to-use mod structure including descriptor.mod, either written directly into your Stellaris mod directory or as a ZIP download.
+
 
 Mod Setup in Stellaris
 
-To use your custom solar system in Stellaris, follow these steps:
+If you use Generate Mod Folder, the structure is created for you — just point it at (or unzip it into) your Stellaris mod directory (typically Documents\Paradox Interactive\Stellaris\mod\) and activate the mod in the launcher.
 
-    Create Mod Folder: If you don't have a mod folder yet, create one via the Stellaris Launcher (in the "Mods" tab under "Mod Tools").
+For manual setup:
 
-    Place Files:
 
-        Copy the downloaded .txt file (e.g., my_custom_system.txt) into the mod_name/common/solar_system_initializers/ folder within your Stellaris mod directory (typically under Documents\Paradox Interactive\Stellaris\mod\).
+Copy the .txt file into mod_name/common/solar_system_initializers/.
+Copy the .yml file into mod_name/localisation/english/. The editor ensures the required UTF-8 with BOM encoding.
+Activate your mod in the Stellaris Launcher before starting the game.
 
-        Copy the downloaded .yml file (e.g., my_custom_system_l_german.yml) into the mod_name/localisation/ folder of your mod directory. Ensure that the .yml file is encoded with UTF-8 with BOM (the editor attempts to ensure this during download).
-
-    Activate Mod: Activate your mod in the Stellaris Launcher before starting the game.
 
 Local Development
 
-If you wish to contribute to the development of the editor, you can clone the repository and run it locally.
 Prerequisites
 
-    A web browser (Chrome, Firefox, Edge, Safari, etc.)
 
-    A text editor or IDE (e.g., VS Code)
+A web browser (Chrome, Firefox, Edge, Safari, etc.)
+A text editor or IDE (e.g., VS Code)
+Optional: Node.js for syntax validation (node --check on the extracted JavaScript)
+
 
 Setup
 
-    Clone Repository:
+git clone https://github.com/YourUsername/stellaris-solar-editor.git
+cd stellaris-solar-editor
 
-    git clone https://github.com/YourUsername/stellaris-solar-editor.git
-    cd stellaris-solar-editor
+Open the HTML file directly in your web browser. Alternatively, use a simple local web server (e.g., python -m http.server).
 
-    Open in Browser:
-    Open the index.html file directly in your web browser. Alternatively, you can use a simple local web server (e.g., with Python: python -m http.server).
+Design Principles
+
+
+Single-file architecture: The entire editor lives in one HTML file. No external libraries, no CDN dependencies, no build tooling.
+Vanilla correctness: All exported structures follow vanilla Stellaris conventions — nested bodies always use moon = {} regardless of class, cumulative orbit_distance chains in list order, change_orbit as pointer reset, stars exported as planet = {} blocks with a star class.
+No invented IDs: Every deposit, modifier, and class ID in the built-in databases is traceable to actual vanilla game files or the Stellaris wiki.
+Brace-matching parsing: Nested Clausewitz structures are parsed with a brace-matching parser rather than regular expressions.
+
 
 Future Development Ideas
 
-This is an initial version of the editor. Here are some ideas for future improvements and features:
 
-    Advanced Visual Editing:
+Drag-and-drop functionality in the visualization to intuitively adjust orbit distances and angles.
+Visual indicators for habitable zones and orbit collisions.
+UI support for more complex init_effect blocks (anomalies, primitive civilizations, megastructures).
+Real-time validation of user inputs against game rules (CWTools-style checks).
+Import of additional script constructs (flags, variables, complex effects).
+Custom planet classes / visual entities.
+Performance optimizations for very complex systems.
 
-        Drag-and-drop functionality in the visualization to intuitively adjust orbit distances and angles.
-
-        Visual indicators for habitable zones and collisions.
-
-        Support for binary and trinary systems with correct visual representation.
-
-    Detailed Effects and Modifiers:
-
-        User interface elements for defining more complex init_effect blocks (e.g., adding resources, modifiers, anomalies, primitive civilizations, megastructures).
-
-        Management of tile_blockers and modifiers via an intuitive interface.
-
-    Robust Validation:
-
-        Real-time validation of user inputs to ensure generated scripts are syntactically correct and adhere to game rules.
-
-        Integration with or replication of CWTools validation logic.
-
-    Enhanced Import Capabilities:
-
-        More robust parsing of complex .txt files containing more than just basic system and celestial details (e.g., flags, variables, complex effects).
-
-    Mod Structure Management:
-
-        Ability to create a new mod directly from within the application, including generating the .mod descriptor file.
-
-        Optional integration with the Stellaris Launcher (if technically feasible and secure).
-
-    Custom Planet Types/Entities:
-
-        Ability to define/select custom planet classes or visual entities.
-
-    Performance Optimizations:
-
-        Improve visualization performance for very complex systems.
 
 Contributing
 
 Contributions are highly welcome! If you find bugs, suggest features, or want to contribute code, please open an issue or submit a pull request.
+
 License
 
 This project is licensed under the MIT License.
