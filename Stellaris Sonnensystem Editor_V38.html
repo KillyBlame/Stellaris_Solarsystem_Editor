@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Stellaris Solar System Editor V37 - Full Editor</title>
+    <title>Stellaris Solar System Editor V38 - Full Editor</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;600;700;800;900&family=Exo+2:wght@300;400;500;600&display=swap');
@@ -380,7 +380,7 @@
 </head>
 <body>
     <div class="container mx-auto py-8 px-4">
-        <h1 class="stellaris-header">🌌 Stellaris Solar System Editor V37</h1>
+        <h1 class="stellaris-header">🌌 Stellaris Solar System Editor V38</h1>
         <div class="text-center mb-6">
             <span class="text-yellow-400 font-semibold">⭐ Full Editor - Edit systems, planets, and neighbors</span>
         </div>
@@ -2211,11 +2211,13 @@ function isStarClass(cls) {
             }
 
             parsePlanetBlock(blockContent, id) {
+                const parsedName = this.extractValue(blockContent, 'name');
                 const planet = {
                     id: id,
                     type: 'planet',
-                    name: this.extractValue(blockContent, 'name') || `planet_${id}`,
-                    displayName: this.extractValue(blockContent, 'name') || `Planet ${id}`,
+                    name: parsedName || '',
+                    displayName: parsedName || `Planet ${id}`,
+                    useAutoName: !parsedName,
                     class: this.extractValue(blockContent, 'class') || 'pc_continental',
                     size: parseInt(this.extractValue(blockContent, 'size')) || 16,
                     orbitDistance: (() => {
@@ -2261,13 +2263,22 @@ function isStarClass(cls) {
                 const moons = [];
                 let moonId = 1;
                 
+                // Depth-0 scan for child body blocks. Accepts `moon = {` (editor/vanilla
+                // notation) AND nested `planet = {` (S-type / legacy notation).
+                // Left word boundary + required `= {` prevent false hits inside strings
+                // and keys (e.g. name = "moon_1", generate_empire_home_planet = yes).
+                let depth = 0;
                 let i = 0;
                 while (i < planetBlock.length) {
-                    const moonStart = planetBlock.indexOf('moon', i);
-                    if (moonStart === -1) break;
+                    const ch = planetBlock[i];
+                    if (ch === '{') { depth++; i++; continue; }
+                    if (ch === '}') { depth--; i++; continue; }
+                    if (depth !== 0 || (ch !== 'm' && ch !== 'p')) { i++; continue; }
+                    if (i > 0 && /[A-Za-z0-9_]/.test(planetBlock[i - 1])) { i++; continue; }
+                    const key = planetBlock.slice(i).match(/^(moon|planet)\s*=\s*\{/);
+                    if (!key) { i++; continue; }
                     
-                    const braceStart = planetBlock.indexOf('{', moonStart);
-                    if (braceStart === -1) break;
+                    const braceStart = i + key[0].length - 1;
                     
                     let braceCount = 0;
                     let blockEnd = -1;
@@ -2287,11 +2298,13 @@ function isStarClass(cls) {
                     
                     const moonBlock = planetBlock.substring(braceStart + 1, blockEnd);
                     
+                    const parsedMoonName = this.extractValue(moonBlock, 'name');
                     const moon = {
                         id: parentId * 1000 + moonId,
                         type: 'moon',
-                        name: this.extractValue(moonBlock, 'name') || `moon_${moonId}`,
-                        displayName: this.extractValue(moonBlock, 'name') || `Mond ${moonId}`,
+                        name: parsedMoonName || '',
+                        displayName: parsedMoonName || `Moon ${moonId}`,
+                        useAutoName: !parsedMoonName,
                         class: this.extractValue(moonBlock, 'class') || 'pc_barren_cold',
                         size: parseInt(this.extractValue(moonBlock, 'size')) || 8,
                         orbitDistance: (() => {
@@ -3723,7 +3736,7 @@ function getCurrentMoon() {
                 id: editingPlanetId || nextPlanetId++,
                 type: 'planet',
                 name: name,
-                displayName: name || `🪐 Unbenannt (Orbit ${orbit})`,
+                displayName: name || `🪐 Unnamed (Orbit ${orbit})`,
                 useAutoName: useAutoName,
                 class: planetClass,
                 size: size,
@@ -3960,7 +3973,7 @@ function getCurrentMoon() {
                 id: existing ? existing.id : nextPlanetId++,
                 type: 'moon',
                 name: name,
-                displayName: name || `🌙 Unbenannt (Orbit ${orbit})`,
+                displayName: name || `🌙 Unnamed (Orbit ${orbit})`,
                 useAutoName: useAutoName,
                 class: moonClass,
                 size: size,
