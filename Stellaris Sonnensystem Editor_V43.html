@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Stellaris Solar System Editor V39 - Full Editor</title>
+    <title>Stellaris Solar System Editor V43 - Full Editor</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;600;700;800;900&family=Exo+2:wght@300;400;500;600&display=swap');
@@ -380,7 +380,7 @@
 </head>
 <body>
     <div class="container mx-auto py-8 px-4">
-        <h1 class="stellaris-header">🌌 Stellaris Solar System Editor V39</h1>
+        <h1 class="stellaris-header">🌌 Stellaris Solar System Editor V43</h1>
         <div class="text-center mb-6">
             <span class="text-yellow-400 font-semibold">⭐ Full Editor - Edit systems, planets, and neighbors</span>
         </div>
@@ -2062,7 +2062,10 @@ function isStarClass(cls) {
                 
                 const nameMatch = blockContent.match(/name\s*=\s*"([^"]+)"/);
                 if (nameMatch) {
-                    system.displayName = nameMatch[1];
+                    // ✅ FIX V42: Decode localization keys back to readable names.
+                    // Previously the raw key (e.g. "asgard_system_initializer_NAME")
+                    // overwrote the display name after every re-import.
+                    system.displayName = decodeSystemDisplayName(nameMatch[1]);
                 }
                 
                 const classMatch = blockContent.match(/class\s*=\s*"([^"]+)"/);
@@ -2073,7 +2076,17 @@ function isStarClass(cls) {
                 const usageMatch = blockContent.match(/usage\s*=\s*(\w+)/);
                 if (usageMatch) {
                     system.usage = usageMatch[1];
+                } else {
+                    // ✅ FIX V43: Absence of usage in the file means 'none'.
+                    // Previously the createEmptySystem() default 'custom_empire'
+                    // leaked into every imported system without a usage line.
+                    system.usage = 'none';
                 }
+                
+                // ✅ FIX V40: Read generate_home_system_resources from the imported file.
+                // Previously the createEmptySystem() default of true leaked into every
+                // imported system (including neighbors), silently re-adding the flag.
+                system.generateHomeResources = /generate_home_system_resources\s*=\s*yes/.test(blockContent);
                 
                 const asteroidBeltRegex = /asteroid_belt\s*=\s*\{[^}]*type\s*=\s*(\w+)[^}]*radius\s*=\s*(\d+)[^}]*\}/g;
                 let beltMatch;
@@ -2526,10 +2539,10 @@ function isStarClass(cls) {
                 // ✅ FIX: Mark system as neighbor system when it is referenced
                 system.isNeighborSystem = referencedAsNeighbor.has(system.name);
 
-                // ✅ FIX: Neighbor systems have no usage (only the main system has custom_empire)
-                if (system.isNeighborSystem && !system.isMain) {
-                    system.usage = 'none';
-                }
+                // ✅ FIX V43: No forcing here anymore. usage and
+                // generate_home_system_resources are read 1:1 from the file
+                // (vanilla allows GHR on neighbor systems, e.g. the Hegemon
+                // origin's overlord_system_2_init..7).
 
                 system.neighborSystems.forEach(neighbor => {
                     // Check whether the referenced system exists
@@ -2586,7 +2599,11 @@ function isStarClass(cls) {
                             allSystems = systems;
                             
                             if (allSystems.length > 0) {
-                                allSystems[0].isMain = true;
+                                // ✅ FIX V43: Main system = first initializer with
+                                // usage = custom_empire (player start). Fallback:
+                                // first system in the file.
+                                const mainIdx = allSystems.findIndex(s => s.usage === 'custom_empire');
+                                allSystems[mainIdx !== -1 ? mainIdx : 0].isMain = true;
                             }
                             
                             // Auto-linking of neighbor systems
@@ -2738,6 +2755,13 @@ function isStarClass(cls) {
 
         // System Properties Modal Event Listeners
         document.getElementById('saveSystemPropertiesBtn').addEventListener('click', saveSystemProperties);
+        // ✅ FIX V43: Convenience only - switching usage to 'none' (neighbor-only)
+        // unchecks GHR, but it stays manually settable afterwards.
+        document.getElementById('systemUsage').addEventListener('change', (e) => {
+            if (e.target.value === 'none') {
+                document.getElementById('systemGenerateHomeResources').checked = false;
+            }
+        });
         document.getElementById('cancelSystemPropertiesBtn').addEventListener('click', () => {
             document.getElementById('systemPropertiesModal').classList.remove('active');
         });
@@ -4327,13 +4351,25 @@ function getCurrentMoon() {
             }
             const delta = belt.radius - prevCumulative;
             
+            // ✅ FIX V41: Default asteroid class matches the belt type.
+            // Vanilla-verified: rocky/debris belts use pc_asteroid, icy belts
+            // pc_ice_asteroid, crystal belts pc_crystal_asteroid
+            // (e.g. guardians_init_hive). Unknown/imported types fall back
+            // to pc_asteroid. User can still change the class afterwards.
+            const BELT_ASTEROID_CLASS = {
+                rocky_asteroid_belt: 'pc_asteroid',
+                icy_asteroid_belt: 'pc_ice_asteroid',
+                crystal_asteroid_belt: 'pc_crystal_asteroid',
+                debris_asteroid_belt: 'pc_asteroid'
+            };
+            
             const asteroid = {
                 id: nextPlanetId++,
                 type: 'planet',
                 name: '',
                 displayName: `\u2604\ufe0f Unnamed (Belt ${belt.radius})`,
                 useAutoName: true,
-                class: 'pc_asteroid',
+                class: BELT_ASTEROID_CLASS[belt.type] || 'pc_asteroid',
                 size: 8,
                 orbitDistance: delta,
                 orbitAngleType: 'range',
@@ -4379,7 +4415,11 @@ function getCurrentMoon() {
             document.getElementById('systemDisplayName').value = system.displayName || '';
             document.getElementById('systemUsage').value = system.usage || 'custom_empire';
             document.getElementById('systemMandatoryNeighbors').checked = system.mandatoryNeighbors || false;
-            document.getElementById('systemGenerateHomeResources').checked = system.generateHomeResources !== false;
+            // ✅ FIX V43: GHR is optional for every system (vanilla-verified);
+            // the value simply mirrors the system's current state.
+            const ghrCheckbox = document.getElementById('systemGenerateHomeResources');
+            ghrCheckbox.checked = system.generateHomeResources !== false;
+            ghrCheckbox.disabled = false;
             
             // Handle star class (check if custom or vanilla)
             const starClassDropdown = document.getElementById('systemStarClass');
@@ -4458,6 +4498,7 @@ function getCurrentMoon() {
             // Get mandatory neighbors
             system.mandatoryNeighbors = document.getElementById('systemMandatoryNeighbors').checked;
             // Get generate home resources flag
+            // ✅ FIX V43: Store the checkbox value as-is (optional for all systems).
             system.generateHomeResources = document.getElementById('systemGenerateHomeResources').checked;
             
             // Close modal and update UI
@@ -4910,8 +4951,9 @@ function getCurrentMoon() {
             if (skipLoc) {
                 code += `\tname = "${system.displayName}"\n`;
             } else {
-                const locBaseName = system.name.replace(/_system_initializer$/, '');
-                code += `\tname = "${locBaseName}_system_initializer_NAME"\n`;
+                // ✅ FIX V42: Vanilla-style loc key (like NAME_Sol) encodes the
+                // display name in the key itself, so re-imports can recover it.
+                code += `\tname = "${systemNameLocKey(system)}"\n`;
             }
             code += `\tclass = "${system.class}"\n`;
             
@@ -4940,7 +4982,9 @@ function getCurrentMoon() {
             }
             
             // ✅ FIX: Only export usage for main system (neighbors don't have usage)
-            if (system.isMain && system.usage !== 'none') {
+            // ✅ FIX V43: Export usage for ANY system that has one (round-trip
+            // fidelity for multi-system files); 'none' systems stay without usage.
+            if (system.usage && system.usage !== 'none') {
                 code += `\tusage = ${system.usage}\n`;
             }
             
@@ -5152,15 +5196,44 @@ function getCurrentMoon() {
             return code;
         }
 
+        // ✅ FIX V42: Vanilla-style localization key for a system's display name.
+        // Sanitized like vanilla keys (NAME_Sol, NAME_1_Ceres): spaces -> underscores,
+        // everything outside [A-Za-z0-9_] removed. Fallback: identifier base name.
+        function systemNameLocKey(system) {
+            const sanitized = (system.displayName || '')
+                .trim()
+                .replace(/\s+/g, '_')
+                .replace(/[^A-Za-z0-9_]/g, '');
+            return 'NAME_' + (sanitized || system.name.replace(/_system_initializer$/, ''));
+        }
+
+        // ✅ FIX V42: Decode a name = "..." value that is a localization key.
+        // NAME_<X> (vanilla + V42 exports): underscores -> spaces, lossless for
+        // sanitizable names. <identifier>_system_initializer_NAME (legacy editor
+        // exports <= V41): derive from identifier base - lossy, the exact name
+        // only exists in the old YML. Plain names pass through unchanged.
+        function decodeSystemDisplayName(rawName) {
+            const vanillaKey = rawName.match(/^NAME_(.+)$/);
+            if (vanillaKey) return vanillaKey[1].replace(/_/g, ' ').trim();
+            const legacyKey = rawName.match(/^(.+)_system_initializer_NAME$/);
+            if (legacyKey) return legacyKey[1].replace(/_/g, ' ').trim();
+            return rawName;
+        }
+
         function generateLocalizationYML(systems) {
             let yml = 'l_english:\n';
             
+            const seenNameKeys = new Set();  // ✅ FIX V42: dedupe identical NAME_ keys
             systems.forEach(system => {
                 const baseName = system.name.replace(/_system_initializer$/, '');
                 const identifier = `${baseName}_system_initializer`;
                 
-                // NAME entry
-                yml += ` ${identifier}_NAME:0 "${system.displayName}"\n`;
+                // NAME entry (✅ FIX V42: vanilla-style key, matches generateSystemCode)
+                const nameKey = systemNameLocKey(system);
+                if (!seenNameKeys.has(nameKey)) {
+                    seenNameKeys.add(nameKey);
+                    yml += ` ${nameKey}:0 "${system.displayName}"\n`;
+                }
                 
                 // DESC entry - create a default description
                 const description = `${system.displayName} Description: A custom star system created with the Stellaris Solar System Editor.`;
