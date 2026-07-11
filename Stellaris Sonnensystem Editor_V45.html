@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Stellaris Solar System Editor V43 - Full Editor</title>
+    <title>Stellaris Solar System Editor V45 - Full Editor</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;600;700;800;900&family=Exo+2:wght@300;400;500;600&display=swap');
@@ -380,7 +380,7 @@
 </head>
 <body>
     <div class="container mx-auto py-8 px-4">
-        <h1 class="stellaris-header">🌌 Stellaris Solar System Editor V43</h1>
+        <h1 class="stellaris-header">🌌 Stellaris Solar System Editor V45</h1>
         <div class="text-center mb-6">
             <span class="text-yellow-400 font-semibold">⭐ Full Editor - Edit systems, planets, and neighbors</span>
         </div>
@@ -397,8 +397,9 @@
                     <button id="importBtn" class="stellaris-btn">Import System(s)</button>
                     <button id="clearAllBtn" class="stellaris-btn stellaris-btn-secondary">Remove all</button>
                 </div>
-                <div class="flex items-end">
+                <div class="flex items-end gap-2">
                     <button id="exportAllBtn" class="stellaris-btn stellaris-btn-secondary">Export all</button>
+                    <button id="systemCheckBtn" class="stellaris-btn stellaris-btn-secondary">🔍 System Check</button>
                 </div>
             </div>
             
@@ -583,6 +584,14 @@
                     <div class="form-group">
                         <label class="label">Size (5-50)</label>
                         <input type="number" id="planetSize" class="stellaris-input" value="16" min="5" max="50">
+                        <label class="flex items-center gap-2 cursor-pointer mt-1">
+                            <input type="checkbox" id="planetSizeRange" onchange="window.toggleSizeRangeFields('planet')">
+                            <span class="text-gray-300 text-sm">Size as range (size = { min max })</span>
+                        </label>
+                        <div id="planetSizeRangeFields" class="hidden grid grid-cols-2 gap-2 mt-1">
+                            <input type="number" id="planetSizeMin" class="stellaris-input" placeholder="min" min="1" max="50">
+                            <input type="number" id="planetSizeMax" class="stellaris-input" placeholder="max" min="1" max="50">
+                        </div>
                     </div>
                     <div class="form-group">
                         <label class="label">Orbit Distance</label>
@@ -1328,6 +1337,14 @@
                     <div class="form-group">
                         <label class="label">Size (3-50)</label>
                         <input type="number" id="moonSize" class="stellaris-input" value="8" min="3" max="50">
+                        <label class="flex items-center gap-2 cursor-pointer mt-1">
+                            <input type="checkbox" id="moonSizeRange" onchange="window.toggleSizeRangeFields('moon')">
+                            <span class="text-gray-300 text-sm">Size as range (size = { min max })</span>
+                        </label>
+                        <div id="moonSizeRangeFields" class="hidden grid grid-cols-2 gap-2 mt-1">
+                            <input type="number" id="moonSizeMin" class="stellaris-input" placeholder="min" min="1" max="50">
+                            <input type="number" id="moonSizeMax" class="stellaris-input" placeholder="max" min="1" max="50">
+                        </div>
                     </div>
                     <div class="form-group">
                         <label class="label">Orbit Distance from Planet</label>
@@ -1717,6 +1734,17 @@
                     </div>
                 </div>
             </div>
+
+        <!-- ✅ NEU V45: System Check Modal -->
+        <div id="systemCheckModal" class="modal">
+            <div class="modal-content">
+                <h2 class="text-2xl font-bold mb-4 text-yellow-300">🔍 System Check</h2>
+                <pre id="systemCheckResult" class="text-sm whitespace-pre-wrap" style="max-height: 60vh; overflow-y: auto;"></pre>
+                <div class="flex justify-end mt-4">
+                    <button id="closeSystemCheckBtn" class="stellaris-btn stellaris-btn-secondary">Close</button>
+                </div>
+            </div>
+        </div>
 
         <!-- Add Asteroid Belt Modal -->
         <div id="asteroidBeltModal" class="modal">
@@ -2204,20 +2232,24 @@ function isStarClass(cls) {
                     try {
                         const planet = this.parsePlanetBlock(planetBlock, planetId);
                         
-                        // ✅ FIX: Skip dummy star entries (syntax-only, not real planets)
-                        if (planet.class === 'star' && planet.orbitDistance === 0 && (!planet.size || planet.size <= 16)) {
-                            // This is just a Stellaris syntax requirement, not an actual planet
+                        // ✅ FIX V44: Skip ONLY the editor's own dummy star
+                        // (class = star, orbit_distance = 0, NO size key at all).
+                        // Vanilla `class = star` blocks always carry a size
+                        // (fixed or range) and must be kept.
+                        if (planet.class === 'star' && planet.orbitDistance === 0 && !/(?<![A-Za-z0-9_])size\s*=/.test(planetBlock)) {
                             i = blockEnd + 1;
                             continue;
                         }
                         
+                        // ✅ FIX V44: Star classes always stay stars. The old
+                        // size/orbit heuristic demoted secondary stars (vanilla
+                        // binary_init_02: class = star, orbit_distance = 240,
+                        // size 15-25) to pc_asteroid = invented data. Removed.
+                        // Known limitation: export still orders stars first, so a
+                        // star imported mid-chain shifts the orbit chain on export.
                         if (this.isStarClass(planet.class)) {
-                            if (planet.size > 30 || (planet.orbitDistance === 0 && planetId === 1)) {
-                                planet.isStar = true;
-                                planet.type = 'star';
-                            } else {
-                                planet.class = 'pc_asteroid';
-                            }
+                            planet.isStar = true;
+                            planet.type = 'star';
                         }
                         
                         if (pendingChangeOrbit !== 0) {
@@ -2239,6 +2271,10 @@ function isStarClass(cls) {
             }
 
             parsePlanetBlock(blockContent, id) {
+                // ✅ FIX V44: Value extraction that is not brace-depth-aware
+                // must run on the block WITHOUT child bodies, otherwise a moon's
+                // modifiers/orbit_angle/deposits leak into the parent.
+                const ownContent = this.stripChildBodies(blockContent);
                 const parsedName = this.extractValue(blockContent, 'name');
                 const planet = {
                     id: id,
@@ -2248,6 +2284,9 @@ function isStarClass(cls) {
                     useAutoName: !parsedName,
                     class: this.extractValue(blockContent, 'class') || 'pc_continental',
                     size: parseInt(this.extractValue(blockContent, 'size')) || 16,
+                    sizeType: 'fixed',
+                    sizeMin: null,
+                    sizeMax: null,
                     orbitDistance: (() => {
                         const val = this.extractValue(blockContent, 'orbit_distance');
                         return val !== null ? parseInt(val) : 25;
@@ -2259,24 +2298,45 @@ function isStarClass(cls) {
                     changeOrbit: (parseInt(this.extractValue(blockContent, 'change_orbit') || '0', 10) || 0),
                     hasRing: this.extractValue(blockContent, 'has_ring') === 'yes',
                     isStartingPlanet: this.checkStartingPlanetAtTopLevel(blockContent),
-                    isGuaranteedHabitable: blockContent.includes('prescripted_ideal') || blockContent.includes('ideal_design_class'),
-                    modifiers: this.extractModifiers(blockContent),
+                    isGuaranteedHabitable: ownContent.includes('prescripted_ideal') || ownContent.includes('ideal_design_class'),
+                    modifiers: this.extractModifiers(ownContent),
                     moons: [],
                     flags: []
                 };
 
-                const angleRangeMatch = blockContent.match(/orbit_angle\s*=\s*\{\s*min\s*=\s*(\d+)\s*max\s*=\s*(\d+)\s*\}/);
+                const angleRangeMatch = ownContent.match(/orbit_angle\s*=\s*\{\s*min\s*=\s*(\d+)\s*max\s*=\s*(\d+)\s*\}/);
                 if (angleRangeMatch) {
                     planet.orbitAngleType = 'range';
                     planet.orbitAngleMin = parseInt(angleRangeMatch[1]);
                     planet.orbitAngleMax = parseInt(angleRangeMatch[2]);
                 } else {
-                    const angleFixedMatch = blockContent.match(/orbit_angle\s*=\s*(\d+)/);
+                    const angleFixedMatch = ownContent.match(/orbit_angle\s*=\s*(\d+)/);
                     if (angleFixedMatch) {
                         planet.orbitAngleType = 'fixed';
                         planet.orbitAngle = parseInt(angleFixedMatch[1]);
                     }
                 }
+
+                // ✅ NEU V45: size ranges (vanilla: size = { min = X max = Y },
+                // e.g. binary_init_02). Display value = rounded mean.
+                const sizeRangeMatch = ownContent.match(/(?<![A-Za-z0-9_])size\s*=\s*\{\s*min\s*=\s*(\d+)\s*max\s*=\s*(\d+)\s*\}/);
+                if (sizeRangeMatch) {
+                    planet.sizeType = 'range';
+                    planet.sizeMin = parseInt(sizeRangeMatch[1]);
+                    planet.sizeMax = parseInt(sizeRangeMatch[2]);
+                    planet.size = Math.round((planet.sizeMin + planet.sizeMax) / 2);
+                }
+
+                // ✅ FIX V44: Round-trip for init_effect content the editor
+                // itself exports. Runs on ownContent only, so every body keeps
+                // its own deposits/modifiers.
+                planet.deposits = [...ownContent.matchAll(/add_deposit\s*=\s*([A-Za-z0-9_]+)/g)].map(m => m[1]);
+                planet.isHomePlanet = /(?<![A-Za-z0-9_])home_planet\s*=\s*yes/.test(ownContent);
+                const addedModifiers = [...ownContent.matchAll(/add_modifier\s*=\s*\{[^{}]*?modifier\s*=\s*"?([A-Za-z0-9_]+)"?[^{}]*?\}/g)].map(m => m[1]);
+                planet.isTerraformingCandidate = addedModifiers.includes('terraforming_candidate');
+                addedModifiers.forEach(m => {
+                    if (m !== 'terraforming_candidate' && !planet.modifiers.includes(m)) planet.modifiers.push(m);
+                });
 
                 planet.moons = this.extractMoons(blockContent, id);
 
@@ -2285,6 +2345,37 @@ function isStarClass(cls) {
                 planet.countMax = _pc.max;
 
                 return planet;
+            }
+
+            // ✅ FIX V44: Remove depth-0 child body blocks (`moon = {}` and
+            // nested `planet = {}`) so regex-based extraction cannot leak data
+            // across bodies. Same scan rules as extractMoons (left word
+            // boundary + brace matching, never regex over nested blocks).
+            stripChildBodies(block) {
+                let out = '';
+                let depth = 0;
+                let i = 0;
+                while (i < block.length) {
+                    const ch = block[i];
+                    if (ch === '{') { depth++; out += ch; i++; continue; }
+                    if (ch === '}') { depth--; out += ch; i++; continue; }
+                    if (depth === 0 && (ch === 'm' || ch === 'p') && !(i > 0 && /[A-Za-z0-9_]/.test(block[i - 1]))) {
+                        const key = block.slice(i).match(/^(moon|planet)\s*=\s*\{/);
+                        if (key) {
+                            const braceStart = i + key[0].length - 1;
+                            let braceCount = 0;
+                            let blockEnd = -1;
+                            for (let j = braceStart; j < block.length; j++) {
+                                if (block[j] === '{') braceCount++;
+                                if (block[j] === '}') { braceCount--; if (braceCount === 0) { blockEnd = j; break; } }
+                            }
+                            if (blockEnd !== -1) { i = blockEnd + 1; continue; }
+                        }
+                    }
+                    out += ch;
+                    i++;
+                }
+                return out;
             }
 
             extractMoons(planetBlock, parentId) {
@@ -2327,34 +2418,18 @@ function isStarClass(cls) {
                     const moonBlock = planetBlock.substring(braceStart + 1, blockEnd);
                     
                     const parsedMoonName = this.extractValue(moonBlock, 'name');
-                    const moon = {
-                        id: parentId * 1000 + moonId,
-                        type: 'moon',
-                        name: parsedMoonName || '',
-                        displayName: parsedMoonName || `Moon ${moonId}`,
-                        useAutoName: !parsedMoonName,
-                        class: this.extractValue(moonBlock, 'class') || 'pc_barren_cold',
-                        size: parseInt(this.extractValue(moonBlock, 'size')) || 8,
-                        orbitDistance: (() => {
-                            const val = this.extractValue(moonBlock, 'orbit_distance');
-                            return val !== null ? parseInt(val) : 10;
-                        })(),
-                        orbitAngleType: 'range',
-                        orbitAngle: 0,
-                        orbitAngleMin: 90,
-                        orbitAngleMax: 270,
-                        changeOrbit: 0,
-                        hasRing: false,
-                        isStartingPlanet: moonBlock.includes('starting_planet') || moonBlock.includes('generate_start_buildings'),
-                        isGuaranteedHabitable: false,
-                        modifiers: this.extractModifiers(moonBlock),
-                        moons: [],
-                        flags: []
-                    };
-
-                    const _mc = this.extractCount(moonBlock);
-                    moon.countMin = _mc.min;
-                    moon.countMax = _mc.max;
+                    // ✅ FIX V44: Reuse the full planet parser (recursion) so
+                    // moons keep orbit_angle, change_orbit, has_ring, deposits,
+                    // modifiers, count and nested children on import. Old code
+                    // hardcoded these fields and lost them.
+                    const moon = this.parsePlanetBlock(moonBlock, parentId * 1000 + moonId);
+                    moon.type = 'moon';
+                    if (!parsedMoonName) moon.displayName = `Moon ${moonId}`;
+                    // Moon-specific fallback defaults (parsePlanetBlock uses
+                    // planet defaults) - only when the key is absent in source.
+                    if (this.extractValue(moonBlock, 'class') === null) moon.class = 'pc_barren_cold';
+                    if (this.extractValue(moonBlock, 'size') === null) moon.size = 8;
+                    if (this.extractValue(moonBlock, 'orbit_distance') === null) moon.orbitDistance = 10;
 
                     moons.push(moon);
                     moonId++;
@@ -2499,7 +2574,9 @@ function isStarClass(cls) {
                             const quotedMatch = afterKey.match(/^"([^"]+)"/);
                             if (quotedMatch) return quotedMatch[1];
                             
-                            const unquotedMatch = afterKey.match(/^(\w+)/);
+                            // ✅ FIX V44: also accept negative numbers
+                            // (vanilla: change_orbit = -220 in sol_initializers).
+                            const unquotedMatch = afterKey.match(/^(-?\w+)/);
                             if (unquotedMatch) return unquotedMatch[1];
                         }
                     }
@@ -2511,7 +2588,11 @@ function isStarClass(cls) {
             }
 
             isStarClass(className) {
-                return this.starClasses.includes(className);
+                // ✅ FIX V44: Delegate to the single global star-class check
+                // (regex-based; covers giants, protostar, plain `star`, mod
+                // stars). The duplicated this.starClasses list missed
+                // pc_m_giant_star and others. List above is now dead data.
+                return isStarClass(className);
             }
         }
 
@@ -2629,6 +2710,11 @@ function isStarClass(cls) {
             const newSystem = createEmptySystem('custom_system_' + (allSystems.length + 1) + '_system_initializer');
             if (allSystems.length === 0) {
                 newSystem.isMain = true;
+            } else {
+                // ✅ NEU V45: Additional systems are almost always neighbors -
+                // no custom_empire usage and no home system resources by default.
+                newSystem.usage = 'none';
+                newSystem.generateHomeResources = false;
             }
             allSystems.push(newSystem);
             updateSystemList();
@@ -2645,6 +2731,116 @@ function isStarClass(cls) {
                 document.getElementById('importInfo').classList.add('hidden');
                 showNotification('🗑️ All systems deleted!');
             }
+        });
+
+        // ✅ NEU V45: System Check. All findings are hints, not blockers.
+        // Thresholds are heuristics derived from vanilla files and are
+        // labeled as such in the messages.
+        function validateSystem(system) {
+            const issues = [];
+            const bodies = [];
+            (function collect(list) {
+                (list || []).forEach(p => { bodies.push(p); collect(p.moons); });
+            })(system.planets);
+
+            // Duplicate body names (incl. moons); e.g. star and planet sharing one name
+            const seen = new Map();
+            bodies.forEach(p => {
+                const n = (p.name || '').trim();
+                if (!n) return;
+                seen.set(n, (seen.get(n) || 0) + 1);
+            });
+            seen.forEach((cnt, n) => { if (cnt > 1) issues.push(`Duplicate body name "${n}" (${cnt}x)`); });
+
+            // Absolute top-level positions (cumulative chain in list order)
+            let ptr = 0;
+            const abs = [];
+            system.planets.forEach(p => { ptr += (p.orbitDistance || 0); abs.push({ p, pos: ptr }); });
+
+            // First non-star orbit vs. star size (vanilla Sol: size 30, first orbit 40)
+            const maxStarSize = system.planets
+                .filter(p => isStarClass(p.class))
+                .reduce((m, s) => Math.max(m, s.size || 0), 0);
+            const firstPlanet = abs.find(e => !isStarClass(e.p.class));
+            if (firstPlanet && maxStarSize > 0 && firstPlanet.pos < maxStarSize) {
+                issues.push(`First orbit (${firstPlanet.pos}) is smaller than the star size (${maxStarSize}) - body may sit visually inside the star (vanilla Sol: size 30, first orbit 40)`);
+            }
+
+            // Tight orbit gaps (heuristic: gaps 1-4; orbit_distance = 0 is an
+            // intentionally shared orbit and is skipped)
+            for (let i = 1; i < abs.length; i++) {
+                if (isStarClass(abs[i].p.class) || isStarClass(abs[i - 1].p.class)) continue;
+                const gap = abs[i].pos - abs[i - 1].pos;
+                if (gap > 0 && gap < 5) {
+                    const a = abs[i - 1].p.name || abs[i - 1].p.displayName || '?';
+                    const b = abs[i].p.name || abs[i].p.displayName || '?';
+                    issues.push(`Tight orbit gap (${gap}) between "${a}" and "${b}" (heuristic; smallest top-level gap in vanilla samples is 5)`);
+                }
+            }
+
+            // Moon chains vs. free orbit spacing; moon size vs. parent size
+            abs.forEach((e, i) => {
+                const p = e.p;
+                if (!p.moons || p.moons.length === 0) return;
+                let mPtr = 0;
+                let chain = 0;
+                p.moons.forEach(m => { mPtr += (m.orbitDistance || 0); chain = Math.max(chain, mPtr); });
+                const prevGap = i > 0 ? e.pos - abs[i - 1].pos : e.pos;
+                const nextGap = i < abs.length - 1 ? abs[i + 1].pos - e.pos : Infinity;
+                const room = Math.min(prevGap > 0 ? prevGap : Infinity, nextGap > 0 ? nextGap : Infinity);
+                if (Number.isFinite(room) && chain >= room) {
+                    issues.push(`Moon chain of "${p.name || p.displayName}" (reaches ${chain}) exceeds the free orbit spacing (${room}) - moons may overlap neighboring orbits`);
+                }
+                p.moons.forEach(m => {
+                    if ((m.size || 0) >= (p.size || 0)) {
+                        issues.push(`Moon "${m.name || m.displayName || '?'}" (size ${m.size}) is as large as or larger than its parent "${p.name || p.displayName}" (size ${p.size})`);
+                    }
+                });
+            });
+
+            // Habitable classes above the usual vanilla size range (max. 25).
+            // Class list verified against 00_planet_classes.txt (+ pc_relic
+            // from 03_planet_classes_ancient_relics.txt).
+            const HABITABLE = ['pc_continental', 'pc_ocean', 'pc_desert', 'pc_tropical', 'pc_arid',
+                'pc_tundra', 'pc_arctic', 'pc_alpine', 'pc_savannah', 'pc_gaia', 'pc_nuked',
+                'pc_relic', 'pc_hive', 'pc_machine'];
+            bodies.forEach(p => {
+                const effSize = p.sizeType === 'range' ? (p.sizeMax || p.size) : p.size;
+                if (HABITABLE.includes(p.class) && effSize > 25) {
+                    issues.push(`"${p.name || p.displayName || '?'}" (${p.class}) has size ${effSize} - above the usual vanilla range for habitable worlds (max. 25)`);
+                }
+            });
+
+            return issues;
+        }
+
+        document.getElementById('systemCheckBtn')?.addEventListener('click', () => {
+            if (allSystems.length === 0) {
+                showNotification('\u26a0\ufe0f No systems to check!');
+                return;
+            }
+            const lines = [];
+            const nameCount = new Map();
+            allSystems.forEach(s => nameCount.set(s.name, (nameCount.get(s.name) || 0) + 1));
+            nameCount.forEach((c, n) => { if (c > 1) lines.push(`\u274c Duplicate initializer name "${n}" (${c}x)`); });
+            const empires = allSystems.filter(s => s.usage === 'custom_empire');
+            if (empires.length > 1) {
+                lines.push(`\u26a0\ufe0f ${empires.length} systems have usage = custom_empire: ${empires.map(s => s.name).join(', ')}`);
+            }
+            allSystems.forEach(s => {
+                const issues = validateSystem(s);
+                if (issues.length) {
+                    if (lines.length) lines.push('');
+                    lines.push(`\u2014 ${s.displayName || s.name} \u2014`);
+                    issues.forEach(i => lines.push('\u26a0\ufe0f ' + i));
+                }
+            });
+            document.getElementById('systemCheckResult').textContent = lines.length ? lines.join('\n') : '\u2705 No issues found.';
+            document.getElementById('systemCheckModal').classList.add('active');
+        });
+
+        document.getElementById('closeSystemCheckBtn')?.addEventListener('click', () => {
+            document.getElementById('systemCheckModal').classList.remove('active');
         });
 
         document.getElementById('exportAllBtn').addEventListener('click', () => {
@@ -3634,6 +3830,8 @@ function getCurrentMoon() {
             document.getElementById('planetName').value = '';
             document.getElementById('planetClass').value = 'pc_continental';
             document.getElementById('planetSize').value = '16';
+            document.getElementById('planetSizeRange').checked = false;
+            window.toggleSizeRangeFields('planet');
             document.getElementById('planetOrbit').value = '25';
             document.getElementById('planetCountMin').value = '1';
             document.getElementById('planetCountMax').value = '1';
@@ -3665,6 +3863,8 @@ function getCurrentMoon() {
             document.getElementById('planetName').value = 'Star';
             document.getElementById('planetClass').value = 'star';
             document.getElementById('planetSize').value = '30';  // Default star size
+            document.getElementById('planetSizeRange').checked = false;
+            window.toggleSizeRangeFields('planet');
             document.getElementById('planetOrbit').value = '0';   // Primary star at center
             document.getElementById('planetCountMin').value = '1';
             document.getElementById('planetCountMax').value = '1';
@@ -3725,6 +3925,10 @@ function getCurrentMoon() {
             document.getElementById('planetName').value = planet.name || '';
             document.getElementById('planetClass').value = planet.class;
             document.getElementById('planetSize').value = planet.size;
+            document.getElementById('planetSizeRange').checked = planet.sizeType === 'range';
+            document.getElementById('planetSizeMin').value = planet.sizeMin ?? planet.size;
+            document.getElementById('planetSizeMax').value = planet.sizeMax ?? planet.size;
+            window.toggleSizeRangeFields('planet');
             document.getElementById('planetOrbit').value = planet.orbitDistance;
             document.getElementById('planetCountMin').value = planet.countMin ?? 1;
             document.getElementById('planetCountMax').value = planet.countMax ?? 1;
@@ -3779,6 +3983,16 @@ function getCurrentMoon() {
             }
             
             const size = parseInt(document.getElementById('planetSize').value);
+            // ✅ NEU V45: optional size range
+            const sizeIsRange = document.getElementById('planetSizeRange')?.checked === true;
+            const sizeMinRaw = parseInt(document.getElementById('planetSizeMin')?.value);
+            const sizeMaxRaw = parseInt(document.getElementById('planetSizeMax')?.value);
+            if (sizeIsRange && (!Number.isFinite(sizeMinRaw) || !Number.isFinite(sizeMaxRaw))) {
+                showNotification('\u26a0\ufe0f Size range requires min and max values!');
+                return;
+            }
+            const sizeMin = sizeIsRange ? Math.min(sizeMinRaw, sizeMaxRaw) : null;
+            const sizeMax = sizeIsRange ? Math.max(sizeMinRaw, sizeMaxRaw) : null;
             const orbit = parseInt(document.getElementById('planetOrbit').value);
             const changeOrbit = parseInt(document.getElementById('planetChangeOrbit').value);
             let countMin = clampCount(document.getElementById('planetCountMin')?.value);
@@ -3831,7 +4045,10 @@ function getCurrentMoon() {
                 displayName: name || `🪐 Unnamed (Orbit ${orbit})`,
                 useAutoName: useAutoName,
                 class: planetClass,
-                size: size,
+                size: sizeIsRange ? Math.round((sizeMin + sizeMax) / 2) : size,
+                sizeType: sizeIsRange ? 'range' : 'fixed',
+                sizeMin: sizeMin,
+                sizeMax: sizeMax,
                 orbitDistance: orbit,
                 orbitAngleType: orbitAngleType,
                 orbitAngle: orbitAngle,
@@ -3949,6 +4166,8 @@ function getCurrentMoon() {
             document.getElementById('moonName').value = '';
             document.getElementById('moonClass').value = 'pc_barren_cold';
             document.getElementById('moonSize').value = '8';
+            document.getElementById('moonSizeRange').checked = false;
+            window.toggleSizeRangeFields('moon');
             document.getElementById('moonOrbit').value = '10';
             document.getElementById('moonCountMin').value = '1';
             document.getElementById('moonCountMax').value = '1';
@@ -3984,6 +4203,10 @@ function getCurrentMoon() {
             document.getElementById('moonName').value = moon.name || '';
             document.getElementById('moonClass').value = moon.class;
             document.getElementById('moonSize').value = moon.size;
+            document.getElementById('moonSizeRange').checked = moon.sizeType === 'range';
+            document.getElementById('moonSizeMin').value = moon.sizeMin ?? moon.size;
+            document.getElementById('moonSizeMax').value = moon.sizeMax ?? moon.size;
+            window.toggleSizeRangeFields('moon');
             document.getElementById('moonOrbit').value = moon.orbitDistance;
             document.getElementById('moonCountMin').value = moon.countMin ?? 1;
             document.getElementById('moonCountMax').value = moon.countMax ?? 1;
@@ -4020,6 +4243,16 @@ function getCurrentMoon() {
             }
             
             const size = parseInt(document.getElementById('moonSize').value);
+            // ✅ NEU V45: optional size range
+            const sizeIsRange = document.getElementById('moonSizeRange')?.checked === true;
+            const sizeMinRaw = parseInt(document.getElementById('moonSizeMin')?.value);
+            const sizeMaxRaw = parseInt(document.getElementById('moonSizeMax')?.value);
+            if (sizeIsRange && (!Number.isFinite(sizeMinRaw) || !Number.isFinite(sizeMaxRaw))) {
+                showNotification('\u26a0\ufe0f Size range requires min and max values!');
+                return;
+            }
+            const sizeMin = sizeIsRange ? Math.min(sizeMinRaw, sizeMaxRaw) : null;
+            const sizeMax = sizeIsRange ? Math.max(sizeMinRaw, sizeMaxRaw) : null;
             const orbit = parseInt(document.getElementById('moonOrbit').value);
             let countMin = clampCount(document.getElementById('moonCountMin')?.value);
             let countMax = clampCount(document.getElementById('moonCountMax')?.value);
@@ -4068,16 +4301,21 @@ function getCurrentMoon() {
                 displayName: name || `🌙 Unnamed (Orbit ${orbit})`,
                 useAutoName: useAutoName,
                 class: moonClass,
-                size: size,
+                size: sizeIsRange ? Math.round((sizeMin + sizeMax) / 2) : size,
+                sizeType: sizeIsRange ? 'range' : 'fixed',
+                sizeMin: sizeMin,
+                sizeMax: sizeMax,
                 orbitDistance: orbit,
                 orbitAngleType: orbitAngleType,
                 orbitAngle: orbitAngle,
                 orbitAngleMin: orbitAngleMin,
                 orbitAngleMax: orbitAngleMax,
-                changeOrbit: 0,
+                // ✅ FIX V45: keep imported values - the modal has no fields
+                // for these, hardcoding 0/false destroyed them on every edit.
+                changeOrbit: existing ? (existing.changeOrbit || 0) : 0,
                 countMin: countMin,
                 countMax: countMax,
-                hasRing: false,
+                hasRing: existing ? (existing.hasRing === true) : false,
                 isStartingPlanet: isStarting,
                 isGuaranteedHabitable: isGuaranteedHabitable,
                 modifiers: existing ? (existing.modifiers || []) : [],
@@ -4110,6 +4348,16 @@ function getCurrentMoon() {
         // ORBIT ANGLE PRESET FUNCTIONS
         // =====================================================
         
+        // ✅ NEU V45: shared toggle for the size range fields (planet + moon)
+        window.toggleSizeRangeFields = function(prefix) {
+            const on = document.getElementById(prefix + 'SizeRange')?.checked === true;
+            const fields = document.getElementById(prefix + 'SizeRangeFields');
+            const fixed = document.getElementById(prefix + 'Size');
+            if (!fields || !fixed) return;
+            fields.classList.toggle('hidden', !on);
+            fixed.disabled = on;
+        };
+
         window.toggleOrbitAngleFields = function() {
             const mode = document.getElementById('orbitAngleMode').value;
             const presetDiv = document.getElementById('orbitAnglePreset');
@@ -4967,6 +5215,21 @@ function getCurrentMoon() {
             // ✅ FEATURE 8: Export stars FIRST (single canonical star check)
             const starPlanets = system.planets.filter(p => isStarClass(p.class));
             const regularPlanets = system.planets.filter(p => !isStarClass(p.class));
+
+            // ✅ NEU V45: The export reorders stars to the front. To keep every
+            // body on its original orbit, absolute positions are computed in
+            // model (list) order and re-emitted as deltas in export order.
+            // When the order is unchanged the deltas equal the original values
+            // and the output stays byte-identical.
+            const _absPos = new Map();
+            let _ptr = 0;
+            system.planets.forEach(p => { _ptr += (p.orbitDistance || 0); _absPos.set(p, _ptr); });
+            let _expPtr = 0;
+            const _expDelta = new Map();
+            [...starPlanets, ...regularPlanets].forEach(p => {
+                _expDelta.set(p, _absPos.get(p) - _expPtr);
+                _expPtr = _absPos.get(p);
+            });
             
             // If no star planets exist, generate default primary star
             if (starPlanets.length === 0) {
@@ -4977,7 +5240,7 @@ function getCurrentMoon() {
             } else {
                 // Export all star planets first
                 starPlanets.forEach(starPlanet => {
-                    code += generatePlanetCode(starPlanet, 1);
+                    code += generatePlanetCode(starPlanet, 1, 'planet', _expDelta.get(starPlanet));
                 });
             }
             
@@ -5004,8 +5267,10 @@ function getCurrentMoon() {
                 code += `\t\t\t\tset_star_flag = empire_cluster\n`;
                 code += `\t\t\t}\n`;
                 code += `\t\t}\n`;
-                // Only main system gets generate_home_system_resources
-                if (system.isMain && system.generateHomeResources !== false) {
+                // ✅ FIX V44: GHR follows the per-system checkbox (vanilla
+                // Hegemon pattern: neighbor systems carry GHR without usage).
+                // Import (V43) already reads it 1:1 - export now matches.
+                if (system.generateHomeResources === true) {
                     code += `\t\tgenerate_home_system_resources = yes\n`;
                 }
                 code += `\t}\n`;
@@ -5013,7 +5278,7 @@ function getCurrentMoon() {
             
             // Export regular planets (non-stars)
             regularPlanets.forEach(planet => {
-                code += generatePlanetCode(planet, 1);
+                code += generatePlanetCode(planet, 1, 'planet', _expDelta.get(planet));
             });
             
             system.neighborSystems.forEach(neighbor => {
@@ -5048,9 +5313,11 @@ function getCurrentMoon() {
             return code;
         }
 
-        function generatePlanetCode(planet, indentLevel, blockKeyword = 'planet') {
+        function generatePlanetCode(planet, indentLevel, blockKeyword = 'planet', orbitDistanceOverride = null) {
             const tab = '\t'.repeat(indentLevel);
-            let code = `\n${tab}planet = {\n`;
+            // ✅ FIX V44: blockKeyword was ignored - children always exported
+            // as `planet = {}`. Now the keyword passed by the caller is used.
+            let code = `\n${tab}${blockKeyword} = {\n`;
 
             // count: double/multiple planets (vanilla: count as first key, max 3)
             const _cMin = clampCount(planet.countMin ?? 1);
@@ -5074,7 +5341,10 @@ function getCurrentMoon() {
             } else {
                 code += `${tab}\tclass = "${planet.class}"\n`;
             }
-            code += `${tab}\torbit_distance = ${planet.orbitDistance}\n`;
+            // ✅ NEU V45: chain compensation may pass an adjusted delta so the
+            // body keeps its absolute position after stars are moved to the
+            // front. Negative values are vanilla-legal (Sol: orbit_distance = -35).
+            code += `${tab}\torbit_distance = ${orbitDistanceOverride ?? planet.orbitDistance}\n`;
             
             // Export orbit_angle based on type
             if (planet.orbitAngleType === 'fixed') {
@@ -5083,7 +5353,12 @@ function getCurrentMoon() {
                 code += `${tab}\torbit_angle = { min = ${planet.orbitAngleMin} max = ${planet.orbitAngleMax} }\n`;
             }
             
-            code += `${tab}\tsize = ${planet.size}\n`;
+            // ✅ NEU V45: size ranges export in vanilla notation
+            if (planet.sizeType === 'range' && planet.sizeMin != null && planet.sizeMax != null) {
+                code += `${tab}\tsize = { min = ${planet.sizeMin} max = ${planet.sizeMax} }\n`;
+            } else {
+                code += `${tab}\tsize = ${planet.size}\n`;
+            }
             
             if (planet.changeOrbit > 0) {
                 code += `${tab}\tchange_orbit = ${planet.changeOrbit}\n`;
@@ -5188,7 +5463,10 @@ function getCurrentMoon() {
             }
             
             planet.moons.forEach(moon => {
-                code += generatePlanetCode(moon, indentLevel + 1, 'moon');
+                // ✅ FIX V44: S-type convention - children of a star export as
+                // nested `planet = {}` (vanilla binary_init_02), children of a
+                // planet as `moon = {}` (vanilla Sol).
+                code += generatePlanetCode(moon, indentLevel + 1, isStarClass(planet.class) ? 'planet' : 'moon');
             });
             
             code += `${tab}}\n`;
