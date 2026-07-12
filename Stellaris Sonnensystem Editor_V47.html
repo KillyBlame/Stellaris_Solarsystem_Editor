@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Stellaris Solar System Editor V45 - Full Editor</title>
+    <title>Stellaris Solar System Editor V47 - Full Editor</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;600;700;800;900&family=Exo+2:wght@300;400;500;600&display=swap');
@@ -380,7 +380,7 @@
 </head>
 <body>
     <div class="container mx-auto py-8 px-4">
-        <h1 class="stellaris-header">🌌 Stellaris Solar System Editor V45</h1>
+        <h1 class="stellaris-header">🌌 Stellaris Solar System Editor V47</h1>
         <div class="text-center mb-6">
             <span class="text-yellow-400 font-semibold">⭐ Full Editor - Edit systems, planets, and neighbors</span>
         </div>
@@ -487,6 +487,7 @@
                             <span class="text-xs text-gray-400">(v4.3: ideal_planet_class → ideal_design_class)</span>
                         </label>
                         <select id="planetClass" class="stellaris-input" onchange="window.toggleCustomPlanetClass()">
+                            <option value="">🎲 Random (no class line)</option>
                             <optgroup label="⭐ Stars">
                                 <option value="pc_b_star">B-Star (Blue)</option>
                                 <option value="pc_a_star">A-Star (White)</option>
@@ -569,6 +570,9 @@
                                 <option value="ideal_design_class">🌍 Ideal Design Class (Colony)</option>
                                 <option value="random_non_ideal">🎲 Random Non-Ideal</option>
                                 <option value="random">🎲 Random (Distance-based)</option>
+                                <option value="random_non_colonizable">🎲 Random Non-Colonizable</option>
+                                <option value="random_colonizable">🎲 Random Colonizable</option>
+                                <option value="random_non_machine">🎲 Random Non-Machine</option>
                                 <option value="random_colonizable">🌿 Random Colonizable</option>
                                 <option value="random_non_colonizable">🪨 Random Non-Colonizable</option>
                                 <option value="random_asteroid">☄️ Random Asteroid</option>
@@ -596,6 +600,14 @@
                     <div class="form-group">
                         <label class="label">Orbit Distance</label>
                         <input type="number" id="planetOrbit" class="stellaris-input" value="25" min="0" max="200">
+                        <label class="flex items-center gap-2 cursor-pointer mt-1">
+                            <input type="checkbox" id="planetOrbitRange" onchange="window.toggleOrbitRangeFields('planet')">
+                            <span class="text-gray-300 text-sm">Orbit as range (orbit_distance = { min max })</span>
+                        </label>
+                        <div id="planetOrbitRangeFields" class="hidden grid grid-cols-2 gap-2 mt-1">
+                            <input type="number" id="planetOrbitMin" class="stellaris-input" placeholder="min">
+                            <input type="number" id="planetOrbitMax" class="stellaris-input" placeholder="max">
+                        </div>
                     </div>
                     <div class="form-group" style="grid-column: span 2;">
                         <label class="label">Anzahl / count – Doppelplanet (max 3)</label>
@@ -1287,6 +1299,9 @@
                     <div class="form-group">
                         <label class="label">Moon Class</label>
                         <select id="moonClass" class="stellaris-input">
+                            <option value="">🎲 Random (no class line)</option>
+                            <option value="random_non_colonizable">🎲 Random Non-Colonizable</option>
+                            <option value="random">🎲 Random (Distance-based)</option>
                             <optgroup label="Habitable Moons">
                                 <option value="pc_continental">Continental</option>
                                 <option value="pc_ocean">Ocean</option>
@@ -1349,6 +1364,14 @@
                     <div class="form-group">
                         <label class="label">Orbit Distance from Planet</label>
                         <input type="number" id="moonOrbit" class="stellaris-input" value="10" min="5" max="30">
+                        <label class="flex items-center gap-2 cursor-pointer mt-1">
+                            <input type="checkbox" id="moonOrbitRange" onchange="window.toggleOrbitRangeFields('moon')">
+                            <span class="text-gray-300 text-sm">Orbit as range (orbit_distance = { min max })</span>
+                        </label>
+                        <div id="moonOrbitRangeFields" class="hidden grid grid-cols-2 gap-2 mt-1">
+                            <input type="number" id="moonOrbitMin" class="stellaris-input" placeholder="min">
+                            <input type="number" id="moonOrbitMax" class="stellaris-input" placeholder="max">
+                        </div>
                     </div>
                     <div class="form-group" style="grid-column: span 2;">
                         <label class="label">Anzahl / count – Doppelmond (max 3)</label>
@@ -2029,6 +2052,28 @@ function isStarClass(cls) {
             }
 
             parseMultipleSystems(fileContent) {
+                // ✅ NEU V46: Resolve file-local @variables (vanilla pattern:
+                // @base_moon_distance = 10 at the top of the file). Definition
+                // lines are removed, usages replaced by their numeric value.
+                // Undefined @vars stay in place - the existing fallbacks apply,
+                // but with a collected warning instead of silent loss.
+                this.importWarnings = [];
+                const varDefs = new Map();
+                fileContent.replace(/^[ \t]*@([A-Za-z0-9_]+)\s*=\s*(-?\d+(?:\.\d+)?)[ \t]*\r?$/gm, (m, name, val) => {
+                    varDefs.set(name, val);
+                    return m;
+                });
+                fileContent = fileContent.replace(/^[ \t]*@[A-Za-z0-9_]+\s*=\s*-?\d+(?:\.\d+)?[ \t]*\r?$/gm, '');
+                const undefinedVars = new Map();
+                fileContent = fileContent.replace(/@([A-Za-z0-9_]+)/g, (m, name) => {
+                    if (varDefs.has(name)) return varDefs.get(name);
+                    undefinedVars.set(name, (undefinedVars.get(name) || 0) + 1);
+                    return m;
+                });
+                undefinedVars.forEach((cnt, name) => {
+                    this.importWarnings.push(`Undefined @variable "@${name}" (${cnt}x) - affected values fall back to editor defaults`);
+                });
+
                 const systems = [];
                 // ✅ FIX: Accept any top-level block that looks like a system initializer
                 // Must start at beginning of line (no indentation) to avoid matching nested blocks
@@ -2100,6 +2145,31 @@ function isStarClass(cls) {
                 if (classMatch) {
                     system.class = classMatch[1];
                 }
+                
+                // ✅ NEU V46: system-level flags (vanilla: flags = { a b c }).
+                // stripChildBodies keeps only top-level content, so planet-level
+                // flags cannot leak into the system.
+                const sysOwn = this.stripChildBodies(blockContent);
+                const sysFlagsMatch = sysOwn.match(/(?<![A-Za-z0-9_])flags\s*=\s*\{\s*([^}]*)\}/);
+                system.flags = sysFlagsMatch ? sysFlagsMatch[1].trim().split(/\s+/).filter(Boolean) : [];
+
+                // ✅ NEU V47: system metadata pass-throughs (verbatim).
+                // Line-start match so commented-out keys (#scaled_spawn_chance
+                // in vanilla leviathans) are not picked up. usage_odds exists in
+                // BOTH vanilla forms: scalar (misc: usage_odds = 20) handled
+                // here, block (usage_odds = { base ... }) handled below - the
+                // two are mutually exclusive per system.
+                system.passThrough = {};
+                for (const ptKey of ['usage_odds', 'spawn_chance', 'scaled_spawn_chance', 'max_instances']) {
+                    const ptMatch = sysOwn.match(new RegExp('^[ \\t]*' + ptKey + '\\s*=\\s*(-?\\d+(?:\\.\\d+)?)', 'm'));
+                    if (ptMatch) system.passThrough[ptKey] = ptMatch[1];
+                }
+                system.usageOdds = this.extractTopLevelBlockVerbatim(sysOwn, 'usage_odds');
+
+                // ✅ NEU V47: verbatim remainder of system init_effect (origin
+                // logic, event targets, spawned megastructures, ...)
+                const sysFx = this.classifyInitEffects(sysOwn, 'system');
+                system.rawInitEffect = sysFx.raw.length ? sysFx.raw.join('\n') : null;
                 
                 const usageMatch = blockContent.match(/usage\s*=\s*(\w+)/);
                 if (usageMatch) {
@@ -2193,19 +2263,28 @@ function isStarClass(cls) {
                 let pendingChangeOrbit = 0;
                 let lastConsumedEnd = 0;
                 
+                // ✅ FIX V47: depth-0 scan with left word boundary (same rules
+                // as extractMoons/stripChildBodies) + comment skip. The old
+                // indexOf scanner had NO boundaries and NO depth tracking -
+                // effect scopes like random_system_planet = { ... } inside
+                // init_effect blocks were parsed as ghost planets.
+                let depth = 0;
                 let i = 0;
                 while (i < code.length) {
-                    const planetKeyword = code.indexOf('planet', i);
-                    if (planetKeyword === -1) break;
-                    
-                    const equalsSign = code.indexOf('=', planetKeyword);
-                    if (equalsSign === -1 || equalsSign - planetKeyword > 10) {
-                        i = planetKeyword + 6;
+                    const ch = code[i];
+                    if (ch === '#') {
+                        const nl = code.indexOf('\n', i);
+                        i = nl === -1 ? code.length : nl + 1;
                         continue;
                     }
-                    
-                    const braceStart = code.indexOf('{', equalsSign);
-                    if (braceStart === -1) break;
+                    if (ch === '{') { depth++; i++; continue; }
+                    if (ch === '}') { depth--; i++; continue; }
+                    if (depth !== 0 || ch !== 'p') { i++; continue; }
+                    if (i > 0 && /[A-Za-z0-9_]/.test(code[i - 1])) { i++; continue; }
+                    const key = code.slice(i).match(/^planet\s*=\s*\{/);
+                    if (!key) { i++; continue; }
+                    const planetKeyword = i;
+                    const braceStart = i + key[0].length - 1;
                     
                     let braceCount = 0;
                     let blockEnd = -1;
@@ -2232,11 +2311,16 @@ function isStarClass(cls) {
                     try {
                         const planet = this.parsePlanetBlock(planetBlock, planetId);
                         
-                        // ✅ FIX V44: Skip ONLY the editor's own dummy star
-                        // (class = star, orbit_distance = 0, NO size key at all).
-                        // Vanilla `class = star` blocks always carry a size
-                        // (fixed or range) and must be kept.
-                        if (planet.class === 'star' && planet.orbitDistance === 0 && !/(?<![A-Za-z0-9_])size\s*=/.test(planetBlock)) {
+                        // ✅ FIX V47: Skip ONLY the editor's own dummy star,
+                        // which is exactly { class = star, orbit_distance = 0 }
+                        // and nothing else. V44 skipped on missing size alone
+                        // and swallowed vanilla star blocks carrying init_effect
+                        // content (utopia: ambient objects on a bare star).
+                        if (planet.class === 'star' && planet.orbitDistance === 0
+                            && !/(?<![A-Za-z0-9_])size\s*=/.test(planetBlock)
+                            && !/(?<![A-Za-z0-9_])init_effect\s*=/.test(planetBlock)
+                            && !/(?<![A-Za-z0-9_])name\s*=/.test(planetBlock)
+                            && planet.moons.length === 0) {
                             i = blockEnd + 1;
                             continue;
                         }
@@ -2282,7 +2366,7 @@ function isStarClass(cls) {
                     name: parsedName || '',
                     displayName: parsedName || `Planet ${id}`,
                     useAutoName: !parsedName,
-                    class: this.extractValue(blockContent, 'class') || 'pc_continental',
+                    class: this.extractValue(blockContent, 'class') || '',
                     size: parseInt(this.extractValue(blockContent, 'size')) || 16,
                     sizeType: 'fixed',
                     sizeMin: null,
@@ -2291,6 +2375,9 @@ function isStarClass(cls) {
                         const val = this.extractValue(blockContent, 'orbit_distance');
                         return val !== null ? parseInt(val) : 25;
                     })(),
+                    odType: 'fixed',
+                    odMin: null,
+                    odMax: null,
                     orbitAngleType: 'range',
                     orbitAngle: 0,
                     orbitAngleMin: 90,
@@ -2301,7 +2388,13 @@ function isStarClass(cls) {
                     isGuaranteedHabitable: ownContent.includes('prescripted_ideal') || ownContent.includes('ideal_design_class'),
                     modifiers: this.extractModifiers(ownContent),
                     moons: [],
-                    flags: []
+                    // ✅ NEU V46: pass-through fields - preserved on import and
+                    // export, not editable in the modal (values survive edits).
+                    flags: (() => {
+                        const m = ownContent.match(/(?<![A-Za-z0-9_])flags\s*=\s*\{\s*([^}]*)\}/);
+                        return m ? m[1].trim().split(/\s+/).filter(Boolean) : [];
+                    })(),
+                    satelliteNamingPolicy: this.extractValue(blockContent, 'satellite_naming_policy') || null
                 };
 
                 const angleRangeMatch = ownContent.match(/orbit_angle\s*=\s*\{\s*min\s*=\s*(\d+)\s*max\s*=\s*(\d+)\s*\}/);
@@ -2327,16 +2420,46 @@ function isStarClass(cls) {
                     planet.size = Math.round((planet.sizeMin + planet.sizeMax) / 2);
                 }
 
-                // ✅ FIX V44: Round-trip for init_effect content the editor
-                // itself exports. Runs on ownContent only, so every body keeps
-                // its own deposits/modifiers.
-                planet.deposits = [...ownContent.matchAll(/add_deposit\s*=\s*([A-Za-z0-9_]+)/g)].map(m => m[1]);
+                // ✅ NEU V46: orbit_distance ranges (vanilla: trinary_init_01,
+                // orbit_distance = { min = 0 max = 20 }). Display value = mean.
+                const odRangeMatch = ownContent.match(/(?<![A-Za-z0-9_])orbit_distance\s*=\s*\{\s*min\s*=\s*(-?\d+)\s*max\s*=\s*(-?\d+)\s*\}/);
+                if (odRangeMatch) {
+                    planet.odType = 'range';
+                    planet.odMin = parseInt(odRangeMatch[1]);
+                    planet.odMax = parseInt(odRangeMatch[2]);
+                    planet.orbitDistance = Math.round((planet.odMin + planet.odMax) / 2);
+                }
+
+                // ✅ NEU V47: init_effect blocks are classified line by line -
+                // managed content goes to data fields (regenerated on export),
+                // everything else is preserved verbatim in rawInitEffect.
+                // Replaces the V44 content-wide regexes, which also matched
+                // add_deposit inside nested effect scopes (double export risk).
+                const fx = this.classifyInitEffects(ownContent, 'planet');
+                planet.deposits = fx.deposits;
                 planet.isHomePlanet = /(?<![A-Za-z0-9_])home_planet\s*=\s*yes/.test(ownContent);
-                const addedModifiers = [...ownContent.matchAll(/add_modifier\s*=\s*\{[^{}]*?modifier\s*=\s*"?([A-Za-z0-9_]+)"?[^{}]*?\}/g)].map(m => m[1]);
-                planet.isTerraformingCandidate = addedModifiers.includes('terraforming_candidate');
-                addedModifiers.forEach(m => {
-                    if (m !== 'terraforming_candidate' && !planet.modifiers.includes(m)) planet.modifiers.push(m);
+                planet.preventAnomaly = fx.preventAnomaly;
+                planet.isTerraformingCandidate = fx.terraforming === true;
+                fx.modifiers.forEach(m => {
+                    if (!planet.modifiers.includes(m)) planet.modifiers.push(m);
                 });
+                // ✅ FIX V47: home-planet pattern (vanilla random empires:
+                // home_planet = yes + generate_empire_home_planet WITHOUT a
+                // starting_planet key). Non-starting planets keep the effect
+                // verbatim; starting planets get it regenerated on export.
+                if (fx.hasHomeMarker && !planet.isStartingPlanet) {
+                    fx.raw.push('generate_empire_home_planet = yes');
+                }
+                planet.rawInitEffect = fx.raw.length ? fx.raw.join('\n') : null;
+                // ✅ FIX V47: direct entity key (vanilla aquatics: entity =
+                // "ocean_paradise_planet_01_entity"). Matched on fx.rest so the
+                // entity line INSIDE set_planet_entity effects cannot leak here.
+                const entMatch = fx.rest.match(/(?<![A-Za-z0-9_])entity\s*=\s*("[^"]*"|[A-Za-z0-9_]+)/);
+                planet.entity = entMatch ? entMatch[1] : null;
+                // ✅ FIX V47: bodies without a size key keep having none -
+                // the editor no longer invents size = 16 lines on export.
+                // Editing the body in the UI makes its size explicit again.
+                planet.omitSizeLine = !/(?<![A-Za-z0-9_])size\s*=/.test(ownContent);
 
                 planet.moons = this.extractMoons(blockContent, id);
 
@@ -2345,6 +2468,177 @@ function isStarClass(cls) {
                 planet.countMax = _pc.max;
 
                 return planet;
+            }
+
+            // ✅ NEU V47: Extract all init_effect blocks from own content and
+            // split them into editor-managed parts (regenerated on export) and
+            // a verbatim remainder (exported unchanged). mode: 'planet'|'system'.
+            classifyInitEffects(content, mode) {
+                const result = { deposits: [], modifiers: [], terraforming: false, preventAnomaly: false, hasHomeMarker: false, raw: [], rest: '' };
+                const restParts = [];
+                let lastEnd = 0;
+                let i = 0;
+                while (i < content.length) {
+                    const isBoundary = i === 0 || !/[A-Za-z0-9_]/.test(content[i - 1]);
+                    if (isBoundary && content.startsWith('init_effect', i)) {
+                        const m = content.slice(i).match(/^init_effect\s*=\s*\{/);
+                        if (m) {
+                            const braceStart = i + m[0].length - 1;
+                            let depth = 0, end = -1;
+                            for (let j = braceStart; j < content.length; j++) {
+                                if (content[j] === '{') depth++;
+                                if (content[j] === '}') { depth--; if (depth === 0) { end = j; break; } }
+                            }
+                            if (end !== -1) {
+                                restParts.push(content.slice(lastEnd, i));
+                                this.classifyEffectBody(content.slice(braceStart + 1, end), mode, result);
+                                lastEnd = end + 1;
+                                i = end + 1;
+                                continue;
+                            }
+                        }
+                    }
+                    i++;
+                }
+                restParts.push(content.slice(lastEnd));
+                result.rest = restParts.join('\n');
+                return result;
+            }
+
+            // Line-based scan of one effect body. Managed content is moved to
+            // data fields; everything else is kept verbatim with re-built
+            // relative indentation (tabs by brace depth) for stable round-trips.
+            classifyEffectBody(body, mode, result) {
+                const lines = body.split('\n');
+                let depth = 0;
+                let buffer = null; // { lines: [], startDepth, kind }
+                const emitRaw = (line, lineDepth) => {
+                    result.raw.push('\t'.repeat(Math.max(0, lineDepth)) + line);
+                };
+                const flushBuffer = () => {
+                    if (!buffer) return;
+                    if (buffer.kind === 'add_modifier') {
+                        // Managed iff the block contains NOTHING but the head,
+                        // modifier = "x" and days = N. Subtract those parts -
+                        // an empty remainder means the export can regenerate
+                        // the block losslessly; anything else stays verbatim.
+                        const joined = buffer.lines.map(l => l.line).join(' ');
+                        const mm = joined.match(/modifier\s*=\s*"?([A-Za-z0-9_]+)"?/);
+                        const remainder = joined
+                            .replace(/^add_modifier\s*=\s*\{/, '')
+                            .replace(/\}\s*$/, '')
+                            .replace(/modifier\s*=\s*"?[A-Za-z0-9_]+"?/, '')
+                            .replace(/days\s*=\s*-1(?!\d)/, '')
+                            .trim();
+                        if (mm && remainder === '') {
+                            if (mm[1] === 'terraforming_candidate') result.terraforming = true;
+                            else if (!result.modifiers.includes(mm[1])) result.modifiers.push(mm[1]);
+                        } else {
+                            buffer.lines.forEach(l => emitRaw(l.line, l.depth));
+                        }
+                    } else if (buffer.kind === 'every_neighbor_system') {
+                        const joined = buffer.lines.map(l => l.line).join(' ');
+                        const leftover = joined.replace(/every_neighbor_system|set_star_flag|empire_cluster|[={}\s]+/g, '');
+                        if (leftover === '') {
+                            // matches the editor-generated empire_cluster pattern -> regenerated
+                        } else {
+                            buffer.lines.forEach(l => emitRaw(l.line, l.depth));
+                        }
+                    }
+                    buffer = null;
+                };
+                for (const rawLine of lines) {
+                    const line = rawLine.trim();
+                    if (!line) continue;
+                    const codePart = line.split('#')[0];
+                    const opens = (codePart.match(/\{/g) || []).length;
+                    const closes = (codePart.match(/\}/g) || []).length;
+                    const lineDepth = line.startsWith('}') ? depth - 1 : depth;
+
+                    if (buffer) {
+                        buffer.lines.push({ line, depth: lineDepth });
+                        depth += opens - closes;
+                        if (depth <= buffer.startDepth) flushBuffer();
+                        continue;
+                    }
+
+                    if (depth === 0) {
+                        let m;
+                        if ((m = codePart.match(/^add_deposit\s*=\s*([A-Za-z0-9_]+)\s*$/))) {
+                            // ✅ FIX V47: NO dedupe - vanilla stacks deposits by
+                            // repeating add_deposit lines (paragon: random_blocker 8x)
+                            result.deposits.push(m[1]);
+                            depth += opens - closes;
+                            continue;
+                        }
+                        if (/^prevent_anomaly\s*=\s*yes\s*$/.test(codePart)) {
+                            result.preventAnomaly = true;
+                            depth += opens - closes;
+                            continue;
+                        }
+                        if (mode === 'planet' && /^(generate_empire_home_planet|generate_start_buildings_and_blockers)\s*=\s*yes\s*$/.test(codePart)) {
+                            // ✅ FIX V47: remember the marker - planets using the
+                            // home_planet pattern (no starting_planet key) must
+                            // keep this effect, see parser.
+                            result.hasHomeMarker = true;
+                            depth += opens - closes;
+                            continue;
+                        }
+                        if (mode === 'planet' && /^set_planet_flag\s*=\s*prescripted_ideal\s*$/.test(codePart)) {
+                            depth += opens - closes;
+                            continue;
+                        }
+                        if (mode === 'system' && /^generate_home_system_resources\s*=\s*yes\s*$/.test(codePart)) {
+                            depth += opens - closes;
+                            continue;
+                        }
+                        if (/^add_modifier\s*=\s*\{/.test(codePart)) {
+                            buffer = { lines: [{ line, depth: lineDepth }], startDepth: depth, kind: 'add_modifier' };
+                            depth += opens - closes;
+                            if (depth <= buffer.startDepth) flushBuffer();
+                            continue;
+                        }
+                        if (mode === 'system' && /^every_neighbor_system\s*=\s*\{/.test(codePart)) {
+                            buffer = { lines: [{ line, depth: lineDepth }], startDepth: depth, kind: 'every_neighbor_system' };
+                            depth += opens - closes;
+                            if (depth <= buffer.startDepth) flushBuffer();
+                            continue;
+                        }
+                    }
+                    emitRaw(line, lineDepth);
+                    depth += opens - closes;
+                }
+                flushBuffer();
+            }
+
+            // ✅ NEU V47: verbatim extraction of a top-level `key = { ... }`
+            // block (line start, not commented out). Returns re-indented body
+            // lines as a string, or null.
+            extractTopLevelBlockVerbatim(content, key) {
+                const re = new RegExp('^[ \\t]*' + key + '\\s*=\\s*\\{', 'm');
+                const m = content.match(re);
+                if (!m) return null;
+                const braceStart = m.index + m[0].length - 1;
+                let depth = 0, end = -1;
+                for (let j = braceStart; j < content.length; j++) {
+                    if (content[j] === '{') depth++;
+                    if (content[j] === '}') { depth--; if (depth === 0) { end = j; break; } }
+                }
+                if (end === -1) return null;
+                const bodyLines = content.slice(braceStart + 1, end).split('\n');
+                let d = 0;
+                const out = [];
+                for (const rawLine of bodyLines) {
+                    const line = rawLine.trim();
+                    if (!line) continue;
+                    const codePart = line.split('#')[0];
+                    const opens = (codePart.match(/\{/g) || []).length;
+                    const closes = (codePart.match(/\}/g) || []).length;
+                    const lineDepth = line.startsWith('}') ? d - 1 : d;
+                    out.push('\t'.repeat(Math.max(0, lineDepth)) + line);
+                    d += opens - closes;
+                }
+                return out.length ? out.join('\n') : null;
             }
 
             // ✅ FIX V44: Remove depth-0 child body blocks (`moon = {}` and
@@ -2427,9 +2721,12 @@ function isStarClass(cls) {
                     if (!parsedMoonName) moon.displayName = `Moon ${moonId}`;
                     // Moon-specific fallback defaults (parsePlanetBlock uses
                     // planet defaults) - only when the key is absent in source.
-                    if (this.extractValue(moonBlock, 'class') === null) moon.class = 'pc_barren_cold';
-                    if (this.extractValue(moonBlock, 'size') === null) moon.size = 8;
-                    if (this.extractValue(moonBlock, 'orbit_distance') === null) moon.orbitDistance = 10;
+                    // ✅ FIX V46: fallbacks only when neither a fixed value nor
+                    // a range exists (extractValue returns null for ranges, which
+                    // overwrote the range mean). Absent class stays empty =
+                    // random class from the system class - no invented IDs.
+                    if (moon.sizeType !== 'range' && this.extractValue(moonBlock, 'size') === null) moon.size = 8;
+                    if (moon.odType !== 'range' && this.extractValue(moonBlock, 'orbit_distance') === null) moon.orbitDistance = 10;
 
                     moons.push(moon);
                     moonId++;
@@ -2534,10 +2831,16 @@ function isStarClass(cls) {
                     if (ch === '}') { depth--; i++; continue; }
                     if (depth !== 0 || ch !== 'c') { i++; continue; }
                     if (i > 0 && /[A-Za-z0-9_]/.test(gap[i - 1])) { i++; continue; }
-                    const m = gap.slice(i).match(/^change_orbit\s*=\s*(-?\d+|@[A-Za-z0-9_]+)/);
+                    // ✅ NEU V46: also fold range form (change_orbit = { min max })
+                    // as rounded mean - not lossless, so a warning is collected.
+                    const m = gap.slice(i).match(/^change_orbit\s*=\s*(?:(-?\d+)|(@[A-Za-z0-9_]+)|\{\s*min\s*=\s*(-?\d+)\s*max\s*=\s*(-?\d+)\s*\})/);
                     if (!m) { i++; continue; }
-                    if (m[1][0] === '@') {
-                        console.warn('Import: top-level change_orbit with variable value skipped:', m[1]);
+                    if (m[2]) {
+                        (this.importWarnings = this.importWarnings || []).push(`Top-level change_orbit with undefined variable ${m[2]} skipped - positions may shift`);
+                    } else if (m[3] !== undefined) {
+                        const mid = Math.round((parseInt(m[3], 10) + parseInt(m[4], 10)) / 2);
+                        sum += mid;
+                        (this.importWarnings = this.importWarnings || []).push(`Top-level change_orbit range { min = ${m[3]} max = ${m[4]} } folded to mean ${mid} (no lossless mapping)`);
                     } else {
                         sum += parseInt(m[1], 10);
                     }
@@ -2678,6 +2981,13 @@ function isStarClass(cls) {
                             }
                             
                             allSystems = systems;
+                            
+                            // ✅ NEU V46: surface parser warnings (undefined @vars,
+                            // folded change_orbit ranges) instead of silent loss
+                            if (parser.importWarnings && parser.importWarnings.length > 0) {
+                                parser.importWarnings.forEach(w => console.warn('Import:', w));
+                                showNotification(`\u26a0\ufe0f Import: ${parser.importWarnings.length} warning(s) - details in browser console (F12)`);
+                            }
                             
                             if (allSystems.length > 0) {
                                 // ✅ FIX V43: Main system = first initializer with
@@ -3833,6 +4143,8 @@ function getCurrentMoon() {
             document.getElementById('planetSizeRange').checked = false;
             window.toggleSizeRangeFields('planet');
             document.getElementById('planetOrbit').value = '25';
+            document.getElementById('planetOrbitRange').checked = false;
+            window.toggleOrbitRangeFields('planet');
             document.getElementById('planetCountMin').value = '1';
             document.getElementById('planetCountMax').value = '1';
             
@@ -3866,6 +4178,8 @@ function getCurrentMoon() {
             document.getElementById('planetSizeRange').checked = false;
             window.toggleSizeRangeFields('planet');
             document.getElementById('planetOrbit').value = '0';   // Primary star at center
+            document.getElementById('planetOrbitRange').checked = false;
+            window.toggleOrbitRangeFields('planet');
             document.getElementById('planetCountMin').value = '1';
             document.getElementById('planetCountMax').value = '1';
             
@@ -3930,6 +4244,10 @@ function getCurrentMoon() {
             document.getElementById('planetSizeMax').value = planet.sizeMax ?? planet.size;
             window.toggleSizeRangeFields('planet');
             document.getElementById('planetOrbit').value = planet.orbitDistance;
+            document.getElementById('planetOrbitRange').checked = planet.odType === 'range';
+            document.getElementById('planetOrbitMin').value = planet.odMin ?? planet.orbitDistance;
+            document.getElementById('planetOrbitMax').value = planet.odMax ?? planet.orbitDistance;
+            window.toggleOrbitRangeFields('planet');
             document.getElementById('planetCountMin').value = planet.countMin ?? 1;
             document.getElementById('planetCountMax').value = planet.countMax ?? 1;
             
@@ -3993,7 +4311,17 @@ function getCurrentMoon() {
             }
             const sizeMin = sizeIsRange ? Math.min(sizeMinRaw, sizeMaxRaw) : null;
             const sizeMax = sizeIsRange ? Math.max(sizeMinRaw, sizeMaxRaw) : null;
-            const orbit = parseInt(document.getElementById('planetOrbit').value);
+            // ✅ NEU V46: optional orbit_distance range
+            const orbitIsRange = document.getElementById('planetOrbitRange')?.checked === true;
+            const odMinRaw = parseInt(document.getElementById('planetOrbitMin')?.value);
+            const odMaxRaw = parseInt(document.getElementById('planetOrbitMax')?.value);
+            if (orbitIsRange && (!Number.isFinite(odMinRaw) || !Number.isFinite(odMaxRaw))) {
+                showNotification('\u26a0\ufe0f Orbit range requires min and max values!');
+                return;
+            }
+            const odMin = orbitIsRange ? Math.min(odMinRaw, odMaxRaw) : null;
+            const odMax = orbitIsRange ? Math.max(odMinRaw, odMaxRaw) : null;
+            const orbit = orbitIsRange ? Math.round((odMin + odMax) / 2) : parseInt(document.getElementById('planetOrbit').value);
             const changeOrbit = parseInt(document.getElementById('planetChangeOrbit').value);
             let countMin = clampCount(document.getElementById('planetCountMin')?.value);
             let countMax = clampCount(document.getElementById('planetCountMax')?.value);
@@ -4050,6 +4378,9 @@ function getCurrentMoon() {
                 sizeMin: sizeMin,
                 sizeMax: sizeMax,
                 orbitDistance: orbit,
+                odType: orbitIsRange ? 'range' : 'fixed',
+                odMin: odMin,
+                odMax: odMax,
                 orbitAngleType: orbitAngleType,
                 orbitAngle: orbitAngle,
                 orbitAngleMin: orbitAngleMin,
@@ -4073,6 +4404,13 @@ function getCurrentMoon() {
                 const existingPlanet = allSystems[currentSystemIndex].planets[editingPlanetIndex];
                 planetData.moons = existingPlanet.moons || [];
                 planetData.modifiers = existingPlanet.modifiers || [];
+                // ✅ NEU V46: pass-through fields survive edits
+                planetData.flags = existingPlanet.flags || [];
+                planetData.satelliteNamingPolicy = existingPlanet.satelliteNamingPolicy || null;
+                // ✅ NEU V47: init_effect remainder + prevent_anomaly survive edits
+                planetData.rawInitEffect = existingPlanet.rawInitEffect || null;
+                planetData.preventAnomaly = existingPlanet.preventAnomaly === true;
+                planetData.entity = existingPlanet.entity || null;
                 allSystems[currentSystemIndex].planets[editingPlanetIndex] = planetData;
                 showNotification('✅ Planet updated!');
             } else {
@@ -4169,6 +4507,8 @@ function getCurrentMoon() {
             document.getElementById('moonSizeRange').checked = false;
             window.toggleSizeRangeFields('moon');
             document.getElementById('moonOrbit').value = '10';
+            document.getElementById('moonOrbitRange').checked = false;
+            window.toggleOrbitRangeFields('moon');
             document.getElementById('moonCountMin').value = '1';
             document.getElementById('moonCountMax').value = '1';
             document.getElementById('moonIsStarting').checked = false;
@@ -4208,6 +4548,10 @@ function getCurrentMoon() {
             document.getElementById('moonSizeMax').value = moon.sizeMax ?? moon.size;
             window.toggleSizeRangeFields('moon');
             document.getElementById('moonOrbit').value = moon.orbitDistance;
+            document.getElementById('moonOrbitRange').checked = moon.odType === 'range';
+            document.getElementById('moonOrbitMin').value = moon.odMin ?? moon.orbitDistance;
+            document.getElementById('moonOrbitMax').value = moon.odMax ?? moon.orbitDistance;
+            window.toggleOrbitRangeFields('moon');
             document.getElementById('moonCountMin').value = moon.countMin ?? 1;
             document.getElementById('moonCountMax').value = moon.countMax ?? 1;
             document.getElementById('moonIsStarting').checked = moon.isStartingPlanet || false;
@@ -4253,7 +4597,17 @@ function getCurrentMoon() {
             }
             const sizeMin = sizeIsRange ? Math.min(sizeMinRaw, sizeMaxRaw) : null;
             const sizeMax = sizeIsRange ? Math.max(sizeMinRaw, sizeMaxRaw) : null;
-            const orbit = parseInt(document.getElementById('moonOrbit').value);
+            // ✅ NEU V46: optional orbit_distance range
+            const orbitIsRange = document.getElementById('moonOrbitRange')?.checked === true;
+            const odMinRaw = parseInt(document.getElementById('moonOrbitMin')?.value);
+            const odMaxRaw = parseInt(document.getElementById('moonOrbitMax')?.value);
+            if (orbitIsRange && (!Number.isFinite(odMinRaw) || !Number.isFinite(odMaxRaw))) {
+                showNotification('\u26a0\ufe0f Orbit range requires min and max values!');
+                return;
+            }
+            const odMin = orbitIsRange ? Math.min(odMinRaw, odMaxRaw) : null;
+            const odMax = orbitIsRange ? Math.max(odMinRaw, odMaxRaw) : null;
+            const orbit = orbitIsRange ? Math.round((odMin + odMax) / 2) : parseInt(document.getElementById('moonOrbit').value);
             let countMin = clampCount(document.getElementById('moonCountMin')?.value);
             let countMax = clampCount(document.getElementById('moonCountMax')?.value);
             if (countMax < countMin) countMax = countMin;
@@ -4306,6 +4660,9 @@ function getCurrentMoon() {
                 sizeMin: sizeMin,
                 sizeMax: sizeMax,
                 orbitDistance: orbit,
+                odType: orbitIsRange ? 'range' : 'fixed',
+                odMin: odMin,
+                odMax: odMax,
                 orbitAngleType: orbitAngleType,
                 orbitAngle: orbitAngle,
                 orbitAngleMin: orbitAngleMin,
@@ -4321,7 +4678,11 @@ function getCurrentMoon() {
                 modifiers: existing ? (existing.modifiers || []) : [],
                 deposits: existing ? (existing.deposits || []) : [],
                 moons: existing ? (existing.moons || []) : [],   // ✅ do NOT lose sub-moons
-                flags: existing ? (existing.flags || []) : []
+                flags: existing ? (existing.flags || []) : [],
+                satelliteNamingPolicy: existing ? (existing.satelliteNamingPolicy || null) : null,
+                rawInitEffect: existing ? (existing.rawInitEffect || null) : null,
+                preventAnomaly: existing ? (existing.preventAnomaly === true) : false,
+                entity: existing ? (existing.entity || null) : null
             };
             
             if (editingMoonIndex !== null) {
@@ -4348,6 +4709,16 @@ function getCurrentMoon() {
         // ORBIT ANGLE PRESET FUNCTIONS
         // =====================================================
         
+        // ✅ NEU V46: shared toggle for the orbit range fields (planet + moon)
+        window.toggleOrbitRangeFields = function(prefix) {
+            const on = document.getElementById(prefix + 'OrbitRange')?.checked === true;
+            const fields = document.getElementById(prefix + 'OrbitRangeFields');
+            const fixed = document.getElementById(prefix + 'Orbit');
+            if (!fields || !fixed) return;
+            fields.classList.toggle('hidden', !on);
+            fixed.disabled = on;
+        };
+
         // ✅ NEU V45: shared toggle for the size range fields (planet + moon)
         window.toggleSizeRangeFields = function(prefix) {
             const on = document.getElementById(prefix + 'SizeRange')?.checked === true;
@@ -5205,6 +5576,11 @@ function getCurrentMoon() {
             }
             code += `\tclass = "${system.class}"\n`;
             
+            // ✅ NEU V46: system flags pass-through
+            if (system.flags && system.flags.length > 0) {
+                code += `\tflags = { ${system.flags.join(' ')} }\n`;
+            }
+            
             system.asteroidBelts.forEach(belt => {
                 code += `\tasteroid_belt = {\n`;
                 code += `\t\ttype = ${belt.type}\n`;
@@ -5251,6 +5627,18 @@ function getCurrentMoon() {
                 code += `\tusage = ${system.usage}\n`;
             }
             
+            // ✅ NEU V47: system metadata pass-throughs
+            if (system.usageOdds) {
+                code += `\tusage_odds = {\n`;
+                system.usageOdds.split('\n').forEach(line => { code += `\t\t${line}\n`; });
+                code += `\t}\n`;
+            }
+            for (const ptKey of ['usage_odds', 'spawn_chance', 'scaled_spawn_chance', 'max_instances']) {
+                if (system.passThrough && system.passThrough[ptKey] !== undefined) {
+                    code += `\t${ptKey} = ${system.passThrough[ptKey]}\n`;
+                }
+            }
+            
             // ✅ NEU: Mandatory Neighbors Export
             if (system.mandatoryNeighbors && system.neighborSystems.length > 0) {
                 code += `\tmandatory_neighbors = yes\n`;
@@ -5273,6 +5661,14 @@ function getCurrentMoon() {
                 if (system.generateHomeResources === true) {
                     code += `\t\tgenerate_home_system_resources = yes\n`;
                 }
+                code += `\t}\n`;
+            }
+            
+            // ✅ NEU V47: verbatim init_effect remainder - exported unchanged,
+            // independent of main/neighbor status (origin systems!)
+            if (system.rawInitEffect) {
+                code += `\tinit_effect = {\n`;
+                system.rawInitEffect.split('\n').forEach(line => { code += `\t\t${line}\n`; });
                 code += `\t}\n`;
             }
             
@@ -5338,13 +5734,22 @@ function getCurrentMoon() {
             // Use ideal_design_class for guaranteed habitable planets
             if (planet.isGuaranteedHabitable) {
                 code += `${tab}\tclass = ideal_design_class\n`;
-            } else {
+            } else if (planet.class) {
                 code += `${tab}\tclass = "${planet.class}"\n`;
             }
-            // ✅ NEU V45: chain compensation may pass an adjusted delta so the
-            // body keeps its absolute position after stars are moved to the
-            // front. Negative values are vanilla-legal (Sol: orbit_distance = -35).
-            code += `${tab}\torbit_distance = ${orbitDistanceOverride ?? planet.orbitDistance}\n`;
+            // ✅ NEU V46: empty class = no class line = random class drawn
+            // from the system class (vanilla random initializer pattern)
+            // ✅ NEU V46: ranges export in vanilla notation and ignore the
+            // chain-compensation override (a range cannot be shifted without
+            // falsifying it; the chain uses the mean, see generateSystemCode).
+            if (planet.odType === 'range' && planet.odMin != null && planet.odMax != null) {
+                code += `${tab}\torbit_distance = { min = ${planet.odMin} max = ${planet.odMax} }\n`;
+            } else {
+                // ✅ NEU V45: chain compensation may pass an adjusted delta so
+                // the body keeps its absolute position after stars are moved to
+                // the front. Negative values are vanilla-legal (Sol: -35).
+                code += `${tab}\torbit_distance = ${orbitDistanceOverride ?? planet.orbitDistance}\n`;
+            }
             
             // Export orbit_angle based on type
             if (planet.orbitAngleType === 'fixed') {
@@ -5354,17 +5759,32 @@ function getCurrentMoon() {
             }
             
             // ✅ NEU V45: size ranges export in vanilla notation
+            // ✅ FIX V47: bodies imported without a size key export without one
+            // (no invented size = 16); editing the body makes size explicit.
             if (planet.sizeType === 'range' && planet.sizeMin != null && planet.sizeMax != null) {
                 code += `${tab}\tsize = { min = ${planet.sizeMin} max = ${planet.sizeMax} }\n`;
-            } else {
+            } else if (planet.omitSizeLine !== true) {
                 code += `${tab}\tsize = ${planet.size}\n`;
             }
             
-            if (planet.changeOrbit > 0) {
+            // ✅ FIX V47: negative in-block change_orbit is vanilla-legal
+            if (planet.changeOrbit !== 0 && Number.isFinite(planet.changeOrbit)) {
                 code += `${tab}\tchange_orbit = ${planet.changeOrbit}\n`;
             }
             
             code += `${tab}\thas_ring = ${planet.hasRing ? 'yes' : 'no'}\n`;
+            
+            // ✅ NEU V46: pass-through fields
+            if (planet.flags && planet.flags.length > 0) {
+                code += `${tab}\tflags = { ${planet.flags.join(' ')} }\n`;
+            }
+            if (planet.satelliteNamingPolicy) {
+                code += `${tab}\tsatellite_naming_policy = ${planet.satelliteNamingPolicy}\n`;
+            }
+            // ✅ FIX V47: direct entity key pass-through
+            if (planet.entity) {
+                code += `${tab}\tentity = ${planet.entity}\n`;
+            }
             
             // ✅ LEGACY FORMAT: Export modifiers as inline list
             if (useLegacyModifiers && planet.modifiers && planet.modifiers.length > 0) {
@@ -5420,9 +5840,16 @@ function getCurrentMoon() {
                 const hasDeposits = planet.deposits && planet.deposits.length > 0;
                 const hasModifiers = !useLegacyModifiers && planet.modifiers && planet.modifiers.length > 0;
                 const hasTerraformingCandidate = planet.isTerraformingCandidate === true;
+                // ✅ NEU V47: prevent_anomaly on regular planets (vanilla Sol:
+                // most bodies carry it; guaranteed-habitable regenerates its own)
+                const hasPreventAnomaly = planet.preventAnomaly === true && !planet.isGuaranteedHabitable;
                 
-                if (hasDeposits || hasModifiers || hasTerraformingCandidate) {
+                if (hasDeposits || hasModifiers || hasTerraformingCandidate || hasPreventAnomaly) {
                     code += `${tab}\tinit_effect = {\n`;
+                    
+                    if (hasPreventAnomaly) {
+                        code += `${tab}\t\tprevent_anomaly = yes\n`;
+                    }
                     
                     // Add deposits
                     if (hasDeposits) {
@@ -5459,6 +5886,14 @@ function getCurrentMoon() {
                 code += `${tab}\tinit_effect = {\n`;
                 code += `${tab}\t\tprevent_anomaly = yes\n`;
                 code += `${tab}\t\tset_planet_flag = prescripted_ideal\n`;
+                code += `${tab}\t}\n`;
+            }
+            
+            // ✅ NEU V47: verbatim init_effect remainder (set_planet_entity,
+            // event targets, orbital deposits in nested scopes, ...)
+            if (planet.rawInitEffect) {
+                code += `${tab}\tinit_effect = {\n`;
+                planet.rawInitEffect.split('\n').forEach(line => { code += `${tab}\t\t${line}\n`; });
                 code += `${tab}\t}\n`;
             }
             
@@ -5570,7 +6005,7 @@ function getCurrentMoon() {
                 'pc_relic': 'Relic World', 'pc_city': 'Ecumenopolis', 'pc_habitat': 'Habitat',
                 'pc_volcanic': 'Volcanic', 'pc_gray_goo': 'Gray Goo', 'pc_ai': 'AI World', 'pc_cybrex': 'Cybrex'
             };
-            return names[planetClass] || planetClass;
+            return names[planetClass] || planetClass || '🎲 Random';
         }
 
         function showNotification(message) {
