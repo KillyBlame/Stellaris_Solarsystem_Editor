@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Stellaris Solar System Editor V47 - Full Editor</title>
+    <title>Stellaris Solar System Editor V48 - Full Editor</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;600;700;800;900&family=Exo+2:wght@300;400;500;600&display=swap');
@@ -380,7 +380,7 @@
 </head>
 <body>
     <div class="container mx-auto py-8 px-4">
-        <h1 class="stellaris-header">🌌 Stellaris Solar System Editor V47</h1>
+        <h1 class="stellaris-header">🌌 Stellaris Solar System Editor V48</h1>
         <div class="text-center mb-6">
             <span class="text-yellow-400 font-semibold">⭐ Full Editor - Edit systems, planets, and neighbors</span>
         </div>
@@ -2980,7 +2980,11 @@ function isStarClass(cls) {
                                 return;
                             }
                             
-                            allSystems = systems;
+                            // ✅ FIX V48: Import appends instead of overwriting.
+                            // Replacing the whole workspace on import silently
+                            // discarded existing work. Use "Clear All" to reset.
+                            const importStartIndex = allSystems.length;
+                            allSystems = allSystems.concat(systems);
                             
                             // ✅ NEU V46: surface parser warnings (undefined @vars,
                             // folded change_orbit ranges) instead of silent loss
@@ -2993,18 +2997,22 @@ function isStarClass(cls) {
                                 // ✅ FIX V43: Main system = first initializer with
                                 // usage = custom_empire (player start). Fallback:
                                 // first system in the file.
-                                const mainIdx = allSystems.findIndex(s => s.usage === 'custom_empire');
-                                allSystems[mainIdx !== -1 ? mainIdx : 0].isMain = true;
+                                // ✅ FIX V48: only assign a main when none exists yet,
+                                // so appended imports never create a second main.
+                                if (!allSystems.some(s => s.isMain)) {
+                                    const mainIdx = allSystems.findIndex(s => s.usage === 'custom_empire');
+                                    allSystems[mainIdx !== -1 ? mainIdx : 0].isMain = true;
+                                }
                             }
                             
                             // Auto-linking of neighbor systems
                             linkNeighborSystemsAfterImport();
                             
                             updateSystemList();
-                            selectSystem(0);
+                            selectSystem(importStartIndex); // ✅ FIX V48: jump to first newly imported system
                             
                             document.getElementById('importInfo').classList.remove('hidden');
-                            document.getElementById('systemCount').textContent = systems.length;
+                            document.getElementById('systemCount').textContent = allSystems.length; // ✅ FIX V48: running total
                             
                             showNotification(`✅ ${systems.length} system(s) successfully imported!`);
                         } catch (error) {
@@ -3118,6 +3126,15 @@ function isStarClass(cls) {
                 const effSize = p.sizeType === 'range' ? (p.sizeMax || p.size) : p.size;
                 if (HABITABLE.includes(p.class) && effSize > 25) {
                     issues.push(`"${p.name || p.displayName || '?'}" (${p.class}) has size ${effSize} - above the usual vanilla range for habitable worlds (max. 25)`);
+                }
+            });
+
+            // ✅ FIX V48: body has auto-name OFF but no name set -> export writes
+            // no name line and Stellaris auto-names it anyway. Flag it so the
+            // omission is not silent. (Auto-name ON = intentional, not flagged.)
+            bodies.forEach(p => {
+                if (!isStarClass(p.class) && !p.useAutoName && !(p.name || '').trim()) {
+                    issues.push(`"${p.displayName || '?'}" (${p.class || 'no class'}) has auto-name off but an empty name - it exports without a name line and Stellaris will auto-name it`);
                 }
             });
 
