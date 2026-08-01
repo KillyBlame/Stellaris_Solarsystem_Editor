@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Stellaris Solar System Editor V48 - Full Editor</title>
+    <title>Stellaris Solar System Editor V49 - Full Editor</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;600;700;800;900&family=Exo+2:wght@300;400;500;600&display=swap');
@@ -380,7 +380,7 @@
 </head>
 <body>
     <div class="container mx-auto py-8 px-4">
-        <h1 class="stellaris-header">🌌 Stellaris Solar System Editor V48</h1>
+        <h1 class="stellaris-header">🌌 Stellaris Solar System Editor V49</h1>
         <div class="text-center mb-6">
             <span class="text-yellow-400 font-semibold">⭐ Full Editor - Edit systems, planets, and neighbors</span>
         </div>
@@ -397,8 +397,9 @@
                     <button id="importBtn" class="stellaris-btn">Import System(s)</button>
                     <button id="clearAllBtn" class="stellaris-btn stellaris-btn-secondary">Remove all</button>
                 </div>
-                <div class="flex items-end gap-2">
+                <div class="flex items-end gap-2 flex-wrap">
                     <button id="exportAllBtn" class="stellaris-btn stellaris-btn-secondary">Export all</button>
+                    <button id="generateModBtnQuick" class="stellaris-btn stellaris-btn-success" title="Build a complete mod folder from all loaded systems">📦 Generate Mod</button>
                     <button id="systemCheckBtn" class="stellaris-btn stellaris-btn-secondary">🔍 System Check</button>
                 </div>
             </div>
@@ -3794,6 +3795,9 @@ function getCurrentMoon() {
                         <div class="flex justify-between items-center mb-3">
                             <h3 class="text-lg font-semibold text-yellow-400">🪐 Celestial Bodies (${system.planets.length + system.asteroidBelts.length})</h3>
                             <div class="flex gap-2">
+                                ${(STAR_CLASS_CONFIG[system.class] && STAR_CLASS_CONFIG[system.class].count > 1)
+                                    ? `<button onclick="openStarConfigWizard()" class="stellaris-btn stellaris-btn-secondary text-sm" title="Configure the stars of this multi-star system">🌟 Star Setup</button>`
+                                    : ''}
                                 <button onclick="openAddStarModal()" class="stellaris-btn stellaris-btn-secondary text-sm" style="background: linear-gradient(135deg, #FFD700, #FFA500);">
                                     ⭐ Star
                                 </button>
@@ -5150,7 +5154,13 @@ function getCurrentMoon() {
         
         function openStarConfigWizard() {
             const starClassDropdown = document.getElementById('systemStarClass');
-            const selectedClass = starClassDropdown.value;
+            // The dropdown only carries a meaningful value while the System-Properties
+            // modal is open. When the wizard is launched from the editor toolbar the
+            // dropdown value is stale, so read the class from the loaded system.
+            const propsModalOpen = document.getElementById('systemPropertiesModal').classList.contains('active');
+            const selectedClass = (!propsModalOpen && currentSystemIndex !== null && allSystems[currentSystemIndex])
+                ? allSystems[currentSystemIndex].class
+                : starClassDropdown.value;
             
             // Check if this is a multi-star system
             const config = STAR_CLASS_CONFIG[selectedClass];
@@ -5574,6 +5584,7 @@ function getCurrentMoon() {
         })();
 
         document.getElementById('generateModBtn')?.addEventListener('click', generateModFolder);
+        document.getElementById('generateModBtnQuick')?.addEventListener('click', generateModFolder);
 
         // =====================================================
         // CODE GENERATION
