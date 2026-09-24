@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Stellaris Solar System Editor V50 - Full Editor</title>
+    <title>Stellaris Solar System Editor V55 - Full Editor</title>
     <!-- V50 K1: Tailwind lokal eingebacken. Hier stand vorher ein
          Script-Tag auf das Tailwind-CDN. Die URL steht hier absichtlich
          nicht mehr im Klartext, sonst meldet jede Suche nach einer
@@ -445,7 +445,7 @@
 </head>
 <body>
     <div class="container mx-auto py-8 px-4">
-        <h1 class="stellaris-header">Stellaris Solar System Editor V50</h1>
+        <h1 class="stellaris-header">Stellaris Solar System Editor V55</h1>
         <div class="text-center mb-6">
             <span class="text-yellow-400 font-semibold">⭐ Full Editor - Edit systems, planets, and neighbors</span>
         </div>
@@ -688,15 +688,15 @@
                         </div>
                     </div>
                     <div class="form-group" style="grid-column: span 2;">
-                        <label class="label">Anzahl / count – Doppelplanet (max 3)</label>
+                        <label class="label">Anzahl / count – Planet (0–99, Vanilla max. 10)</label>
                         <div class="grid grid-cols-2 gap-2">
                             <div>
                                 <label class="label">Min</label>
-                                <input type="number" id="planetCountMin" class="stellaris-input" value="1" min="1" max="3">
+                                <input type="number" id="planetCountMin" class="stellaris-input" value="1" min="0" max="99">
                             </div>
                             <div>
                                 <label class="label">Max</label>
-                                <input type="number" id="planetCountMax" class="stellaris-input" value="1" min="1" max="3">
+                                <input type="number" id="planetCountMax" class="stellaris-input" value="1" min="0" max="99">
                             </div>
                         </div>
                     </div>
@@ -1452,15 +1452,15 @@
                         </div>
                     </div>
                     <div class="form-group" style="grid-column: span 2;">
-                        <label class="label">Anzahl / count – Doppelmond (max 3)</label>
+                        <label class="label">Anzahl / count – Mond (0–99, Vanilla max. 10)</label>
                         <div class="grid grid-cols-2 gap-2">
                             <div>
                                 <label class="label">Min</label>
-                                <input type="number" id="moonCountMin" class="stellaris-input" value="1" min="1" max="3">
+                                <input type="number" id="moonCountMin" class="stellaris-input" value="1" min="0" max="99">
                             </div>
                             <div>
                                 <label class="label">Max</label>
-                                <input type="number" id="moonCountMax" class="stellaris-input" value="1" min="1" max="3">
+                                <input type="number" id="moonCountMax" class="stellaris-input" value="1" min="0" max="99">
                             </div>
                         </div>
                     </div>
@@ -1760,35 +1760,39 @@
                                 <option value="sc_black_hole">Black Hole</option>
                                 <option value="sc_neutron_star">Neutron Star</option>
                                 <option value="sc_pulsar">Pulsar</option>
+                                <!-- V52: in 00_star_classes.txt (4.5.0) definiert, fehlten hier -->
+                                <option value="sc_m_giant">M-Giant (Red Giant)</option>
+                                <option value="sc_toxoid_star">Toxoid Star</option>
+                                <option value="sc_rift_star">Rift Star (Astral Planes DLC)</option>
                             </optgroup>
                             <optgroup label="🌟 Binary Systems">
-                                <option value="sc_binary_1">Binary 1 (Both Main Sequence)</option>
-                                <option value="sc_binary_2">Binary 2 (Main Sequence + Compact)</option>
-                                <option value="sc_binary_3">Binary 3 (Main Sequence + Neutron)</option>
-                                <option value="sc_binary_4">Binary 4 (Both Compact)</option>
-                                <option value="sc_binary_5">Binary 5 (Main Sequence + Black Hole)</option>
-                                <option value="sc_binary_6">Binary 6 (Neutron + Black Hole)</option>
-                                <option value="sc_binary_7">Binary 7 (Both Black Holes)</option>
-                                <option value="sc_binary_8">Binary 8 (Both Neutron Stars)</option>
-                                <option value="sc_binary_9">Binary 9 (Both Pulsars)</option>
-                                <option value="sc_binary_10">Binary 10 (Pulsar + Black Hole)</option>
+                                <option value="sc_binary_1">Binary 1 (A-Star + Pulsar)</option>
+                                <option value="sc_binary_2">Binary 2 (B-Star + Neutron Star)</option>
+                                <option value="sc_binary_3">Binary 3 (Red Giant + B-Star)</option>
+                                <option value="sc_binary_4">Binary 4 (Red Giant + F-Star)</option>
+                                <option value="sc_binary_5">Binary 5 (B-Star + B-Star)</option>
+                                <option value="sc_binary_6">Binary 6 (M-Star + G-Star)</option>
+                                <option value="sc_binary_7">Binary 7 (K-Star + F-Star)</option>
+                                <option value="sc_binary_8">Binary 8 (G-Star + F-Star)</option>
+                                <option value="sc_binary_9">Binary 9 (A-Star + F-Star)</option>
+                                <option value="sc_binary_10">Binary 10 (A-Star + T-Star)</option>
                             </optgroup>
                             <optgroup label="✨ Trinary Systems">
-                                <option value="sc_trinary_1">Trinary 1 (Three Main Sequence)</option>
-                                <option value="sc_trinary_2">Trinary 2 (Two Main Sequence + Compact)</option>
-                                <option value="sc_trinary_3">Trinary 3 (Two Main Sequence + Neutron)</option>
-                                <option value="sc_trinary_4">Trinary 4 (Main Sequence + Two Compact)</option>
+                                <option value="sc_trinary_1">Trinary 1 (G-Star + M-Star + K-Star)</option>
+                                <option value="sc_trinary_2">Trinary 2 (B-Star + A-Star + F-Star)</option>
+                                <option value="sc_trinary_3">Trinary 3 (K-Star + F-Star + G-Star)</option>
+                                <option value="sc_trinary_4">Trinary 4 (B-Star + K-Star + T-Star)</option>
                             </optgroup>
                             <optgroup label="☠️ Crisis Systems (Advanced)">
-                                <option value="sc_crisis_binary_1">Crisis Binary 1</option>
-                                <option value="sc_crisis_binary_2">Crisis Binary 2</option>
-                                <option value="sc_crisis_binary_5">Crisis Binary 5</option>
-                                <option value="sc_crisis_binary_7_8_9">Crisis Binary 7/8/9</option>
-                                <option value="sc_crisis_binary_10">Crisis Binary 10</option>
-                                <option value="sc_crisis_trinary_1">Crisis Trinary 1</option>
-                                <option value="sc_crisis_trinary_2">Crisis Trinary 2</option>
-                                <option value="sc_crisis_trinary_3">Crisis Trinary 3</option>
-                                <option value="sc_crisis_trinary_4">Crisis Trinary 4</option>
+                                <option value="sc_crisis_binary_1">Crisis Binary 1 (Red Giant + Pulsar)</option>
+                                <option value="sc_crisis_binary_2">Crisis Binary 2 (Red Giant + Neutron Star)</option>
+                                <option value="sc_crisis_binary_5">Crisis Binary 5 (M-Star + B-Star)</option>
+                                <option value="sc_crisis_binary_7_8_9">Crisis Binary 7/8/9 (M-Star + F-Star)</option>
+                                <option value="sc_crisis_binary_10">Crisis Binary 10 (M-Star + T-Star)</option>
+                                <option value="sc_crisis_trinary_1">Crisis Trinary 1 (M-Star + M-Star + K-Star)</option>
+                                <option value="sc_crisis_trinary_2">Crisis Trinary 2 (Red Giant + A-Star + F-Star)</option>
+                                <option value="sc_crisis_trinary_3">Crisis Trinary 3 (M-Star + F-Star + G-Star)</option>
+                                <option value="sc_crisis_trinary_4">Crisis Trinary 4 (Red Giant + K-Star + T-Star)</option>
                             </optgroup>
                             <optgroup label="🔧 Custom">
                                 <option value="CUSTOM">🔧 Custom Star Class...</option>
@@ -1926,23 +1930,38 @@
             'sc_neutron_star': { count: 1, types: ['pc_neutron_star'] },
             'sc_pulsar': { count: 1, types: ['pc_pulsar'] },
             
+            // V53: Multi-star entries follow Stellaris 4.5.0,
+            // common/star_classes/00_star_classes.txt (planet = { key = ... },
+            // in file order). These are only the wizard's starting values;
+            // the export writes whatever the wizard holds.
             // Binary Systems
-            'sc_binary_1': { count: 2, types: ['pc_g_star', 'pc_k_star'] },
-            'sc_binary_2': { count: 2, types: ['pc_g_star', 'pc_m_star'] },
-            'sc_binary_3': { count: 2, types: ['pc_g_star', 'pc_neutron_star'] },
-            'sc_binary_4': { count: 2, types: ['pc_m_star', 'pc_m_star'] },
-            'sc_binary_5': { count: 2, types: ['pc_g_star', 'pc_black_hole'] },
-            'sc_binary_6': { count: 2, types: ['pc_neutron_star', 'pc_black_hole'] },
-            'sc_binary_7': { count: 2, types: ['pc_black_hole', 'pc_black_hole'] },
-            'sc_binary_8': { count: 2, types: ['pc_neutron_star', 'pc_neutron_star'] },
-            'sc_binary_9': { count: 2, types: ['pc_pulsar', 'pc_pulsar'] },
-            'sc_binary_10': { count: 2, types: ['pc_pulsar', 'pc_black_hole'] },
+            'sc_binary_1': { count: 2, types: ['pc_a_star', 'pc_pulsar'] },
+            'sc_binary_2': { count: 2, types: ['pc_b_star', 'pc_neutron_star'] },
+            'sc_binary_3': { count: 2, types: ['pc_m_giant_star', 'pc_b_star'] },
+            'sc_binary_4': { count: 2, types: ['pc_m_giant_star', 'pc_f_star'] },
+            'sc_binary_5': { count: 2, types: ['pc_b_star', 'pc_b_star'] },
+            'sc_binary_6': { count: 2, types: ['pc_m_star', 'pc_g_star'] },
+            'sc_binary_7': { count: 2, types: ['pc_k_star', 'pc_f_star'] },
+            'sc_binary_8': { count: 2, types: ['pc_g_star', 'pc_f_star'] },
+            'sc_binary_9': { count: 2, types: ['pc_a_star', 'pc_f_star'] },
+            'sc_binary_10': { count: 2, types: ['pc_a_star', 'pc_t_star'] },
             
             // Trinary Systems
-            'sc_trinary_1': { count: 3, types: ['pc_g_star', 'pc_k_star', 'pc_m_star'] },
-            'sc_trinary_2': { count: 3, types: ['pc_g_star', 'pc_k_star', 'pc_m_star'] },
-            'sc_trinary_3': { count: 3, types: ['pc_g_star', 'pc_k_star', 'pc_neutron_star'] },
-            'sc_trinary_4': { count: 3, types: ['pc_g_star', 'pc_neutron_star', 'pc_black_hole'] }
+            'sc_trinary_1': { count: 3, types: ['pc_g_star', 'pc_m_star', 'pc_k_star'] },
+            'sc_trinary_2': { count: 3, types: ['pc_b_star', 'pc_a_star', 'pc_f_star'] },
+            'sc_trinary_3': { count: 3, types: ['pc_k_star', 'pc_f_star', 'pc_g_star'] },
+            'sc_trinary_4': { count: 3, types: ['pc_b_star', 'pc_k_star', 'pc_t_star'] },
+            
+            // Crisis variants (crisis_star_class of the regular classes)
+            'sc_crisis_binary_1': { count: 2, types: ['pc_m_giant_star', 'pc_pulsar'] },
+            'sc_crisis_binary_2': { count: 2, types: ['pc_m_giant_star', 'pc_neutron_star'] },
+            'sc_crisis_binary_5': { count: 2, types: ['pc_m_star', 'pc_b_star'] },
+            'sc_crisis_binary_7_8_9': { count: 2, types: ['pc_m_star', 'pc_f_star'] },
+            'sc_crisis_binary_10': { count: 2, types: ['pc_m_star', 'pc_t_star'] },
+            'sc_crisis_trinary_1': { count: 3, types: ['pc_m_star', 'pc_m_star', 'pc_k_star'] },
+            'sc_crisis_trinary_2': { count: 3, types: ['pc_m_giant_star', 'pc_a_star', 'pc_f_star'] },
+            'sc_crisis_trinary_3': { count: 3, types: ['pc_m_star', 'pc_f_star', 'pc_g_star'] },
+            'sc_crisis_trinary_4': { count: 3, types: ['pc_m_giant_star', 'pc_k_star', 'pc_t_star'] }
         };
         
         // Calculate star orbits for multi-star systems
@@ -2152,6 +2171,8 @@ function isStarClass(cls) {
         
         class MultiSystemParser {
             constructor() {
+                // V52: pc_o_star is not defined in any vanilla 4.5.0 file. Kept
+                // as a mod value. The list itself has no effect since V44.
                 this.starClasses = [
                     'pc_b_star', 'pc_a_star', 'pc_f_star', 'pc_g_star', 
                     'pc_k_star', 'pc_m_star', 
@@ -2250,9 +2271,23 @@ function isStarClass(cls) {
                     system.displayName = decodeSystemDisplayName(nameMatch[1]);
                 }
                 
-                const classMatch = blockContent.match(/class\s*=\s*"([^"]+)"/);
-                if (classMatch) {
-                    system.class = classMatch[1];
+                // V54 A: the system class is the depth-0 'class' key of the
+                // system block, quoted or not (vanilla writes class = sc_trinary_1
+                // without quotes). Planet and moon blocks are stripped first, and
+                // nested blocks like init_effect { create_species { class = ... } }
+                // are skipped by the depth counter, so no child class can leak in.
+                {
+                    const own = this.stripChildBodies(blockContent).replace(/#[^\n]*/g, '');
+                    let depth = 0;
+                    for (let i = 0; i < own.length; i++) {
+                        const ch = own[i];
+                        if (ch === '{') { depth++; continue; }
+                        if (ch === '}') { depth--; continue; }
+                        if (depth === 0 && ch === 'c' && !(i > 0 && /[A-Za-z0-9_]/.test(own[i - 1]))) {
+                            const m = own.slice(i).match(/^class\s*=\s*"?([A-Za-z0-9_]+)"?/);
+                            if (m) { system.class = m[1]; break; }
+                        }
+                    }
                 }
                 
                 // ✅ NEU V46: system-level flags (vanilla: flags = { a b c }).
@@ -2446,7 +2481,19 @@ function isStarClass(cls) {
                         }
                         
                         if (pendingChangeOrbit !== 0) {
-                            planet.orbitDistance += pendingChangeOrbit;
+                            // V55: folding into orbit_distance is only exact for
+                            // count = 1. In a count block orbit_distance is the
+                            // spacing of every copy (vanilla Alpha Centauri:
+                            // change_orbit = -220, then count = 2 / orbit 25 gives
+                            // 45 and 70). There the shift stays separate as
+                            // preShift and is written back as change_orbit.
+                            // Same for orbit_distance = { min max }: the export writes the
+                            // range verbatim, a folded shift would be lost there.
+                            if (clampCount(planet.countMin ?? 1) === 1 && clampCount(planet.countMax ?? 1) === 1 && planet.odType !== 'range') {
+                                planet.orbitDistance += pendingChangeOrbit;
+                            } else {
+                                planet.preShift = pendingChangeOrbit;
+                            }
                             pendingChangeOrbit = 0;
                         }
                         
@@ -3179,10 +3226,30 @@ function isStarClass(cls) {
             });
             seen.forEach((cnt, n) => { if (cnt > 1) issues.push(`Duplicate body name "${n}" (${cnt}x)`); });
 
-            // Absolute top-level positions (cumulative chain in list order)
-            let ptr = 0;
+            // Absolute top-level positions, one entry per copy. V55: count-aware
+            // chain in min mode (the bodies that always exist).
             const abs = [];
-            system.planets.forEach(p => { ptr += (p.orbitDistance || 0); abs.push({ p, pos: ptr }); });
+            const _vChain = bodyChain(system.planets, 'min');
+            system.planets.forEach(p => _vChain.copies.get(p).forEach(pos => abs.push({ p, pos })));
+
+            // V55: count above the vanilla maximum (10 on planet and moon blocks, 4.5.0)
+            const _countIssue = (b, what) => {
+                const mx = clampCount(b.countMax ?? b.countMin ?? 1);
+                if (mx > 10) issues.push(`${what} "${b.name || b.displayName || '?'}" has count ${mx} - above the vanilla maximum of 10`);
+            };
+            system.planets.forEach(p => { _countIssue(p, 'Body'); (p.moons || []).forEach(m => _countIssue(m, 'Moon')); });
+
+            // V55: the export moves stars to the front. A star listed after a body
+            // with a random count depends on the rolled count in game; the export
+            // places it for the minimum count.
+            let _randomBefore = null;
+            system.planets.forEach(p => {
+                if (isStarClass(p.class)) {
+                    if (_randomBefore) issues.push(`Star "${p.name || p.displayName || '?'}" is listed after "${_randomBefore}" (random count) - the export places it for the minimum count; move the star above it for an exact position`);
+                } else if (clampCount(p.countMin ?? 1) !== clampCount(p.countMax ?? 1) && (p.orbitDistance || 0) !== 0) {
+                    _randomBefore = p.name || p.displayName || '?';
+                }
+            });
 
             // First non-star orbit vs. star size (vanilla Sol: size 30, first orbit 40)
             const maxStarSize = system.planets
@@ -3226,11 +3293,14 @@ function isStarClass(cls) {
             });
 
             // Habitable classes above the usual vanilla size range (max. 25).
-            // Class list verified against 00_planet_classes.txt (+ pc_relic
-            // from 03_planet_classes_ancient_relics.txt).
+            // V52: re-checked against Stellaris 4.5.0. Every colonizable class
+            // with a size range up to 25: 00_planet_classes.txt, pc_city from
+            // 02_planet_classes_megacorp.txt, pc_relic from
+            // 03_planet_classes_ancient_relics.txt. Fixed-size classes
+            // (ringworld, habitat, pc_warden_guardian ...) are left out.
             const HABITABLE = ['pc_continental', 'pc_ocean', 'pc_desert', 'pc_tropical', 'pc_arid',
                 'pc_tundra', 'pc_arctic', 'pc_alpine', 'pc_savannah', 'pc_gaia', 'pc_nuked',
-                'pc_relic', 'pc_hive', 'pc_machine'];
+                'pc_relic', 'pc_hive', 'pc_machine', 'pc_volcanic', 'pc_nanotech', 'pc_city'];
             bodies.forEach(p => {
                 const effSize = p.sizeType === 'range' ? (p.sizeMax || p.size) : p.size;
                 if (HABITABLE.includes(p.class) && effSize > 25) {
@@ -3247,7 +3317,8 @@ function isStarClass(cls) {
                 }
             });
 
-            return issues;
+            // V55: one line per finding, even when several copies trigger it
+            return [...new Set(issues)];
         }
 
         document.getElementById('systemCheckBtn')?.addEventListener('click', () => {
@@ -3285,7 +3356,12 @@ function isStarClass(cls) {
                 return;
             }
             
-            const exportCode = allSystems.map(sys => generateSystemCode(sys)).join('\n\n');
+            // V51 N6: Modus beim Erzeugen der Vorschau festhalten. Der
+            // Download uebernimmt genau diesen Text und muss deshalb auch
+            // genau diesen Modus fuer die .yml-Entscheidung verwenden.
+            exportPreviewSkipLoc = document.getElementById('skipLocalizationCheckbox').checked;
+            const exportCode = exportModeHeader(exportPreviewSkipLoc) +
+                allSystems.map(sys => generateSystemCode(sys)).join('\n\n');
             document.getElementById('exportTextarea').value = exportCode;
             document.getElementById('exportPreview').classList.add('active');
         });
@@ -3308,7 +3384,13 @@ function isStarClass(cls) {
             // Generate .yml files (localization) - only if not skipped
             // ✅ V50: all language folders in one ZIP. Stellaris does not fall back to
             //    English, so a lone l_english file leaves other clients with raw NAME_ keys.
-            const skipLocalization = document.getElementById('skipLocalizationCheckbox').checked;
+            // V51 N6: nicht die Checkbox neu lesen, sondern den Modus, mit dem
+            // die Vorschau erzeugt wurde. Das Modal hat keine Fokusfalle, per
+            // Tab und Leertaste liess sich die Checkbox hinter der Abdunklung
+            // umschalten, und dann passten Initializer und .yml nicht zusammen.
+            const skipLocalization = (exportPreviewSkipLoc !== null)
+                ? exportPreviewSkipLoc
+                : document.getElementById('skipLocalizationCheckbox').checked;
             if (!skipLocalization) {
                 const locEnc = new TextEncoder();
                 // ✅ UTF-8 with BOM (required by Stellaris)
@@ -3325,7 +3407,7 @@ function isStarClass(cls) {
             }
             
             const fileCount = skipLocalization ? 1 : 2;
-            showNotification(`💾 ${fileCount} file${fileCount > 1 ? 's' : ''} downloaded!`);
+            showNotification(`💾 ${fileCount} file${fileCount > 1 ? 's' : ''} downloaded (${exportModeLabel(skipLocalization)}).`);
         });
 
         document.getElementById('copyExportBtn').addEventListener('click', () => {
@@ -4053,16 +4135,18 @@ function getCurrentMoon() {
         function renderCombinedCelestialBodies(planets, asteroidBelts) {
             // Combine planets and asteroid belts with correct orbit calculation
             const combined = [];
-            
-            // Compute cumulative positions for planets
-            let cumulativeOrbit = 0;
+            // V55: positions from the count-aware chain (first copy). With a
+            // count range the label shows min and max position.
+            const _lMin = bodyChain(planets, 'min');
+            const _lMax = bodyChain(planets, 'max');
             planets.forEach((planet, index) => {
-                cumulativeOrbit += planet.orbitDistance;
+                const _pMin = _lMin.first.get(planet), _pMax = _lMax.first.get(planet);
                 combined.push({
                     type: 'planet',
                     data: planet,
                     index: index,
-                    orbit: cumulativeOrbit,  // Kumulative Position
+                    orbit: _pMin,  // Kumulative Position
+                    orbitLabel: _pMin === _pMax ? `${_pMin}` : `${_pMin}\u2013${_pMax}`,
                     displayOrbit: planet.orbitDistance  // original for display
                 });
             });
@@ -4122,7 +4206,7 @@ function getCurrentMoon() {
                                             <span class="text-2xl">${icon}</span>
                                             <div>
                                                 <div class="font-semibold text-blue-300">${planet.class === 'star' ? '⭐ ' : ''}${planet.name}</div>
-                                                <div class="text-xs text-gray-400">${getClassDisplayName(planet.class)} • Size ${planet.size} • Orbit +${item.displayOrbit} (Position: ${item.orbit})</div>
+                                                <div class="text-xs text-gray-400">${getClassDisplayName(planet.class)} • Size ${planet.size}${(() => { const _a = clampCount(planet.countMin ?? 1), _b = clampCount(planet.countMax ?? 1); return (_a === 1 && _b === 1) ? '' : ' \u2022 \u00d7' + (_a === _b ? _a : _a + '\u2013' + _b); })()}${Number.isFinite(planet.preShift) ? ' \u2022 change_orbit ' + planet.preShift : ''} • Orbit +${item.displayOrbit} (Position: ${item.orbitLabel ?? item.orbit})</div>
                                             </div>
                                         </div>
                                         ${moonCount > 0 ? `<div class="text-xs text-yellow-400 ml-8">🌙 ${moonCount} Moon(s)</div>` : ''}
@@ -4185,7 +4269,7 @@ function getCurrentMoon() {
                                 <div class="flex items-center justify-between">
                                     <div class="flex items-center gap-2">
                                         <span class="text-lg">${getPlanetIcon(moon.class)}</span>
-                                        <span class="text-sm">${kind} ${moon.displayName} (${getClassDisplayName(moon.class)}, Size ${moon.size}, Orbit ${moon.orbitDistance})${startingIcon}</span>
+                                        <span class="text-sm">${kind} ${moon.displayName} (${getClassDisplayName(moon.class)}, Size ${moon.size}, Orbit ${moon.orbitDistance}${(() => { const _a = clampCount(moon.countMin ?? 1), _b = clampCount(moon.countMax ?? 1); return (_a === 1 && _b === 1) ? '' : ' \u2022 \u00d7' + (_a === _b ? _a : _a + '\u2013' + _b); })()})${startingIcon}</span>
                                     </div>
                                     <div class="flex gap-1">
                                         <button onclick="editMoon(${JSON.stringify(parentPath)}, ${moonIndex})" class="stellaris-btn stellaris-btn-secondary text-xs px-2 py-1">✏️</button>
@@ -4551,6 +4635,8 @@ function getCurrentMoon() {
                 planetData.rawInitEffect = existingPlanet.rawInitEffect || null;
                 planetData.preventAnomaly = existingPlanet.preventAnomaly === true;
                 planetData.entity = existingPlanet.entity || null;
+                // V55: change_orbit in front of a count block survives editing
+                if (Number.isFinite(existingPlanet.preShift)) planetData.preShift = existingPlanet.preShift;
                 allSystems[currentSystemIndex].planets[editingPlanetIndex] = planetData;
                 showNotification('✅ Planet updated!');
             } else {
@@ -5097,15 +5183,19 @@ function getCurrentMoon() {
             if (!belt) { showNotification('\u26a0\ufe0f Asteroid belt not found!'); return; }
             const planets = system.planets;
             
-            // Insertion point: after the last body at position <= belt radius
-            let cumulative = 0;
+            // Insertion point: after the last body whose chain pointer ends at
+            // or before the belt radius. V55: pointer after a body includes its
+            // count copies and preShift (bodyChain, min mode).
+            const _bChain = bodyChain(planets, 'min');
             let insertAt = 0;
             let prevCumulative = 0;
             for (let k = 0; k < planets.length; k++) {
-                cumulative += planets[k].orbitDistance;
-                if (cumulative <= belt.radius) {
+                const pk = planets[k];
+                const odk = Number.isFinite(pk.orbitDistance) ? pk.orbitDistance : 0;
+                const endK = _bChain.first.get(pk) - odk + odk * clampCount(pk.countMin ?? 1);
+                if (endK <= belt.radius) {
                     insertAt = k + 1;
-                    prevCumulative = cumulative;
+                    prevCumulative = endK;
                 }
             }
             const delta = belt.radius - prevCumulative;
@@ -5152,7 +5242,13 @@ function getCurrentMoon() {
             planets.splice(insertAt, 0, asteroid);
             // Compensate the following body so downstream positions are unchanged
             if (delta !== 0 && insertAt + 1 < planets.length) {
-                planets[insertAt + 1].orbitDistance -= delta;
+                const nx = planets[insertAt + 1];
+                // V55: a count block keeps its spacing, the shift goes to preShift
+                if (clampCount(nx.countMin ?? 1) === 1 && clampCount(nx.countMax ?? 1) === 1 && nx.odType !== 'range') {
+                    nx.orbitDistance -= delta;
+                } else {
+                    nx.preShift = (Number.isFinite(nx.preShift) ? nx.preShift : 0) - delta;
+                }
             }
             showNotification('\u2604\ufe0f Asteroid added to belt!');
             loadSystemIntoEditor(system);
@@ -5365,6 +5461,8 @@ function getCurrentMoon() {
                                 <option value="pc_g_star" ${star.class === 'pc_g_star' ? 'selected' : ''}>G-Star (Yellow)</option>
                                 <option value="pc_k_star" ${star.class === 'pc_k_star' ? 'selected' : ''}>K-Star (Orange)</option>
                                 <option value="pc_m_star" ${star.class === 'pc_m_star' ? 'selected' : ''}>M-Star (Red)</option>
+                                <option value="pc_m_giant_star" ${star.class === 'pc_m_giant_star' ? 'selected' : ''}>Red Giant</option>
+                                <option value="pc_t_star" ${star.class === 'pc_t_star' ? 'selected' : ''}>T-Star (Brown Dwarf)</option>
                                 <option value="pc_black_hole" ${star.class === 'pc_black_hole' ? 'selected' : ''}>Black Hole</option>
                                 <option value="pc_neutron_star" ${star.class === 'pc_neutron_star' ? 'selected' : ''}>Neutron Star</option>
                                 <option value="pc_pulsar" ${star.class === 'pc_pulsar' ? 'selected' : ''}>Pulsar</option>
@@ -5650,8 +5748,10 @@ function getCurrentMoon() {
             const folderName = modName.toLowerCase().replace(/[^a-z0-9]+/g, '_').replace(/^_+|_+$/g, '');
             const supportedVersion = '4.4.*';
 
-            const initializerCode = allSystems.map(sys => generateSystemCode(sys)).join('\n\n');
-            const skipLoc = document.getElementById('skipLocalizationCheckbox')?.checked;
+            const skipLoc = document.getElementById('skipLocalizationCheckbox')?.checked || false;
+            // V51 N6: Kopfzeilen mit Version und Namensmodus.
+            const initializerCode = exportModeHeader(skipLoc) +
+                allSystems.map(sys => generateSystemCode(sys)).join('\n\n');
             const locFiles = skipLoc ? [] : generateLocalizationFiles(allSystems);
 
             const descriptor = `name="${modName}"\nversion="1.0"\nsupported_version="${supportedVersion}"\ntags={\n\t"Galaxy Generation"\n}\n`;
@@ -5674,7 +5774,7 @@ function getCurrentMoon() {
                         const locDir = await _mkPath(modDir, ['localisation', lf.language]);
                         await _writeFile(locDir, lf.fileName, enc.encode(BOM + lf.content));
                     }
-                    showNotification(`📦 Mod "${modName}" written to the selected folder!`, 'success');
+                    showNotification(`📦 Mod "${modName}" written to the selected folder (${exportModeLabel(skipLoc)}).`, 'success');
                     return;
                 } catch (err) {
                     if (err.name === 'AbortError') { showNotification('Folder selection cancelled.', 'warning'); return; }
@@ -5693,7 +5793,7 @@ function getCurrentMoon() {
             const url = URL.createObjectURL(buildZip(files));
             const a = document.createElement('a'); a.href = url; a.download = `${folderName}.zip`; a.click();
             URL.revokeObjectURL(url);
-            showNotification(`📦 Mod "${modName}" downloaded as ZIP!`, 'success');
+            showNotification(`📦 Mod "${modName}" downloaded as ZIP (${exportModeLabel(skipLoc)}).`, 'success');
         }
 
         // OS-specific path hint for the mod folder
@@ -5716,6 +5816,38 @@ function getCurrentMoon() {
         // CODE GENERATION
         // =====================================================
         
+        // ===== V51 N6: EXPORTMODUS SICHTBAR MACHEN =====
+        //
+        // Der Exportmodus aendert den Vertrag der Datei: Klarname inline
+        // oder Lokalisierungsschluessel mit passender .yml. Bisher blieb
+        // davon keine Spur. Jetzt steht er als Kommentar am Dateikopf.
+        //
+        // Die Kopfzeilen beginnen ausnahmslos mit #. Fuer das Spiel sind das
+        // Kommentare (38 von 40 Vanilla-Initializern tragen solche Zeilen).
+        // Fuer den eigenen Importer sind sie unsichtbar: seine Dateiebene
+        // erkennt nur Zeilen, die in Spalte 0 mit Bezeichner und '= {'
+        // beginnen. Eine Kopfzeile ohne fuehrendes # wuerde diese Garantie
+        // brechen, deshalb gibt es hier keine.
+
+        const EDITOR_VERSION = 'V55';
+
+        // Modus, mit dem die aktuelle Vorschau erzeugt wurde. null = keine.
+        let exportPreviewSkipLoc = null;
+
+        function exportModeHeader(skipLoc) {
+            const lines = [
+                '# Generated by Stellaris Solar System Editor ' + EDITOR_VERSION,
+                skipLoc
+                    ? '# Names: plain text inline. No localisation files belong to this export.'
+                    : '# Names: localisation keys (NAME_...). Requires the .yml files from the same export.'
+            ];
+            return lines.join('\n') + '\n\n';
+        }
+
+        function exportModeLabel(skipLoc) {
+            return skipLoc ? 'plain names, no localisation' : 'localisation keys + .yml';
+        }
+
         function generateSystemCode(system) {
             let code = `${system.name} = {\n`;
             // ✅ Loc-consistent: with localization enabled, reference the generated loc key
@@ -5751,14 +5883,30 @@ function getCurrentMoon() {
             // model (list) order and re-emitted as deltas in export order.
             // When the order is unchanged the deltas equal the original values
             // and the output stays byte-identical.
-            const _absPos = new Map();
-            let _ptr = 0;
-            system.planets.forEach(p => { _ptr += (p.orbitDistance || 0); _absPos.set(p, _ptr); });
+            // V55: positions from bodyChain (count-aware, min mode). A body whose
+            // export predecessor differs from its list predecessor keeps the V45
+            // delta form when count = 1 (output unchanged). With count > 1 or a
+            // count range the delta would become the spacing of every copy, so
+            // the shift goes into a top-level change_orbit (vanilla syntax, the
+            // importer folds it) and orbit_distance stays the body's own value.
+            const _chain = bodyChain(system.planets, 'min');
             let _expPtr = 0;
             const _expDelta = new Map();
+            const _expShift = new Map();
             [...starPlanets, ...regularPlanets].forEach(p => {
-                _expDelta.set(p, _absPos.get(p) - _expPtr);
-                _expPtr = _absPos.get(p);
+                const od = Number.isFinite(p.orbitDistance) ? p.orbitDistance : 0;
+                const first = _chain.first.get(p);
+                const shift = Math.round(((first - od) - _expPtr) * 1000) / 1000;
+                // orbit_distance ranges are written verbatim, so they need the
+                // change_orbit form as well
+                const single = clampCount(p.countMin ?? 1) === 1 && clampCount(p.countMax ?? 1) === 1 && p.odType !== 'range';
+                if (shift === 0 || single) {
+                    _expDelta.set(p, first - _expPtr);
+                } else {
+                    _expShift.set(p, shift);
+                    _expDelta.set(p, od);
+                }
+                _expPtr = (first - od) + od * clampCount(p.countMin ?? 1);
             });
             
             // If no star planets exist, generate default primary star
@@ -5770,6 +5918,7 @@ function getCurrentMoon() {
             } else {
                 // Export all star planets first
                 starPlanets.forEach(starPlanet => {
+                    if (_expShift.has(starPlanet)) code += `\n\tchange_orbit = ${_expShift.get(starPlanet)}\n`;
                     code += generatePlanetCode(starPlanet, 1, 'planet', _expDelta.get(starPlanet));
                 });
             }
@@ -5828,6 +5977,8 @@ function getCurrentMoon() {
             
             // Export regular planets (non-stars)
             regularPlanets.forEach(planet => {
+                // V55: shift for count > 1 bodies moved by the star reordering
+                if (_expShift.has(planet)) code += `\n\tchange_orbit = ${_expShift.get(planet)}\n`;
                 code += generatePlanetCode(planet, 1, 'planet', _expDelta.get(planet));
             });
             
@@ -5873,7 +6024,8 @@ function getCurrentMoon() {
             const _cMin = clampCount(planet.countMin ?? 1);
             const _cMax = clampCount(planet.countMax ?? 1);
             if (_cMin === _cMax) {
-                if (_cMin > 1) code += `${tab}\tcount = ${_cMin}\n`;
+                // V55: every value except the default 1, including count = 0
+                if (_cMin !== 1) code += `${tab}\tcount = ${_cMin}\n`;
             } else {
                 code += `${tab}\tcount = { min = ${Math.min(_cMin, _cMax)} max = ${Math.max(_cMin, _cMax)} }\n`;
             }
@@ -6137,11 +6289,41 @@ function getCurrentMoon() {
         // HELPER FUNCTIONS
         // =====================================================
         
+        // V55: count range 0..99. Vanilla 4.5.0 planet and moon blocks use 0
+        // (count = { min = 0 ... }, 333 blocks) up to 10. The old cap [1,3]
+        // rewrote those values on import. 99 is a sanity bound for mods, not a
+        // vanilla rule; validation flags values above 10.
         function clampCount(v) {
             const n = parseInt(v);
             if (!Number.isFinite(n)) return 1;
-            return Math.min(3, Math.max(1, n));
+            return Math.min(99, Math.max(0, n));
         }
+
+        // V55: top-level orbit chain with count. Verified in game (Alpha
+        // Centauri, screenshot 2026-09-24): count = 2 with orbit_distance = 25
+        // places two bodies, the first at +25 and the second at +50. Copy k
+        // sits at pointer + orbit_distance * k, afterwards the pointer has moved
+        // by orbit_distance * count. mode picks the count of count = { min max }:
+        // 'max' for the canvas, 'min' for validation and export.
+        // ASSUMPTION: count = 0 leaves the pointer where it was.
+        function bodyChain(bodies, mode) {
+            const first = new Map(), copies = new Map();
+            let ptr = 0;
+            bodies.forEach(p => {
+                // preShift: top-level change_orbit in front of a count block
+                // (kept separate by the importer, see parsePlanets)
+                if (Number.isFinite(p.preShift)) ptr += p.preShift;
+                const od = Number.isFinite(p.orbitDistance) ? p.orbitDistance : 0;
+                const n = clampCount(mode === 'max' ? (p.countMax ?? p.countMin ?? 1) : (p.countMin ?? 1));
+                first.set(p, ptr + od);
+                const list = [];
+                for (let k = 1; k <= n; k++) list.push(ptr + od * k);
+                copies.set(p, list);
+                ptr += od * n;
+            });
+            return { first, copies, end: ptr };
+        }
+
 
         function getPlanetIcon(planetClass) {
             const icons = {
@@ -6309,7 +6491,12 @@ function getCurrentMoon() {
             // ✅ Filter: separate stars from real planets (single canonical star check)
             const actualPlanets = system.planets.filter(p => !isStarClass(p.class));
             const starPlanets = system.planets.filter(p => isStarClass(p.class));
-            
+
+            // V55: count-aware chain (bodyChain, max mode: the canvas shows the
+            // largest possible layout). Negative steps stay legal (Alpha Centauri
+            // B: -35) and put the body on the opposite side.
+            const _cChain = bodyChain(system.planets, 'max');
+            const bodyPos = _cChain.first;
             // Draw main system star (from system.class) - ONLY if no stars in planets list
             if (starPlanets.length === 0) {
                 drawStar(system.class);
@@ -6318,18 +6505,12 @@ function getCurrentMoon() {
             // ✅ Draw additional stars as "planets" (binary/trinary systems)
             starPlanets.forEach(starPlanet => {
                 // Stars in planet list get drawn with special handling
-                let cumulativeStarOrbit = 0;
-                // Calculate cumulative orbit for this star
-                const starIndex = system.planets.indexOf(starPlanet);
-                for (let i = 0; i <= starIndex; i++) {
-                    if (system.planets[i].orbitDistance > 0) {
-                        cumulativeStarOrbit += system.planets[i].orbitDistance;
-                    }
-                }
-                
-                const distance = cumulativeStarOrbit * canvasScale;
+                // V54 B: position from the shared signed chain
+                const distance = (bodyPos.get(starPlanet) || 0) * canvasScale;
                 const _starAngleDeg = (starPlanet.orbitAngleType === 'fixed' && Number.isFinite(starPlanet.orbitAngle)) ? starPlanet.orbitAngle : 90;
-                const angle = _starAngleDeg * Math.PI / 180;
+                // V55: counter-clockwise, y up. Observed in game: Proxima Centauri
+                // with orbit_angle = 130 sits upper left (screenshot 2026-09-24).
+                const angle = -_starAngleDeg * Math.PI / 180;
                 const x = canvasOffsetX + Math.cos(angle) * distance;
                 const y = canvasOffsetY + Math.sin(angle) * distance;
                 
@@ -6343,7 +6524,9 @@ function getCurrentMoon() {
                     'pc_b_star': '#87CEEB',
                     'pc_black_hole': '#000000',
                     'pc_neutron_star': '#9370DB',
-                    'pc_pulsar': '#FF1493'
+                    'pc_pulsar': '#FF1493',
+                    'pc_m_giant_star': '#B22222',
+                    'pc_t_star': '#8B4513'
                 };
                 
                 const color = colors[starPlanet.class] || '#FFD700';
@@ -6369,43 +6552,42 @@ function getCurrentMoon() {
                     ctx.textAlign = 'center';
                     ctx.fillText(starPlanet.displayName, x, y - radius - 8);
                 }
+
+                // V54 C: S-type bodies nested in a star block (Proxima b and c)
+                drawBodyChildren(starPlanet, bodyPos.get(starPlanet) || 0, angle);
             });
             
-            // ✅ CUMULATIVE orbit calculation for REAL planets with orbit_distance = 0 support
-            let cumulativePlanetOrbit = 0;
+            // V55: every copy of a count block gets its own position from the
+            // chain (max mode). Copies on one position (orbit_distance = 0) and
+            // consecutive bodies on the same position share one orbit.
             let sharedOrbitGroup = []; // group of planets on the same orbit
-            let globalPlanetAngleIndex = 0; // ✅ global angle counter for visual distribution
-            
+            let sharedOrbitPos = null;
+            let globalPlanetAngleIndex = 0; // global angle counter for visual distribution
+
             actualPlanets.forEach((planet, index) => {
-                // Compute cumulative orbit position
-                if (planet.orbitDistance > 0) {
-                    // Draw previous group with orbit_distance = 0
-                    if (sharedOrbitGroup.length > 0) {
-                        drawPlanetsAndMoons(sharedOrbitGroup, cumulativePlanetOrbit, globalPlanetAngleIndex);
-                        globalPlanetAngleIndex += sharedOrbitGroup.length; // increment counter
-                        sharedOrbitGroup = [];
+                let positions = _cChain.copies.get(planet) || [];
+                // Kept display rule: a first body with orbit_distance = 0 on
+                // position 0 is drawn on orbit 30 instead of inside the star.
+                if (index === 0 && planet.orbitDistance === 0) positions = positions.map(q => q === 0 ? 30 : q);
+                positions.forEach(pos => {
+                    if (sharedOrbitPos === null || pos !== sharedOrbitPos) {
+                        if (sharedOrbitGroup.length > 0) {
+                            drawPlanetsAndMoons(sharedOrbitGroup, sharedOrbitPos, globalPlanetAngleIndex);
+                            globalPlanetAngleIndex += sharedOrbitGroup.length;
+                            sharedOrbitGroup = [];
+                        }
+                        sharedOrbitPos = pos;
+                        drawOrbit(Math.abs(pos)); // arc() rejects negative radii
                     }
-                    
-                    cumulativePlanetOrbit += planet.orbitDistance;
-                    drawOrbit(cumulativePlanetOrbit);
-                }
-                
-                // First planet with orbit_distance = 0
-                if (index === 0 && planet.orbitDistance === 0) {
-                    cumulativePlanetOrbit = 30;
-                    drawOrbit(cumulativePlanetOrbit);
-                }
-                
-                // Add planet to the current orbit group
-                sharedOrbitGroup.push({
-                    planet: planet,
-                    orbitDistance: cumulativePlanetOrbit
+                    const last = sharedOrbitGroup[sharedOrbitGroup.length - 1];
+                    if (last && last.planet === planet) last.copies++;
+                    else sharedOrbitGroup.push({ planet: planet, orbitDistance: pos, copies: 1 });
                 });
             });
-            
+
             // Draw last group
             if (sharedOrbitGroup.length > 0) {
-                drawPlanetsAndMoons(sharedOrbitGroup, cumulativePlanetOrbit, globalPlanetAngleIndex);
+                drawPlanetsAndMoons(sharedOrbitGroup, sharedOrbitPos, globalPlanetAngleIndex);
             }
             
             // ✅ ABSOLUTE position for asteroid belts
@@ -6421,16 +6603,22 @@ function getCurrentMoon() {
             // count: fan out each planet into its display instances (range max)
             const planetInstances = [];
             planetGroup.forEach(item => {
-                const cnt = Math.max(1, clampCount(item.planet.countMax ?? item.planet.countMin ?? 1));
-                for (let k = 0; k < cnt; k++) planetInstances.push(item.planet);
+                // V55: copies come from the chain; fallback for other callers
+                const cnt = item.copies ?? Math.max(1, clampCount(item.planet.countMax ?? item.planet.countMin ?? 1));
+                for (let k = 0; k < cnt; k++) planetInstances.push({ planet: item.planet, single: cnt === 1 });
             });
 
             const useGlobalDistribution = planetInstances.length === 1;
             const angleStep = useGlobalDistribution ? 90 : (360 / planetInstances.length);
 
-            planetInstances.forEach((planet, index) => {
+            planetInstances.forEach((inst, index) => {
+                const planet = inst.planet;
                 const angleIndex = useGlobalDistribution ? startAngleIndex : index;
-                const planetAngle = (angleIndex * angleStep) * Math.PI / 180;
+                // V54 D / V55: a fixed orbit_angle wins when the body has one copy
+                // on this orbit. ASSUMPTION: absolute angle (relative reading not
+                // verified). V55: counter-clockwise, as observed in game.
+                const _fixedAngle = planet.orbitAngleType === 'fixed' && Number.isFinite(planet.orbitAngle) && inst.single;
+                const planetAngle = (_fixedAngle ? -planet.orbitAngle : angleIndex * angleStep) * Math.PI / 180;
                 //```
                 //
                 //---
@@ -6462,43 +6650,50 @@ function getCurrentMoon() {
                 // ✅ Draw planet at its position
                 drawPlanet(planet, orbitDistance, planetAngle);
                 
-                // ✅ Draw moons around this planet
-                if (planet.moons && planet.moons.length > 0) {
-                    const planetDistance = orbitDistance * canvasScale;
-                    const planetX = canvasOffsetX + Math.cos(planetAngle) * planetDistance;
-                    const planetY = canvasOffsetY + Math.sin(planetAngle) * planetDistance;
-                    
-                    let cumulativeMoonOrbit = 0;
-                    let sharedMoonGroup = [];
-                    
-                    planet.moons.forEach((moon, moonIndex) => {
-                        if (moon.orbitDistance > 0) {
-                            // Draw previous moon group
-                            if (sharedMoonGroup.length > 0) {
-                                drawMoonGroup(sharedMoonGroup, planetX, planetY, cumulativeMoonOrbit);
-                                sharedMoonGroup = [];
-                            }
-                            
-                            cumulativeMoonOrbit += moon.orbitDistance;
-                            drawMoonOrbit(orbitDistance, planetAngle, cumulativeMoonOrbit);
-                        }
-                        
-                        if (moonIndex === 0 && moon.orbitDistance === 0) {
-                            cumulativeMoonOrbit = 10;
-                            drawMoonOrbit(orbitDistance, planetAngle, cumulativeMoonOrbit);
-                        }
-                        
-                        sharedMoonGroup.push(moon);
-                    });
-                    
-                    // Draw last moon group
-                    if (sharedMoonGroup.length > 0) {
-                        drawMoonGroup(sharedMoonGroup, planetX, planetY, cumulativeMoonOrbit);
-                    }
-                }
+                // V54 C: children drawing moved to drawBodyChildren (shared with stars)
+                drawBodyChildren(planet, orbitDistance, planetAngle);
             });
         }
         
+        // V54 C: draw the nested bodies (moon = {} and S-type planet = {})
+        // of a planet or a star around that parent. Body of the former
+        // moon block in drawPlanetsAndMoons, unchanged.
+        function drawBodyChildren(planet, orbitDistance, planetAngle) {
+        if (planet.moons && planet.moons.length > 0) {
+            const planetDistance = orbitDistance * canvasScale;
+            const planetX = canvasOffsetX + Math.cos(planetAngle) * planetDistance;
+            const planetY = canvasOffsetY + Math.sin(planetAngle) * planetDistance;
+            
+            let cumulativeMoonOrbit = 0;
+            let sharedMoonGroup = [];
+            
+            planet.moons.forEach((moon, moonIndex) => {
+                if (moon.orbitDistance > 0) {
+                    // Draw previous moon group
+                    if (sharedMoonGroup.length > 0) {
+                        drawMoonGroup(sharedMoonGroup, planetX, planetY, cumulativeMoonOrbit);
+                        sharedMoonGroup = [];
+                    }
+                    
+                    cumulativeMoonOrbit += moon.orbitDistance;
+                    drawMoonOrbit(orbitDistance, planetAngle, cumulativeMoonOrbit);
+                }
+                
+                if (moonIndex === 0 && moon.orbitDistance === 0) {
+                    cumulativeMoonOrbit = 10;
+                    drawMoonOrbit(orbitDistance, planetAngle, cumulativeMoonOrbit);
+                }
+                
+                sharedMoonGroup.push(moon);
+            });
+            
+            // Draw last moon group
+            if (sharedMoonGroup.length > 0) {
+                drawMoonGroup(sharedMoonGroup, planetX, planetY, cumulativeMoonOrbit);
+            }
+        }
+        }
+
         // ✅ NEW: Draw moon group around planet
         function drawMoonGroup(moons, planetX, planetY, moonOrbitRadius) {
             // count: fan out moons into their display instances (range max)
